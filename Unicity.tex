@@ -72,7 +72,7 @@ One way to conceptualize a blockchain is as a proof generation machine. That is,
 
 Bitcoin, while primarily designed as a peer-to-peer electronic cash system, introduced a basic form of programmability through its scripting language. This limited scripting capability allowed for simple conditions to be attached to transactions, such as multi-signature requirements or time-locked transfers. However, Bitcoin's scripting language was intentionally restricted to maintain the network's security and focus on its primary use case as a digital currency.
 
-The concept of a more expansive, programmable blockchain was significantly advanced by Vitalik Buterin with the introduction of Ethereum in 2015. Buterin envisioned a "world computer" - a global, decentralized platform capable of executing arbitrary code in the form of smart contracts. This vision expanded the blockchain's role from a mere ledger of transactions to a general-purpose computational infrastructure. This progression from Bitcoin's basic scripting to Ethereum's world computer marked a paradigm shift, transforming blockchains from specialized tools for cryptocurrency into general-purpose platforms for decentralized computation and application deployment.
+The concept of a more expansive, programmable blockchain was significantly advanced by Vitalik Buterin with the introduction of Ethereum in 2015. Buterin envisioned a ``world computer'' - a global, decentralized platform capable of executing arbitrary code in the form of smart contracts. This vision expanded the blockchain's role from a mere ledger of transactions to a general-purpose computational infrastructure. This progression from Bitcoin's basic scripting to Ethereum's world computer marked a paradigm shift, transforming blockchains from specialized tools for cryptocurrency into general-purpose platforms for decentralized computation and application deployment.
 
 \begin{figure}[H]
     \centering
@@ -204,11 +204,10 @@ An agent will execute locally and send a state transition request to the Aggrega
 
  A Sparse Merkle Tree (SMT) is used such that each unique request is allocated a leaf node in the tree. The details of the request will be described in the next section. A Unicity Proof consists of several elements:
 
- \begin{itemize}
-\setlength{\leftmargin}{1em}
-\item ZK non-deletion proof at previous ZK checkpoint.
-\item Proof of non-inclusion (the SMT hash chain from leaf to root) for all SMT rounds since the previous ZK checkpoint up to the previous round.
-\item Proof of inclusion (the SMT hash chain from leaf to root) for the current round.
+\begin{itemize}
+    \item ZK non-deletion proof at previous ZK checkpoint.
+    \item Proof of non-inclusion (the SMT hash chain from leaf to root) for all SMT rounds since the previous ZK checkpoint up to the previous round.
+    \item Proof of inclusion (the SMT hash chain from leaf to root) for the current round.
 \end{itemize}
 
 
@@ -448,230 +447,8 @@ When combined with a native currency as a means to reward agents based on their 
 The incentive structure  enables the creation of decentralized marketplaces where AI agents can exchange data, services, or computational power with other agents or human participants. Digital currency provides a transparent, automated way to measure the value of contributions, ensuring that autonomous AI systems remain aligned with predefined goals and facilitating verifiability between agents, human operators, and stakeholders. The structure promotes self-sustaining, scalable systems where AI agents evolve and improve autonomously while being rewarded for their beneficial outputs. By addressing the challenges of on-chain AI execution and providing a framework for verifiable, incentivized AI agents, Unicity paves the way for a new era of decentralized artificial intelligence that balances innovation with accountability and alignment with human values.
 
 \appendix
-\section{Appendix: Protocol Descriptions}
+% \include{appendix-protocols}
 
-Data structures in the ABNF\footnote{\url{https://tools.ietf.org/html/rfc5234}} format:
-
-\begin{lstlisting}[language=abnf]
-token = tokenId, tokenClass, tokenValue, mint, transition*, token-state
-
-mint = mintProofs, mintRequest, mintSalt, genesis
-mintProofs = path*
-mintRequest = destPointer
-genesis = challenge
-
-path = unicityProof, payload, authenticator   ; leaf <\~=> unicityProof
-
-payload = hash       ; payload <- h(h(source.challenge) || destPointer || salt)
-authenticator = state-hash, pubkey, signature   ; owner's signature
-
-transition = tokenId, source, input, destination   ; token history record, with proofs
-input = path*, destPointer, salt  ; sender's proof of the ownership and Unicity (single-spend) proof
-source      = challenge   ; owner id
-destination = challenge   ; newowner id
-
-token-state = challenge   ; owner id
-
-destPointer = hash  ; destPointer <- h(tokenClass || pubkey || nonce)
-                    ; Destination pointer: the pointer refering the hidden expected token's destination state. recipient --> sender
-                    ; masked NewOwner
-
-challenge = tokenClass, tokenId, pubkey, nonce    ; a challenge for the respective private key to 'solve'
-         ;  like 'address'
-
-; ----------- token+transaction are delivered to the new owner.
-transaction = tokenId, source, input, destPointer
-
-; -----------
-tokenId = tokenClass = hash
-tokenValue = DIGIT+
-salt = mintSalt = 64(HEXDIG)
-nonce = 64(HEXDIG)
-state-hash = hash
-pubkey = 130(HEXDIG)
-signature = 144(HEXDIG)
-hash = 64(HEXDIG)
-DIGIT = %x30-39
-HEXDIG = %x30-39 / %x41-46 / %x61-66
-\end{lstlisting}
-
-
-
-
-\begin{figure}[!htbp]
-        \begin{center}
-        \includegraphics[width=\textwidth]{unicity-tx}
-        \caption{Data flow of a Transaction}\label{fig:tx}
-        \end{center}
-\end{figure}
-% https://mermaid.live/edit#pako:eNp9U8Fu2zAM_RVBMFAbc7q7UeSyXXJYW2DoZdOAKhZjC7UlV6JRBIn_fZSsOG47zBdLJB8f-SieeG0V8Ip7eB3B1PBdy8bJXhhG38ObAbfZbr_cw1s8VyxH-0JxnfS-mIPuLQJzummR2QO7RjZAP0m-FzgOUru7vfu6lUYxY4knYVM0cWwSLMuE6CW2_nBS4PHRaoPgJiZEA-hZmy_uWMm3UEnwntniGMY9cX4wRtapoPTvW3syutZ4rNggj52Vit1tiMQG906x85mtqghXLzssYi-5C5p53KnyAi6ZHLEFg7qWaN0_FVoIfY-_lxR_YuOhxSxj-X_TpQQrzZKFPTpLBPlKwufngQ43N1OWFe8bvw4KnTRe1qitCc3PEw5NJRFKps0wYrlWIikQQ8t1huLTYD8Q6QsPzQ36fQf5Cl3Oj4P0jCOcWSLJ7RXsA_qz8WmVf4W7TDJgFv-tSUXtlDC85D24XmpFe3AK9QtOqvcgeEVHBQc5dii4MBOF0kTsz6OpeYVuhJI7OzYtrw6y83QbB0VPPi3RYh2k-WXt9Q5K0zh_zJsXF3D6C_AtPcg
-
-
-
-\subsection{Token Transfer (with blinding)}
-
-\begin{lstlisting}
-     0. owner has a token:
-        token = tokenId, tokenClass, tokenValue, mint, transition*, token-state
-
-     1. new owner:
-        - generates a fresh keypair and a blinding factor (nonce)
-          (newOwnerPk, newOwnerSk) <- Gen(\lambda)
-          nonce <$ {0,1}^256
-        - calculates a pointer, sends to owner. Pointer ~ blinded recipient
-          destPointer <- h(tokenClass || newOwnerPk || nonce)
-        - sends it to owner
-
-     2. owner:
-        - generate random salt
-          salt <$ {0,1}^256
-        - sends a request to Unicity Service:
-          blindedOwnerId <- h(token-state)      ; token.state = transition.source = transaction.source
-          payload <- h(blindedOwnerId || destPointer || salt)
-          ; Note that blindedOwnerId is also token identifier because the owner id is unique one-time id; and called "token state" as ownership is the only immutable field; more consistent naming is needed
-          RequestId <- h(ownerPk || blindedOwnerId)
-          authenticator <- (blindedOwnerId, ownerPk, Sig_ownerSk(payload))
-          Submit_request(RequestId, payload, authenticator)
-        - Obtain Unicity Proof
-          (RequestId, (payload, authenticator), path) <- Get_proof(RequestId)
-        - Create tx:
-          input <- (path, destPointer, salt)  ; where path is unicity proof, salt is sender's blinding factor
-          transaction <- (tokenId, token.state, input, destPointer)   ; state ~ current owner
-
-     3. send tx to new owner:
-          send (token, transaction)
-
-     4. new owner receives (token, transaction) and finalizes the token:
-        - recall the keypair and nonce generated during step 1
-        - convert transaction to transition, append transition to transition history, and set new owner:
-          destination <- (token.tokenClass, token.tokenId, pubkey, nonce)
-          transition <- (transaction.tokenId, transaction.source, transaction.input, destination)
-              token.transitions <- token.transitions U transition
-              token.state <- transition.destination   ; the owner field
-
-\end{lstlisting}
-
-\subsection{Unicity Service}
-
-Provides two services: 1) set a key-value in key-value store:
-
-\begin{lstlisting}
-Set a key-value pair (if not set)
-input: (RequestId, payload, authenticator)
-
-1. If the key RequestId is set then return error
-2. Validate the request:
-2.1 check if the sender is in possession of private key the OwnerAddress and RequestId are derived from
-2.1.1 verify the signature on whatever:
-        Ver_{authenticator.ownerPk}(payload) = 1
-2.1.2 verify if RequestId is derived correctly:
-        RequestId = h(authenticator.ownerPk || authenticator.blindedOwnerId)
-2.1.3 verify if TransitionCommitment is fresh or related to this request
-        not needed, as there is assumption that (ownerPk, ownerSk) is not reused.
-3 Write the key
-smt[RequestId] <- (payload, authenticator)
-\end{lstlisting}
-
-... and 2) return a key-value+proof:
-
-\begin{lstlisting}
-Return a key-value pair (if set)
-input: (RequestId)
-output: (RequestId, (payload, authenticator), unicityProof)
-
-1. return error if smt[RequestId] is not set
-2. return (requestId, smt[RequestId], unicityProof)
-   where unicityProof is hash chain and finality gadget's signature
-\end{lstlisting}
-
-
-
-\subsection{Token Validation}
-
-\begin{lstlisting}
-Token validation:
-input: token
-output: ok or not
-
-1. validate "path"s , that is, signature + Unicity Proof pairs.
-     Ver_{token.transition[i].input.path[j].authenticator.ownerPk}(token.transition[i].input.path[j].payload,
-         token.transition[i].input.path[j].authenticator.signature) = 1
-     \forall p <- token.transition[i].input.path[j]:
-        Ver_{p.authenticator.ownerPk}(p.payload, p.authenticator.signature) = 1
-   Unicity Cert:
-     \forall p <- token.transition[i].input.path[j]:
-       requestId <- Ver_{UTB}((p.payload, p.authenticator), tp.unicityCert)
-       requestId = h(p.authenticator.ownerPk || p.authenticator.blindedOwnerId)
-2. consistency
-     \forall t <- token.transition[i]:
-       t.input.path[j].payload = h(source.blindedOwnerId || t.input.destPointer || t.input.salt)
-     token.token-state.challenge = token.transition[-1].destination.challenge
-
-     token.transition[i].destination.challenge = token.transition[i+1].source.challenge
-
-
-\end{lstlisting}
-
-
-\section{Appendix: Provably Secure Append-only Accumulator}
-
-This section describes the core data structure for implementing the Unicity's Aggregation Layer in trustless way.
-
-Trustless append only accumulator is consistent, if during insertion of a batch of updates there were no changes or deletions of existing leaves. The data structure implements other usual functions like inclusion proofs and non-inclusion proofs.
-
-The size of consistency proof depends on the size of addition batch and logarithm of capacity. If we denote batch size as $k$ and depth $d$, then size of consistency proof is $O(k \cdot d)$, where $d \approx \log(capacity)$.
-
-By using a cryptographic SNARK (a zero knowledge proof with certain properties), the size of consistency proof can be further reduced to constant size.
-
-After every addition batch, the root of aggregation layer is certified by the BFT Finality Gadget, ensuring its uniqueness and immutability. This provides a useful trust anchor for consistency proofs, inclusion proofs, and non-inclusion proofs.
-
-\subsection{Proof of Consistency}
-
-We have $i$th batch of insertions $B = (k_1, k_2, \dots, k_j)$, where $k$ is an inserted item; all executed during a round of operation. Root hash before the round is $r_{i-1}$, and after the round is $r_i$. The accumulator is implemented as a Sparse Merkle Tree (SMT).
-
-The consistency proof generation for batch $B_i$ works as follows:
-
-\begin{itemize}
-    \item Insert the new SMT leaves in $B_i$,
-    \item Starting from the newly inserted leaves, for each sibling hash necessary to compute the root of the tree, we record sibling's path and sibling's value as the proof. Let's denote the set as $s_i$.
-    \item Record $(B_i, r_{i-1}, r_i, s_i)$.
-\end{itemize}
-
-Proof verification works as follows:
-\begin{itemize}
-    \item authenticate $r_{i-1}, r_i$
-    \item Build an incomplete SMT tree: for each item in $B_i$, we insert the value of empty leaf at appropriate position,
-    \item All necessary siblings necessary to compute the root are available in $s_i$. Compute the root, compare with $r_{i-1}$, if not equal then proof is not valid.
-    \item Build again an incomplete SMT tree, for each item in $B_i$, we insert the value of each key into appropriate position.
-    \item Compute the root based on siblings in $s_i$. If root is not equal to $r_i$ then proof is not valid.
-    \item Proof is valid if the checks above passed.
-\end{itemize}
-
-This shows that given authentic $s_{i-1}, s_i$, the keys in $B_i$ were empty before the insertion batch, and after execution of insertion batch the values in $B_i$ were recorded at the positions defined by respective keys, and there were no other changes.
-
-
-\subsection{SNARK based Proof of Consistency}
-
-Statement to be proved is the verification algorithm sketched above. Instance is defined by the root of trust and insertions, $I = ((r_i, r_{i-1}),B_i)$. Witness $\omega = (s_i, s'_i)$ is the secret in zero knowledge, but for our use-case, it is not necessary to keep the witness secret.
-
-The statement is implemented as a constraint system $R$ using the CIRCOM domain specific language. The witness is generated based on $s_i, B_i$, and supplemented by control wires defining how individual hashing blocks in the circuit are connected together and to the inputs. If all constraints are satisfied, then the proof is valid.
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.33\textwidth]{smt-circuit-cell.drawio}
-    \caption{A cell of the ZK circuit}
-    \label{fig:zk-circuit-cell}
-\end{figure}
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=\textwidth]{smt-circuit.drawio}
-    \caption{The ZK circuit for SMT consistency verification; cells are connected together and to the input based on pre-generated wiring signals}
-    \label{fig:zk-circuit}
-\end{figure}
-
-The proving backend is Groth 2016\footnote{\url{https://eprint.iacr.org/2016/260}} with conveniently small proof size. The proving time depends on the depth of SMT and the maximum size of the insertion batch. Importantly, the proving effort does not depend on the total size/capacity of SMT, enabling fairly large instantiations.
-
-If the layer above verifies proofs of consistency, then Unicity aggregation layer is trustless. Still, some redundancy (at least one node able to persist the data structure) is required for data availability.
+\include{appendix-zk-smt}
 
 \end{document}
