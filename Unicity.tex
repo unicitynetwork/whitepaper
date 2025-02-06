@@ -5,6 +5,7 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{url}
+\usepackage{enumitem}
 
 % ABNF listings
 \usepackage[utf8]{inputenc} % Use UTF-8 encoding for modern Unicode handling
@@ -28,7 +29,12 @@
 
 % \setlength{\parindent}{0pt}
 % \setlength{\leftmargin}{1em}
-\setcounter{secnumdepth}{2}
+\setlist[itemize]{nosep,itemsep=.1ex}
+\setlist[description]{nosep,labelwidth=2em,itemsep=.2ex}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex}
+
+\setcounter{secnumdepth}{1}
 
 \title{Unicity: Verifiable Off-Chain Agents}
 \author{The Unicity Developers\\unicity-devs@proton.me}
@@ -60,13 +66,13 @@ Unicity is a novel blockchain architecture designed for the development of decen
 
 \section{Introduction}
 
-\subsubsection{Why build decentralized applications?}
+\subsection{Why build decentralized applications?}
 
 Decentralization is not a goal in itself but a means to achieve specific objectives that may not be feasible or optimal in centralized systems. Bitcoin, for example, uses decentralization as a means to achieve censorship resistance and the elimination of trusted third parties in the transfer of value across the Internet. More generally, decentralized applications can offer enhanced trust, transparency, and user empowerment. They can be designed to be resistant to censorship, manipulation, and single points of failure. They can enable new business models and forms of collaboration that were previously impossible or impractical.
 
 Historically, the technical approaches to decentralization using blockchains have come with very significant trade-offs including performance, scalability, privacy and cost. Blockchains as computers are orders of magnitude more expensive than their conventional counterparts. The inherent need for global ordering (sequential execution of contracts) and globally shared state creates bottlenecks that limit performance and struggles to meet the performance demands of truly global, high-throughput systems.
 
-\subsubsection*{Blockchain as a proof generation machine}
+\subsection*{Blockchain as a proof generation machine}
 
 One way to conceptualize a blockchain is as a proof generation machine. That is, the blockchain is a distributed computational machine that generates cryptographic proofs of integrity, order, uniqueness, computation, ownership, and more. The machine can be centralized or decentralized, with access either permissioned or permissionless. Various incentive schemes can be devised to encourage users to operate parts of the machine, and the machine can be programmable to varying degrees. The evolution of this programmability has been a defining feature in the blockchain landscape.
 
@@ -84,14 +90,14 @@ The concept of a more expansive, programmable blockchain was significantly advan
 
 As the complexity and usage of these smart contract platforms have grown, fundamental limitations in their design have become increasingly apparent. Blockchain computers are extremely inefficient with throughput many orders of magnitude lower than a traditional computer. More recent concepts such as alternative consensus protocols, layer-two solutions and sharding introduce various incremental innovations, but these are all short-term workarounds attempting to address the limitations of the base layer or compromise either security or decentralization. For instance, layer-two solutions like rollups for Ethereum can increase transaction throughput by one or two orders of magnitude before they reach a hard limit. They also introduce additional complexity, centralization (centralized sequencers with escape hatches etc.) with potential security vulnerabilities at the points where they interface with the main chain. Sharding is another area of scalability research, however it introduces new challenges in cross-shard communication that can potentially fragment the network's security model. The core issue remains: traditional blockchain architectures struggle to scale without sacrificing either security, decentralization, or both.
 
-\subsubsection{Unicity: A new model for decentralization}
+\subsection{Unicity: A new model for decentralization}
 
 Rather than attempting to optimize within the constraints of traditional blockchain designs, Unicity introduces a fundamentally new approach to building decentralized applications. The core invention is to allow the execution of applications off-chain but with the same cryptographic guarantees as if they were executing on-chain i.e. instead of all contracts being stored in the same shared global ledger and competing for the same resources Unicity introduces a novel approach that allows execution to happen in parallel off-chain.
 
 
 The key cryptographic guarantee that is handled differently in Unicity is proof of uniqueness. Proof of uniqueness, or non-forking, is one of the key proofs that a blockchain provides. In Bitcoin, for example, Proof of Work is used to guarantee that there is a single unique version of the blockchain. The proof of uniqueness in this case is probabilistic, i.e. there may be other copies (forks) but over time the incentive scheme ensures that Miners will converge onto the chain with most work (the longest chain rule). This uniqueness proof covers all transactions in a block as all transactions are included in the Proof of Work calculation.
 
-\subsubsection{The Unicity architecture}
+\subsection{The Unicity architecture}
 
 \begin{figure}[htbp]
     \centering
@@ -105,7 +111,7 @@ At an abstract level the Unicity design is divided into three layers (four if Po
 
 
 
-\subsubsection{A comparison with traditional blockchains}
+\subsection{A comparison with traditional blockchains}
 
 \begin{figure}[htbp]
     \centering
@@ -140,7 +146,7 @@ The Alpha public blockchain is used, both as the trust anchor and as the native 
 \end{itemize}
 
 
-\subsection*{ASIC Resistance and Fair Mining}
+\subsection{ASIC Resistance and Fair Mining}
 
 Nakamoto's vision for Bitcoin was based on achieving censorship resistance through decentralization, with the idea that anyone with a computer could participate in the network's consensus mechanism through mining. However, the rapid evolution of mining technology, particularly the development of ASICs, introduced an unforeseen challenge to this egalitarian ideal. These machines, designed solely for the purpose of mining, quickly outpaced general-purpose computer hardware in terms of hash rate, leading to a concentration of mining power. The resulting centralization not only deviated from Bitcoin's original decentralized ethos but also introduced potential vulnerabilities to the network, such as increased susceptibility to 51\% attacks and reduced geographical distribution of miners.
 
@@ -151,7 +157,7 @@ To prevent centralization of mining power new ASIC resistant hash functions have
 
 
 
-\subsection*{Ledger Decomposition}
+\subsection{Ledger Decomposition}
 
 
 A simple but key innovation in the Consensus Layer is to restrict UTXOs to single inputs.
@@ -221,7 +227,7 @@ The Aggregation Layer is a decentralized permissionless infrastructure built in 
     \label{fig:SMT-Infra}
 \end{figure}
 
-\subsubsection{Dimensioning}
+\subsection{Dimensioning}
 
 We assume one million state transition requests per second, EC digital signatures, one second round times, 10 minute ZK checkpoints and 1KB ZK proof size. We assume that the tree remains around a size of 30x$10^{12}$ entries (or 1 million entries per second for an average lifetime of one year) giving a hash-chain size of approximately 1KB.
 A Unicity Proof would be at best case 2KB (just after the ZK checkpoint) and at worst case 600KB (just before the ZK Checkpoint\footnote{the size of the proof can be reduced automatically after the next ZK checkpoint.}).
@@ -239,7 +245,7 @@ The agent layer provides APIs for developers for agent development, agent to age
 \end{description}
 
 
-\subsubsection{A different programming model}
+\subsection{A different programming model}
 
 We will use the example of a Non-Fungible Token (NFT) and highlight the different approach by comparing the operations involved in transferring an NFT in Ethereum and Unicity.  We will assume two users, Alice and Bob. Alice currently owns an NFT and wishes to transfer it to Bob.
 
@@ -266,7 +272,7 @@ At this point the agent instances can only accept a valid transaction order from
 
 The major difference in models is the parallelization of compute. There may be an unlimited number of agents all interacting with each other or external parties, and they do not compete for resources on the blockchain. The blockchain still plays a critical role as the trust anchor but does not play a direct role in execution. The model has changed from a sequential to a parallel programming model.
 
-\subsubsection{State transitions}
+\subsection{State transitions}
 
 The definition of a state transition is agent specific and could be anything from a cryptocurrency transaction, a token mint or player-to-player or agent-to-agent interaction in a multi-player game. In this simple NFT example we use the most basic configuration possible for the purposes of explanatory clarity.
 
@@ -324,13 +330,13 @@ Alice's agent instance will then synchronize its state with Bob's agent instance
 \end{figure}
 
 
-\subsubsection{Programmability and composability}
+\subsection{Programmability and composability}
 
-The agent model can be extended to include composition, namely different types of agents updating the state of other agents, the splitting of agents, and agents that spawn other agents. In figure \ref{fig:AgentSpawn} we show some example of agents of different types (A1,A2,A3). An example of spawning would be an NFT mint agent which is enabled to spawn NFT agents/mint NFTs based on pre-defined conditions. The example of splitting would be agents that are holding state representing some fungible value. If fungibility is allowed as part of the application then an agent may split with the splits each holding part of the overall value. The rules of that application determine how the split should occur, and are implemented in its code.
+The agent model can be extended to include composition, namely different types of agents updating the state of other agents, the splitting of agents, and agents that spawn other agents. In figure~\ref{fig:AgentSpawn} we show some example of agents of different types (A1, A2, A3). An example of spawning would be an NFT mint agent which is enabled to spawn NFT agents/mint NFTs based on pre-defined conditions. The example of splitting would be agents that are holding state representing some fungible value. If fungibility is allowed as part of the application then an agent may split with the splits each holding part of the overall value. The rules of that application determine how the split should occur, and are implemented in its code.
 
 
 
-A critical point is that settlement is local i.e. agents do not depend on the state of other agents to execute. All agents are independent and execute locally in their own environments without referring to the state of other agents. This is in contrast to smart contract platforms such as Ethereum in which smart contracts have full access to other smart contracts' state, as all code and state exists within the memory of a single instance of the Ethereum Virtual Machine. Whilst contracts such as flash loans in Ethereum, i.e. contracts that rely on global state, could be built in Unicity it would defeat the purpose of the parallelization.
+A critical point is that settlement is local i.e. agents do not depend on the state of other agents to execute. All agents are independent and execute locally in their own environments without referring to the state of other agents. This is in contrast to smart contract platforms such as Ethereum in which smart contracts have full access to other smart contracts' state, as all code and state exists within the memory of a single instance of the Ethereum Virtual Machine. Whilst contracts such as flash loans in Ethereum, i.e., contracts that rely on global state, could be built in Unicity it would defeat the purpose of the parallelization.
 
 \begin{figure}[H]
     \centering
@@ -340,12 +346,12 @@ A critical point is that settlement is local i.e. agents do not depend on the st
 \end{figure}
 
 
-\subsubsection{Analogy with Kubernetes: an agent approach to application deployments}
+\subsection{Analogy with Kubernetes: an agent approach to application deployments}
 
 The Unicity model is a radical departure from traditional blockchain design, allowing massive scale parallelization of agents which interact to execute a decentralized application. An analogy with microservices and Kubernetes is relevant. A microservices architecture involves breaking down an application into small, independent services that can be developed, deployed, and scaled independently, with Kubernetes providing the platform for management and orchestration. The Unicity platform involves breaking down a decentralized application into small independent agents that can be developed, deployed and scaled without a centralized gatekeeper.
 
 
-\subsubsection{Zero knowledge: combining verifiable compute and  uniqueness}
+\subsection{Zero knowledge: combining verifiable compute and  uniqueness}
 
 As a result of the increased use of blockchain technologies there has been the surge in research and development of Zero Knowledge (ZK) technology. Zcash pioneered the use of zk-SNARKs (Zero-Knowledge Succinct Non-Interactive Argument of Knowledge) in 2016, enabling fully private transactions on a public blockchain. This breakthrough spurred further innovations, such as Ethereum's implementation of zk-rollups for scalability, reducing transaction costs and increasing throughput. As described earlier, Unicity uses ZK extensively at the Proof Aggregation Layer to provide succinct proofs of non-deletion. ZK techniques can also be applied at the Agent Layer enabling agents to provide verifiable proof of computation to other agents.
 
@@ -446,9 +452,10 @@ When combined with a native currency as a means to reward agents based on their 
 
 The incentive structure  enables the creation of decentralized marketplaces where AI agents can exchange data, services, or computational power with other agents or human participants. Digital currency provides a transparent, automated way to measure the value of contributions, ensuring that autonomous AI systems remain aligned with predefined goals and facilitating verifiability between agents, human operators, and stakeholders. The structure promotes self-sustaining, scalable systems where AI agents evolve and improve autonomously while being rewarded for their beneficial outputs. By addressing the challenges of on-chain AI execution and providing a framework for verifiable, incentivized AI agents, Unicity paves the way for a new era of decentralized artificial intelligence that balances innovation with accountability and alignment with human values.
 
-\appendix
-% \include{appendix-protocols}
 
+\appendix
+\setcounter{secnumdepth}{3}
+% \include{appendix-protocols}
 \include{appendix-zk-smt}
 
 \end{document}
