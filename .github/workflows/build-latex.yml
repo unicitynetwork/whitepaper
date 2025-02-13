@@ -52,7 +52,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          release_name: "Latest Main Branch Release"
+          name: "Latest Main Branch Release"
           body: |
             📄 This release contains the latest compiled version of the Unicity whitepaper.
             - Commit: ${{ env.sha_short }}
@@ -60,4 +60,4 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
