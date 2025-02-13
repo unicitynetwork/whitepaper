@@ -1,0 +1,32 @@
+name: Build LaTeX Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up LaTeX environment
+      uses: xu-cheng/latex-action@v2
+      with:
+        latexmk_use: true
+
+    - name: Build project
+      run: make all
+
+    - name: Upload PDF
+      uses: actions/upload-artifact@v3
+      with:
+        name: Unicity.pdf
+        path: Unicity.pdf
+        
