@@ -23,4 +23,6 @@ jobs:
         with:
           name: Unicity-Whitepaper
           path: Unicity.pdf
+          if-no-files-found: error
+          compression-level: 0
           
