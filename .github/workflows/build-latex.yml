@@ -45,16 +45,19 @@ jobs:
 
       - name: Get latest commit info
         id: commit
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "release_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: Create or Update GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Latest Main Branch Release"
+          name: "Unicity Whitepaper"
           body: |
             📄 This release contains the latest compiled version of the Unicity whitepaper.
+            - Date: ${{ env.release_date }}
             - Commit: ${{ env.sha_short }}
           files: Unicity.pdf
           draft: false
