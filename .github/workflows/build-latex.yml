@@ -25,7 +25,7 @@ jobs:
       run: make all
 
     - name: Upload PDF
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Unicity.pdf
         path: Unicity.pdf
