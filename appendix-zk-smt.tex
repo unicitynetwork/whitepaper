@@ -1,24 +1,37 @@
 
-\section{Appendix: Provably Secure Append-only Accumulator}
+\section{Appendix: Trustless Aggregation Layer}
 
-This section describes the core data structure for implementing the Unicity's Aggregation Layer in trustless way.
+This section describes the security model and data structures for implementing the Unicity's Aggregation Layer in trustless way.
 
-Trustless append only accumulator is consistent, if during insertion of a batch of updates there were no changes or deletions of existing leaves. The data structure implements other usual functions like inclusion proofs and non-inclusion proofs.
+Aggregation layer accepts state transition requests from the Agent layer. Each valid request's identifier is permanently recorded by the Aggregation layer. The underlying data structure can be modeled as a write-only key-value store. The permanent registration of requests guarantees the unicity of Agent state transitions.
 
-The size of consistency proof depends on the size of addition batch and logarithm of capacity. If we denote batch size as $k$ and depth $d$, then size of consistency proof is $O(k \cdot d)$, where $d \approx \log(capacity)$.
+Aggregation layer returns cryptographic certificates as proofs of registration. For efficiency, Aggregation layer works in rounds, where each round certifies a batch of requests. In terms of functionality the layer implements an \emph{append-only accumulator}.
 
-By using a cryptographic SNARK (a zero knowledge proof with certain properties), the size of consistency proof can be further reduced to constant size.
+The short cryptographic per-round summary commitment of the accumulator is further certified by the BFT Finality Gadget. The BFT Layer guarantees that there is only one copy of the Aggregation layer's state, and that there is no forking of states: the summary commitments can not be forked. This guarantees the unicity of the Aggregation layer.
 
-After every addition batch, the root of aggregation layer is certified by the BFT Finality Gadget, ensuring its uniqueness and immutability. This provides a useful trust anchor for consistency proofs, inclusion proofs, and non-inclusion proofs.
+The Aggregation layer is implemented as a Sparse Merkle Tree (SMT) (or some optimized variant). The root hash value is the commitment. SMT can efficiently return inclusion proofs and non-inclusion proofs, which can be cryptographically verified based on BFT Layer's certificate as the trust anchor.
+
+\subsection{Definition of Consistency}
+
+Trustless append only accumulator is \emph{consistent}, if during insertion of a batch of updates there were no changes or deletions of existing leaves.
+
+SMT Layer generates consistency proofs for each batch of insertions. The consistency proof is a cryptographic proof that the leaves in the batch were empty before the insertion, and that after the insertion the leaves contain the values defined by the keys in the batch. The consistency proof is generated based on the root hash before and after the batch, and on the path to each inserted leaf in the batch.
+
+A consistency proof proves, that based on committed root hash before the batch, and committed root hash after the batch insertion, and the list of leaves in the batch, no other leaves were modified -- neither changed nor deleted.
+
+The size of consistency proof depends on the batch size and the logarithm of capacity. If we denote batch size as $k$ and SMT tree depth $d$, then size of consistency proof is $O(k \cdot d)$, where $d \approx \log_2(\text{capacity})$.
+
+By using a cryptographic SNARK or STARK (a zero knowledge proof with certain properties), the size of consistency proof can be further reduced to constant size.
+
 
 \subsection{Proof of Consistency}
 
-We have $i$th batch of insertions $B = (k_1, k_2, \dots, k_j)$, where $k$ is an inserted item; all executed during a round of operation. Root hash before the round is $r_{i-1}$, and after the round is $r_i$. The accumulator is implemented as a Sparse Merkle Tree (SMT).
+We have $i$th batch of insertions $B = (k_1, k_2, \dots, k_j)$, where $k$ is a state transition identifier; all executed during a round of operation. Root hash before the round is $r_{i-1}$, and after the round is $r_i$. The accumulator is implemented as a Merkle Tree.
 
 The consistency proof generation for batch $B_i$ works as follows:
 
 \begin{itemize}
-    \item Insert the new SMT leaves in $B_i$,
+    \item Insert the new leaves in $B_i$,
     \item Starting from the newly inserted leaves, for each sibling hash necessary to compute the root of the tree, we record sibling's path and sibling's value as the proof. Let's denote the set as $s_i$.
     \item Record $(B_i, r_{i-1}, r_i, s_i)$.
 \end{itemize}
@@ -26,8 +39,8 @@ The consistency proof generation for batch $B_i$ works as follows:
 Proof verification works as follows:
 \begin{itemize}
     \item authenticate $r_{i-1}, r_i$
-    \item Build an incomplete SMT tree: for each item in $B_i$, we insert the value of empty leaf at appropriate position,
-    \item All necessary siblings necessary to compute the root are available in $s_i$. Compute the root, compare with $r_{i-1}$, if not equal then proof is not valid.
+    \item Build an incomplete SMT tree: for each item in $B_i$, we insert the value of empty leaf at the appropriate position, that is, the tree width at the leaf layer is equal to the number of items in $B_i$ plus their siblings.
+    \item All siblings necessary to compute the root are available in $s_i$. Compute the root, compare with $r_{i-1}$, if not equal then proof is not valid.
     \item Build again an incomplete SMT tree, for each item in $B_i$, we insert the value of each key into appropriate position.
     \item Compute the root based on siblings in $s_i$. If root is not equal to $r_i$ then proof is not valid.
     \item Proof is valid if the checks above passed.
@@ -36,26 +49,26 @@ Proof verification works as follows:
 This shows that given authentic $r_{i-1}, r_i$, the keys in $B_i$ were empty before the insertion batch, and after execution of insertion batch the values in $B_i$ were recorded at the positions defined by respective keys, and there were no other changes.
 
 
-\subsection{SNARK based Proof of Consistency}
+\subsection{Model}
+
+Crucially, the consistency proof is checked \emph{before} each certificate is returned to the Aggregation layer; and then based on this certificate and inclusion proofs extracted from SMT, individual responses can be returned to Agents and other users. This means, that valid (non-)inclusion proofs can not be issued before BFT layer have checked the consistency of each batch, and that there are no alternative copies (forks) of the SMT.
+
+Alternative, weaker model is where proving and proof verification happens ``after the fact''. Then, it is up to users to obtain assurance of SMT's correct operation and make the transaction acceptance decision accordingly. The STARK / SNARK proof can be generated asynchronously, after SMT root have been committed, and delivered to the users. The proof must be \emph{cumulative} -- covering system operation from the genesis or some check-point.
+
+User side auditing bypasses the trust in BFT layer's certificates, and its somewhat weaker model of n-of-m trust, typical to BFT consensus systems.
+
+
+\subsection{SNARK / STARK based Proof of Consistency}
 
 Statement to be proved is the verification algorithm sketched above. Instance is defined by the root of trust and insertions, $I = ((r_i, r_{i-1}),B_i)$. Witness $\omega = (s_i)$ is the secret in zero knowledge, but for our use-case, it is not necessary to keep the witness secret.
 
-The statement is implemented as a constraint system $R$ using the CIRCOM domain specific language. The witness is generated based on $s_i, B_i$, and supplemented by control wires defining how individual hashing blocks in the circuit are connected to the previous layer and to the inputs. If all constraints are satisfied, then the proof is valid.
+The proving speed is rather critical, as the BFT Layer expects a ZK proof with every certification request. Thus, the proving is within the critical path of the state transition certification and affects the user experience.
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.33\textwidth]{smt-circuit-cell.drawio}
-    \caption{A cell of the ZK circuit}
-    \label{fig:zk-circuit-cell}
-\end{figure}
+The proving scheme, components and implementation are chosen based on pure proving speed. The proving system is STARK proofs over small finite fields (e.g. BabyBear, Mersenne 31), comprising of Circle Polynomial Commitment Scheme\footnote{\url{https://eprint.iacr.org/2024/278}},  FRI (Fast Reed-Solomon IOP (Interactive Oracle Protocol)) protocol\footnote{\url{https://doi.org/10.4230/LIPIcs.ICALP.2018.14}}. The input is the verification algorithm implemented as a custom AIR circuit, using Poseidon 2 hash function\footnote{\url{https://eprint.iacr.org/2023/323}}. Based on the circuit and input data, an execution trace is generated, which is the input for STARK proof generation. The underlying library is Plonky 3 framework\footnote{\url{https://github.com/Plonky3/Plonky3}}.
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=\textwidth]{smt-circuit.drawio}
-    \caption{The ZK circuit for SMT consistency verification; cells are connected together and to the input vector based on pre-generated wiring signals}
-    \label{fig:zk-circuit}
-\end{figure}
 
-The proving backend is Groth 2016\footnote{\url{https://eprint.iacr.org/2016/260}} with conveniently small proof size. The proving time depends on the depth of SMT and the maximum size of the insertion batch. Importantly, the proving effort does not depend on the total size/capacity of SMT, enabling fairly large instantiations.
+\subsection{Proof Aggregation}
 
-If the layer above verifies proofs of consistency, then Unicity aggregation layer is trustless. Still, some redundancy (at least one node able to persist the data structure) is required for data availability.
+The STARK proof described above covers only one batch of insertions (and this is the reason behind its efficiency). End users verifying tokens and agent states need assurance about continued operation, not just about a single batch. The cumulative batch from genesis to a checkpoint is generated recursively.
+
+For STARK recursion SP1 zkVM\footnote{\url{https://github.com/succinctlabs/sp1}} is used. The proving speed is not critical, as the verification happens asynchronously, as an optional auditing layer giving extra assurance to interested clients. SP1 is specifically useful in this scenario, offering brute-force performance with continuations (sharding) and support of networked and GPU assisted proving.
