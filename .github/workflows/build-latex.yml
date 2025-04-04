@@ -1,0 +1,66 @@
+name: Build and Release PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: Unicity.tex
+
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unicity-Whitepaper
+          path: Unicity.pdf
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    needs: build_latex
+    # Only runs on direct commits or merges to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Unicity-Whitepaper
+          path: .
+
+      - name: Get latest commit info
+        id: commit
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "release_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Create or Update GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Unicity Whitepaper"
+          body: |
+            📄 This release contains the latest compiled version of the Unicity whitepaper.
+            - Date: ${{ env.release_date }}
+            - Commit: ${{ env.sha_short }}
+          files: Unicity.pdf
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
