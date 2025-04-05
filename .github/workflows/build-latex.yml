@@ -30,8 +30,7 @@ jobs:
 
   release:
     needs: build_latex
-    # Only runs on direct commits or merges to main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' 
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
@@ -49,6 +48,13 @@ jobs:
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "release_date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
+      - name: Move 'latest' tag to current commit
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag -f latest
+          git push origin -f refs/tags/latest
+
       - name: Create or Update GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -64,3 +70,4 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
