@@ -71,6 +71,7 @@ jobs:
           files: Unicity.pdf
           draft: false
           prerelease: false
+          recreate: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
