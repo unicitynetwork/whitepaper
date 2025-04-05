@@ -1,5 +1,8 @@
 name: Build and Release PDF
 
+permissions:
+  contents: write
+  
 on:
   push:
     branches:
@@ -27,7 +30,7 @@ jobs:
           path: Unicity.pdf
           if-no-files-found: error
           compression-level: 0
-
+  
   release:
     needs: build_latex
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -69,5 +72,5 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
