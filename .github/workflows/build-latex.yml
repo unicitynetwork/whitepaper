@@ -2,7 +2,7 @@ name: Build and Release PDF
 
 permissions:
   contents: write
-  
+
 on:
   push:
     branches:
@@ -30,7 +30,7 @@ jobs:
           path: Unicity.pdf
           if-no-files-found: error
           compression-level: 0
-  
+
   release:
     needs: build_latex
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -65,7 +65,7 @@ jobs:
           tag_name: latest
           name: "Unicity Whitepaper"
           body: |
-            📄 This release contains the latest compiled version of the Unicity whitepaper.
+            - This release contains the latest compiled version of the Unicity whitepaper.
             - Date: ${{ env.release_date }}
             - Commit: ${{ env.sha_short }}
           files: Unicity.pdf
@@ -74,4 +74,3 @@ jobs:
           recreate: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
