@@ -376,8 +376,55 @@ When Alice wishes to initiate a transfer she will create a state transition and 
     \label{fig:Alice Transfer}
 \end{figure}
 
-
 Bob's agent will verify the integrity of the coin sub-ledger (verifying the burn transaction) as well as the integrity of the state transition and the Unicity Proof. At this point only Bob's agent can execute a transaction order i.e., Bob is now under full control of the agent and therefore the underlying value of the coin.
+
+\subsection{Off-chain tokens}
+
+An off-chain token's genesis (value, initial state, etc.) is proved by the PoW coinbase transaction and the PoW Block Headers. The proof of the current state is the sequence of valid state transitions starting at the genesis and leading to the latest state.\footnote{The PoW block headers are strictly only necessary for maximalist zero-trust verification in off-line environments.}
+
+To transfer a token to Bob, Alice creates a state transition and proves no double-spend with an inclusion proof that this state change has been registered. The updated token structure can then be transferred directly to Bob with no further on-chain actions required, as shown on Figure~\ref{fig:OffChain}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{OffChain.png}
+    \caption{An off-chain token}
+    \label{fig:OffChain}
+\end{figure}
+
+\subsection{Low-latency transactions}
+
+Normally, when a Buyer wants to buy some goods from a Seller, the process is as shown on Figure~\ref{fig:LowLatency1}:
+\begin{itemize}
+  \item The Buyer creates a commitment that authorizes transfer to the Seller and, a state transition request.
+  \item The Buyer sends the state transition request to the Prover which will return an inclusion proof in approximately 2~seconds.
+  \item The Buyer then sends the token + commitment + inclusion proof to the Seller.
+  \item The Seller verifies the inclusion proof and releases the goods.\footnote{Note that, for trustless exchange of digital assets, the token transfer and goods release steps can be done atomically using the token predicate system.}
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{LowLatency1.png}
+    \caption{Regular transaction flow with proof of inclusion before the transfer}
+    \label{fig:LowLatency1}
+\end{figure}
+
+To reduce latency, an extension of the protocol for high frequency trading is as shown on Figure~\ref{fig:LowLatency2}:
+\begin{itemize}
+  \item The Buyer produces the commitment that authorizes transfer to the Seller.
+  \item The Buyer sends the token + commitment proof to the Seller.
+  \item The Seller generates the state transition request, sends it to the Prover, and receives back an immediate exclusion proof: a confirmation that this state transition has not been registered before and is now scheduled to be registered.
+  \item The Seller then releases the goods immediately.
+  \item Finally, the Seller waits (approximately 2~seconds) for the inclusion proof before the received token can be added to usable inventory.
+\end{itemize}
+
+Provided that participants have sufficient inventory of tokens for the 2-second latency, extreme volumes of high frequency transactions can be achieved.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{LowLatency2.png}
+    \caption{Low-latency transaction flow with proof of inclusion after the transfer}
+    \label{fig:LowLatency2}
+\end{figure}
 
 \section{Decentralized Finance}
 
