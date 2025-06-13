@@ -55,7 +55,7 @@ Unicity is a novel blockchain architecture designed for the development of decen
 \begin{itemize}
     \item Unicity agents are encapsulations of verifiably unique code and state e.g. a fungible currency token, an NFT, a smart contract,  a game NPC, an AI, or any combination thereof. Agent instances execute off chain and request unicity proofs when needed to prove unique state histories.
     \item  Four layered Infrastructure: Proof of Work (PoW) trust anchor, BFT consensus, Proof Aggregation and Agent Layers.
-    \item PoW Layer: Native platform currency(ALPHA). RandomX ASIC resistant hash function. Two-minute block times, 10 ALPHA subsidy per block. Exponential moving average difficulty adjustment. Zero pre-mine.
+    \item PoW Layer: Native platform currency. RandomX ASIC resistant hash function. Exponential moving average difficulty adjustment.
     \item BFT Layer: Block reward winners form a subset of validators that operate a BFT Consensus Layer with one second rounds.
     \item Only single input UTXOs are allowed by consensus rules enabling decomposition of the ledger into compact individual coin sub-ledgers, which can then be efficiently transferred to the Agent Layer.
     \item Proof Aggregation Layer: public permissionless infrastructure, operating an append-only fault tolerant Sparse Merkle Tree (SMT). The SMT receives requests in rounds with each round root hash value anchored in the BFT layer and then subsequently in the PoW layer. ZK succinct proofs of consistency for every insertion batch.
@@ -106,7 +106,7 @@ The key cryptographic guarantee that is handled differently in Unicity is proof 
     \label{fig:layers}
 \end{figure}
 
-At an abstract level the Unicity design is divided into three layers (four if PoW Consensus is used). The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in blocks\footnote{Certain transactions may still necessary at this layer. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}.
+At an abstract level the Unicity design is divided into three layers (four if PoW Consensus is used). The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in blocks.\footnote{Certain transactions may still necessary at this layer. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}
 	Instead, state transitions happen at the Agent Layer where each agent will order and execute transactions and then send a request to the Proof Aggregation Layer. The requesting agent will receive back a uniqueness proof for the set of transactions that it executed. Effectively, the Proof Aggregation Layer aggregates requests for agents executing in parallel,  commits the aggregate request to the Consensus Layer and returns to each individual agent a proof of uniqueness for that agent's state history.
 
 
@@ -129,7 +129,7 @@ Unicity somewhat resembles a (zero transaction) L1 and a set of dynamically spaw
 
 \section{Implementation: Consensus Layer}
 
-The Alpha public blockchain is used, both as the trust anchor and as the native currency of the system (for compensating network participants and paying of transaction fees). Alpha is purpose built for Unicity as a zero-premine Proof of Work chain similar to Bitcoin with several modifications.
+The public blockchain is used both as the trust anchor and as the native currency of the system (for compensating network participants and paying of transaction fees). The blockchain is purpose-built for Unicity as a Proof of Work chain similar to Bitcoin with a few modifications.
 
 \begin{figure}[htbp]
     \centering
@@ -167,7 +167,7 @@ A simple but key innovation in the Consensus Layer is to restrict UTXOs to singl
 if (tx.vin.size() != 1)
     return state.Invalid(TxValidationResult::TX_CONSENSUS,
                          "bad-txns-too-many-inputs",
-                         "Alpha Transactions must have exactly one input");
+                         "Transactions must have exactly one input");
 \end{lstlisting}
 \end{minipage}
 
@@ -208,7 +208,7 @@ An agent will execute locally and send a state transition request to the Aggrega
 \end{figure}
 
 
- A Sparse Merkle Tree (SMT) is used such that each unique state transition request from the agent layer is allocated a leaf node in the tree. The details of the request will be described in the next section. The SMT is updated in rounds with a batch of state transition requests per round. In each round the SMT state root is calculated, a ZK SMT consistency proof\footnote{See Appendix for full description. The ZK consistency proof proves that no recorded state transitions were modified or removed during the round} generated and the SMT state transition (previous SMT state root, new SMT state root, ZK SMT consistency Proof) is passed to the Consensus Layer. The validators in the Consensus Layer verify the ZK SMT consistency proof and the validity of request, and then commit to the new SMT root and return a certificate, or cryptographic proof of acceptance of the valid change. After that only requests from the SMT which update the new state root can be accepted\footnote{the design of the SMT is optimized for ZK proving techniques. Batches of up to 10,000 state transitions can be proven per second using the Poseidon2 hash function, a custom Algebraic Intermediate Representation and Plonky3's FRI STARK prover.}.)
+ A Sparse Merkle Tree (SMT) is used such that each unique state transition request from the agent layer is allocated a leaf node in the tree. The details of the request will be described in the next section. The SMT is updated in rounds with a batch of state transition requests per round. In each round the SMT state root is calculated, a ZK SMT consistency proof\footnote{The ZK consistency proof proves that no recorded state transitions were modified or removed during the round.} generated and the SMT state transition (previous SMT state root, new SMT state root, ZK SMT consistency proof) is passed to the Consensus Layer. The validators in the Consensus Layer verify the ZK SMT consistency proof and the validity of request, and then commit to the new SMT root and return a certificate, or cryptographic proof of acceptance of the valid change. After that only requests from the SMT which update the new state root can be accepted.\footnote{The design of the SMT is optimized for ZK proving techniques. Batches of up to 10,000 state transitions can be proven per second using the Poseidon2 hash function, a custom Algebraic Intermediate Representation and Plonky3's FRI STARK prover.}
  
  
  
@@ -236,8 +236,8 @@ The Aggregation Layer is a decentralized permissionless infrastructure built in 
 
 \subsection{Dimensioning}
 
-We assume one million state transition requests per second, EC digital signatures, one second round times and 10 minute ZK checkpoints. We assume that the tree remains around a size of 30x$10^{12}$ entries (or 1 million entries per second for an average lifetime of one year) giving a hash-chain size of approximately 1KB.
-A Unicity Proof would be at best case 2KB (just after the ZK checkpoint) and at worst case 600KB (just before the ZK Checkpoint\footnote{the hash-based proof can be discarded after the next ZK checkpoint.}).
+We assume one million state transition requests per second, 256-bit hash values, EC digital signatures, one-second round times and 10-minute ZK checkpoints. We assume that the tree size remains around $32 \cdot 10^{12}$~entries ($10^6$~entries per second with an average lifetime of one year $\approx 32 \cdot 10^6$~seconds) giving a hash-chain size of approximately 1.5\;KB.
+A Unicity Proof would be at best case $3$\;KB (just after the ZK checkpoint) and at worst case $900$\;KB (just before the ZK checkpoint).\footnote{The hash-based proof can be discarded after the next ZK checkpoint.}
 
 There is no bottleneck in the system or centralized points of failure. Subtrees operate asynchronously in clusters and their number and location is algorithmically optimized for network conditions.
 
@@ -260,13 +260,13 @@ In the Ethereum model the NFT exists inside an ERC721 smart contract, executed b
 
 
 
-In Unicity the NFT exists inside an agent, instances of which execute locally in their own execution environment(s) (Alice's laptop or mobile device, in the cloud, at the edge or all of the above, simultaneously) Unlike Ethereum ERC721 each NFT is implemented by its own agent\footnote{a separate agent may act as minting agent, spawning NFT agents.}.
+In Unicity the NFT exists inside an agent, instances of which execute locally in their own execution environment(s) (Alice's laptop or mobile device, in the cloud, at the edge or all of the above, simultaneously). Unlike Ethereum ERC721 each NFT is implemented by its own agent.\footnote{A separate agent may act as minting agent, spawning NFT agents.}
 
 
 In the Ethereum model Alice will send a transaction order to the blockchain network, which will be received by validators, added to a block proposal and then broadcast to the other validators in the network. Alice and Bob can then verify that the transfer took place by checking that the blockchain includes the transaction.
 
 
-In the Unicity model, Alice will send a transaction order to the agent instance in her execution environment that stores the NFT. The agent instance will then execute the transaction order, request a Unicity Proof from the Unicity infrastructure and synchronize with a new agent instance instantiated in Bob's execution environment. At this point there are identical agent instances in both Alice and Bob's environments. Once synchronized the agent instance in Bob's execution environment will verify both the Unicity Proof (verifying that there are no forks, i.e. Alice is not trying to double spend) as well as the integrity of computation\footnote{this could be by simply rerunning the agent code or verifying a ZK proof.}.
+In the Unicity model, Alice will send a transaction order to the agent instance in her execution environment that stores the NFT. The agent instance will then execute the transaction order, request a Unicity Proof from the Unicity infrastructure and synchronize with a new agent instance instantiated in Bob's execution environment. At this point there are identical agent instances in both Alice and Bob's environments. Once synchronized the agent instance in Bob's execution environment will verify both the Unicity Proof (verifying that there are no forks, i.e. Alice is not trying to double spend) as well as the integrity of computation.\footnote{This could be by simply rerunning the agent code or verifying a ZK proof.}
 
 \begin{figure}[htbp]
     \centering
@@ -275,7 +275,7 @@ In the Unicity model, Alice will send a transaction order to the agent instance 
     \label{fig:UserAgent}
 \end{figure}
 
-At this point the agent instances can only accept a valid transaction order from Bob to further transfer the NFT. Alice may choose to delete or archive the agent instance that processed the transaction as it can serve no purpose going forward for her\footnote{having multiple copies may of course be useful for censorship resistance or fault tolerance depending on the application.}.
+At this point the agent instances can only accept a valid transaction order from Bob to further transfer the NFT. Alice may choose to delete or archive the agent instance that processed the transaction as it can serve no purpose going forward for her.\footnote{Having multiple copies may of course be useful for censorship resistance or fault tolerance depending on the application.}
 
 The major difference in models is the parallelization of compute. There may be an unlimited number of agents all interacting with each other or external parties, and they do not compete for resources on the blockchain. The blockchain still plays a critical role as the trust anchor but does not play a direct role in execution. The model has changed from a sequential to a parallel programming model.
 
@@ -337,21 +337,7 @@ Alice's agent instance will then synchronize its state with Bob's agent instance
 \end{figure}
 
 
-\subsection{Programmability and composability}
-
-The agent model can be extended to include composition, namely different types of agents updating the state of other agents, the splitting of agents, and agents that spawn other agents. In figure~\ref{fig:AgentSpawn} we show some example of agents of different types (A1, A2, A3). An example of spawning would be an NFT mint agent which is enabled to spawn NFT agents/mint NFTs based on pre-defined conditions. The example of splitting would be agents that are holding state representing some fungible value. If fungibility is allowed as part of the application then an agent may split with the splits each holding part of the overall value. The rules of that application determine how the split should occur, and are implemented in its code.
-
-
-
 A critical point is that settlement is local i.e. agents do not depend on the state of other agents to execute. All agents are independent and execute locally in their own environments without referring to the state of other agents. This is in contrast to smart contract platforms such as Ethereum in which smart contracts have full access to other smart contracts' state, as all code and state exists within the memory of a single instance of the Ethereum Virtual Machine. Whilst contracts such as flash loans in Ethereum, i.e., contracts that rely on global state, could be built in Unicity it would defeat the purpose of the parallelization.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Replication.png}
-    \caption{Agent Actions}
-    \label{fig:AgentSpawn}
-\end{figure}
-
 
 \subsection{Analogy with Kubernetes: an agent approach to application deployments}
 
@@ -369,7 +355,7 @@ ZK and Unicity solve different problems that when combined represent a powerful 
 
 Bitcoin provided a practical implementation of the ideological commitment to freedom, self-sovereignty, and resistance to government censorship.  It marked a significant advance towards censorship-resistant money with predictable and transparent issuance rules, preventing the kinds of fiscal mismanagement that are inevitable under fiat systems. However, whilst it has proven to be a resilient store of value, it has not seen widespread adoption as a medium of exchange. In this section we show how the Proof of Work coins generated in the Consensus Layer can be extracted and used by agents to provide a highly portable medium of exchange similar to physical cash.
 
-Alice is the owner of an Alpha coin - a coin generated through Proof of Work in the Consensus Layer. In order to use it like cash the first step is to transfer the coin to a specified transfer or burn address in the Alpha ledger. Alice then creates a new agent with a genesis state defined by the transaction ID of the burn transaction in the Alpha ledger. The agent's genesis state includes this transaction ID, the Alpha coin sub-ledger, and the genesis ownership predicate. The genesis owner predicate must match the send address in the ultimate transaction in the Alpha coin sub-ledger i.e. only the private key that initiated the burn transaction can execute a transfer.
+Alice is the owner of a coin - a coin generated through Proof of Work in the Consensus Layer. In order to use it like cash the first step is to transfer the coin to a specified transfer or burn address in the ledger. Alice then creates a new agent with a genesis state defined by the transaction ID of the burn transaction in the ledger. The agent's genesis state includes this transaction ID, the coin sub-ledger, and the genesis ownership predicate. The genesis owner predicate must match the send address in the ultimate transaction in the coin sub-ledger i.e. only the private key that initiated the burn transaction can execute a transfer.
 
 \begin{figure}[htbp]
     \centering
@@ -378,7 +364,7 @@ Alice is the owner of an Alpha coin - a coin generated through Proof of Work in 
     \label{fig:GenesisEvent}
 \end{figure}
 
-The reason for including the Alpha coin sub-ledger is local verifiability. If a recipient had access to a full node of the PoW blockchain they would have the full history and be able to verify the transaction integrity themselves. However, this is quite restrictive and would limit the choices for execution environments. By including the coin sub-ledger a recipient simply needs the genesis block of the PoW blockchain to independently verify the integrity of the coin sub-ledger. The analogy with physical cash is relevant. When someone hands over cash the recipient does not need to verify the integrity of every transaction in history to know that the cash is valid. In other words Unicity agents share the same property of physical cash that verification and settlement happen locally.
+The reason for including the coin sub-ledger is local verifiability. If a recipient had access to a full node of the PoW blockchain they would have the full history and be able to verify the transaction integrity themselves. However, this is quite restrictive and would limit the choices for execution environments. By including the coin sub-ledger a recipient simply needs the genesis block of the PoW blockchain to independently verify the integrity of the coin sub-ledger. The analogy with physical cash is relevant. When someone hands over cash the recipient does not need to verify the integrity of every transaction in history to know that the cash is valid. In other words Unicity agents share the same property of physical cash that verification and settlement happen locally.
 
 
 When Alice wishes to initiate a transfer she will create a state transition and a state transition request similar to the NFT example above. In this case the token is fungible which means that for a transfer less than the value of the coin the agent will split into two agents, one with the value of the transfer and the other with the value of the remainder.
@@ -391,7 +377,7 @@ When Alice wishes to initiate a transfer she will create a state transition and 
 \end{figure}
 
 
-Bob's agent will verify the integrity of the Alpha coin sub-ledger (verifying the burn transaction) as well as the integrity of the state transition and the Unicity Proof. At this point only Bob's agent can execute a transaction order i.e., Bob is now under full control of the agent and therefore the underlying value of the coin.
+Bob's agent will verify the integrity of the coin sub-ledger (verifying the burn transaction) as well as the integrity of the state transition and the Unicity Proof. At this point only Bob's agent can execute a transaction order i.e., Bob is now under full control of the agent and therefore the underlying value of the coin.
 
 \section{Decentralized Finance}
 
@@ -459,10 +445,5 @@ When combined with a native currency as a means to reward agents based on their 
 
 The incentive structure  enables the creation of decentralized marketplaces where AI agents can exchange data, services, or computational power with other agents or human participants. Digital currency provides a transparent, automated way to measure the value of contributions, ensuring that autonomous AI systems remain aligned with predefined goals and facilitating verifiability between agents, human operators, and stakeholders. The structure promotes self-sustaining, scalable systems where AI agents evolve and improve autonomously while being rewarded for their beneficial outputs. By addressing the challenges of on-chain AI execution and providing a framework for verifiable, incentivized AI agents, Unicity paves the way for a new era of decentralized artificial intelligence that balances innovation with accountability and alignment with human values.
 
-
-\appendix
-\setcounter{secnumdepth}{3}
-\include{appendix-proto2}
-\include{appendix-zk-smt}
 
 \end{document}
