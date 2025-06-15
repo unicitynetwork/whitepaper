@@ -37,7 +37,7 @@
 \setcounter{secnumdepth}{1}
 
 \title{Unicity: Verifiable Off-Chain Agents}
-\author{The Unicity Developers\\unicity-devs@proton.me}
+\author{The Unicity Developers\\info@unicity-labs.com}
 \date{}
 
 \begin{document}
@@ -53,7 +53,7 @@ Unicity is a novel blockchain architecture designed for the development of decen
 \section*{TL;DR}
 
 \begin{itemize}
-    \item Unicity agents are encapsulations of verifiably unique code and state e.g. a fungible currency token, an NFT, a smart contract,  a game NPC, an AI, or any combination thereof. Agent instances execute off chain and request unicity proofs when needed to prove unique state histories.
+    \item Unicity agents are encapsulations of verifiably unique code and state e.g. a fungible currency token, an NFT, a smart contract,  a game NPC, an AI, or any combination thereof. Agent instances execute off chain and generate/verify proofs when needed to prove unique state histories.
     \item  Four layered Infrastructure: Proof of Work (PoW) trust anchor, BFT consensus, Proof Aggregation and Agent Layers.
     \item PoW Layer: Native platform currency. RandomX ASIC resistant hash function. Exponential moving average difficulty adjustment.
     \item BFT Layer: Block reward winners form a subset of validators that operate a BFT Consensus Layer with one second rounds.
@@ -106,7 +106,7 @@ The key cryptographic guarantee that is handled differently in Unicity is proof 
     \label{fig:layers}
 \end{figure}
 
-At an abstract level the Unicity design is divided into three layers (four if PoW Consensus is used). The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in blocks.\footnote{Certain transactions may still necessary at this layer. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}
+At an abstract level the Unicity design is divided into three layers (four if PoW Consensus is used). The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in Consensus Layer blocks.\footnote{Certain transactions may still necessary. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}
 	Instead, state transitions happen at the Agent Layer where each agent will order and execute transactions and then send a request to the Proof Aggregation Layer. The requesting agent will receive back a uniqueness proof for the set of transactions that it executed. Effectively, the Proof Aggregation Layer aggregates requests for agents executing in parallel,  commits the aggregate request to the Consensus Layer and returns to each individual agent a proof of uniqueness for that agent's state history.
 
 
@@ -120,7 +120,7 @@ At an abstract level the Unicity design is divided into three layers (four if Po
     \label{fig:comp}
 \end{figure}
 
-Unicity somewhat resembles a (zero transaction) L1 and a set of dynamically spawned L2s, one per contract (agent). Agent instances perform local transaction ordering, obtain a unicity proof and synchronize state with other agent instances. There is always an ``interested party'' (players in a game, owners of tokens) to ensure verifiability and availability. For example consider a simple turn-based game played by three players. There are only three interested parties. To run this game on-chain either in an L1 or an L2 would be highly inefficient, as all the validators would need to execute the game (and all other games) as part of the consensus process. The Unicity approach would be to define the game logic as an agent template with the three players running agent instances. At each turn the player agent instance would update its state, generate a Unicity proof and synchronize with other agent instances.
+Unicity somewhat resembles a (zero transaction) L1 and a set of dynamically spawned, ephemeral L2s, one per contract (agent). Agent instances perform local transaction ordering, obtain a uniqueness proof and synchronize state with other agent instances. There is always an ``interested party'' (players in a game, owners of tokens) to ensure verifiability and availability. For example consider a simple turn-based game played by three players. There are only three interested parties. Running this game on-chain either in an L1 or an L2 implies that all the validators  need to execute the game (and all other games) as part of the consensus process. The Unicity approach would be to define the game logic as an agent template with the three players running agent instances. At each turn the player agent instance would update its state, generate a uniqueness proof and synchronize with other agent instances.
 
 
 
@@ -140,7 +140,7 @@ The public blockchain is used both as the trust anchor and as the native currenc
 
 \begin{itemize}
 \setlength{\leftmargin}{1em}
- \item It works on two-minute block times with RandomX ASIC-resistant hashing algorithm.
+ \item It uses the RandomX ASIC-resistant hashing algorithm.
  \item A subset of miners, based on winning past block rewards, self-select to operate a BFT consensus subnet operating at one-second block times. The BFT subnet implements a finality gadget to periodically ensure settlement finality.
  \item Transactions are restricted to single inputs, enabling the overall ledger to be decomposed into compact individual coin sub-ledgers which can be verified with the same trust assumptions as the full chain.  This allows for the coin sub-ledgers can be extracted from the blockchain and used off-chain, such as for paying transaction fees in the Agent Layer.
 \end{itemize}
@@ -150,7 +150,7 @@ The public blockchain is used both as the trust anchor and as the native currenc
 
 Nakamoto's vision for Bitcoin was based on achieving censorship resistance through decentralization, with the idea that anyone with a computer could participate in the network's consensus mechanism through mining. However, the rapid evolution of mining technology, particularly the development of ASICs, introduced an unforeseen challenge to this egalitarian ideal. These machines, designed solely for the purpose of mining, quickly outpaced general-purpose computer hardware in terms of hash rate, leading to a concentration of mining power. The resulting centralization not only deviated from Bitcoin's original decentralized ethos but also introduced potential vulnerabilities to the network, such as increased susceptibility to 51\% attacks and reduced geographical distribution of miners.
 
-In our view Proof of Work is unsurpassed as means to build a fault tolerant censorship resistant network. It ties the security of the system to a physical quantity (energy) and with certain limitations coins can be fairly and transparently distributed. The last years have seen numerous variations of Proof of Stake as a means to provide a proof of uniqueness. However, the distribution of tokens in Proof of Stake is subject to human oversight, leading to potential errors, malfeasance and fraud. Token allocations and airdrops may give the illusion of decentralization, yet the reality can be quite different. There are certainly limitations to Proof of Work such as potential centralization and slow settlement finality, however these limitations can be overcome with modern technologies.
+In our view Proof of Work is unsurpassed as means to build a fault tolerant censorship resistant network. It ties the security of the system to a physical quantity (energy) and with certain limitations coins can be fairly and transparently distributed. There are certainly limitations to Proof of Work such as potential centralization and slow settlement finality, however these limitations can be overcome with modern technologies.
 
 To prevent centralization of mining power new ASIC resistant hash functions have been developed, of which RandomX represents the state of the art, having been battle-tested in Monero, a privacy preserving cryptocurrency, over several years. Unlike Bitcoin's SHA-256 algorithm, RandomX is designed to be ASIC-resistant and CPU-friendly, leveling the playing field and helping maintain a decentralized network of miners. This democratization not only improves network security through wider participation but also upholds the original Bitcoin vision as a decentralized financial system accessible to all. RandomX works by generating random code for each mining round, including a variety of CPU instructions, memory-hard operations and random code execution that can be efficiently performed by general-purpose processors but challenging to optimize in hardware. This ensures that CPUs remain competitive in mining, preserving the network's decentralization and resistance to the concentration of mining power.
 
@@ -196,7 +196,7 @@ The Proof Aggregation Layer can be explained in terms of the workflow for an age
 \end{figure}
 
 
-An agent will execute locally and send a state transition request to the Aggregation Layer. The Aggregation Layer will generate a Unicity Proof i.e., a proof that shows the state transition is unique, and return it to the agent who then synchronizes its state with a recipient agent who can verify both the correctness of the agent computation and the uniqueness of the state history.
+An agent will execute locally and send a state transition request to the Aggregation Layer. The Aggregation Layer will generate a uniqueness proof i.e., a proof that shows the state transition is unique, and return it to the agent who then synchronizes its state with a recipient agent who can verify both the correctness of the agent computation and the uniqueness of the state history.
 
 
 
@@ -212,7 +212,7 @@ An agent will execute locally and send a state transition request to the Aggrega
  
  
  
-  A Unicity Proof consists of several elements:
+  A uniqueness proof consists of several elements:
 
 \begin{itemize}
     \item ZK recursively generated cumulative proof at previous ZK checkpoint (common to all requests)
@@ -351,34 +351,23 @@ As a result of the increased use of blockchain technologies there has been the s
 ZK and Unicity solve different problems that when combined represent a powerful approach to building decentralized applications. ZK provides proof of computation but not proof of uniqueness. Many client side ZK proof generation platforms such a Aztec, ZKSync, Aleo etc. can be used in combination with Unicity to provide proof of computation \textbf{and} proof of uniqueness, effectively moving all compute to the client side and reducing the verification task of a recipient to verifying a single ZK Proof. In the simple example above Bob's agent instance must re-execute the state transition to verify the correctness of computation. If Alice's agent generated a ZK Proof of the state transition, it would reduce the work necessary for Bob's agent instance, and also for future recipients of the NFT to verify the correctness of previous computations.
 
 
-\section{Programmable Digital Currency}
+\section{Off-chain Peer to Peer Transactions}
 
-Bitcoin provided a practical implementation of the ideological commitment to freedom, self-sovereignty, and resistance to government censorship.  It marked a significant advance towards censorship-resistant money with predictable and transparent issuance rules, preventing the kinds of fiscal mismanagement that are inevitable under fiat systems. However, whilst it has proven to be a resilient store of value, it has not seen widespread adoption as a medium of exchange. In this section we show how the Proof of Work coins generated in the Consensus Layer can be extracted and used by agents to provide a highly portable medium of exchange similar to physical cash.
-
-Alice is the owner of a coin - a coin generated through Proof of Work in the Consensus Layer. In order to use it like cash the first step is to transfer the coin to a specified transfer or burn address in the ledger. Alice then creates a new agent with a genesis state defined by the transaction ID of the burn transaction in the ledger. The agent's genesis state includes this transaction ID, the coin sub-ledger, and the genesis ownership predicate. The genesis owner predicate must match the send address in the ultimate transaction in the coin sub-ledger i.e. only the private key that initiated the burn transaction can execute a transfer.
+Bitcoin provided a practical implementation of the ideological commitment to freedom, self-sovereignty, and resistance to government censorship.  It marked a significant advance towards censorship-resistant money with predictable and transparent issuance rules, preventing the kinds of fiscal mismanagement that are inevitable under fiat systems. However, whilst it has proven to be a resilient store of value, it has not seen widespread adoption as a medium of exchange. In this section we show how Unicity can be used to allow off-chain peer to peer transactions, effectively replicated the properties of physical cash for tokens of any chain.
+\\
+\\
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.15\textwidth]{CoinGenesis.png}
-    \caption{Agent Genesis State}
+    \includegraphics[width=0.5\textwidth]{Unicity_Offchain.png}
+    \caption{Off-Chain Applications}
     \label{fig:GenesisEvent}
 \end{figure}
 
-The reason for including the coin sub-ledger is local verifiability. If a recipient had access to a full node of the PoW blockchain they would have the full history and be able to verify the transaction integrity themselves. However, this is quite restrictive and would limit the choices for execution environments. By including the coin sub-ledger a recipient simply needs the genesis block of the PoW blockchain to independently verify the integrity of the coin sub-ledger. The analogy with physical cash is relevant. When someone hands over cash the recipient does not need to verify the integrity of every transaction in history to know that the cash is valid. In other words Unicity agents share the same property of physical cash that verification and settlement happen locally.
+In the above diagram Token Operations SDK is a Unicity TypeScript library\footnote{https://github.com/unicitynetwork/state-transition-sdk} that allows the integration of token operations such as minting or transferring into off-chain applications.
 
 
-When Alice wishes to initiate a transfer she will create a state transition and a state transition request similar to the NFT example above. In this case the token is fungible which means that for a transfer less than the value of the coin the agent will split into two agents, one with the value of the transfer and the other with the value of the remainder.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{Alice-Transfer.png}
-    \caption{Transfer of a coin minted in the Contract Execution Layer}
-    \label{fig:Alice Transfer}
-\end{figure}
-
-Bob's agent will verify the integrity of the coin sub-ledger (verifying the burn transaction) as well as the integrity of the state transition and the Unicity Proof. At this point only Bob's agent can execute a transaction order i.e., Bob is now under full control of the agent and therefore the underlying value of the coin.
-
-\subsection{Off-chain tokens}
 
 An off-chain token's genesis (value, initial state, etc.) is proved by the PoW coinbase transaction and the PoW Block Headers. The proof of the current state is the sequence of valid state transitions starting at the genesis and leading to the latest state.\footnote{The PoW block headers are strictly only necessary for maximalist zero-trust verification in off-line environments.}
 
@@ -425,6 +414,10 @@ Provided that participants have sufficient inventory of tokens for the 2-second 
     \caption{Low-latency transaction flow with proof of inclusion after the transfer}
     \label{fig:LowLatency2}
 \end{figure}
+
+
+\subsection{off-line transactions}
+TODO
 
 \section{Decentralized Finance}
 
