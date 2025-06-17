@@ -386,7 +386,7 @@ Normally, when a Buyer wants to buy some goods from a Seller, the process is as 
   \item The Buyer creates a commitment that authorizes transfer to the Seller and, a state transition request.
   \item The Buyer sends the state transition request to the Prover which will return an inclusion proof in approximately 2~seconds.
   \item The Buyer then sends the token + commitment + inclusion proof to the Seller.
-  \item The Seller verifies the inclusion proof and releases the goods.\footnote{Note that, for trustless exchange of digital assets, the token transfer and goods release steps can be done atomically using the token predicate system.}
+  \item The Seller verifies the inclusion proof and releases the goods.\footnote{Note that, for trustless exchange of digital assets, the token transfer and goods release steps can be made atomic using the token predicate system.}
 \end{itemize}
 
 \begin{figure}[ht]
@@ -399,7 +399,7 @@ Normally, when a Buyer wants to buy some goods from a Seller, the process is as 
 To reduce latency, an extension of the protocol for high frequency trading is as shown on Figure~\ref{fig:LowLatency2}:
 \begin{itemize}
   \item The Buyer produces the commitment that authorizes transfer to the Seller.
-  \item The Buyer sends the token + commitment proof to the Seller.
+  \item The Buyer sends the token + commitment to the Seller.
   \item The Seller generates the state transition request, sends it to the Prover, and receives back an immediate exclusion proof: a confirmation that this state transition has not been registered before and is now scheduled to be registered.
   \item The Seller then releases the goods immediately.
   \item Finally, the Seller waits (approximately 2~seconds) for the inclusion proof before the received token can be added to usable inventory.
@@ -414,9 +414,17 @@ Provided that participants have sufficient inventory of tokens for the 2-second 
     \label{fig:LowLatency2}
 \end{figure}
 
+\subsection{Off-line transactions}
 
-\subsection{off-line transactions}
-TODO
+Unicity can support off-line transactions in two distinct ways: assisted by certified secure hardware or using time-locking of tokens designated for off-line spending to predefined recipients.
+
+\paragraph{Assisted by secure hardware:}
+
+In this mode, tokens are moved from on-line usage to off-line usage by first executing an on-line transaction transferring the ownership to a certified hardware device. After that, all off-line transfers must be signed by certified devices (and this property must be verified by each subsequent recipient) until the whole chain is eventually posted on-line by the last off-line recipient. Each off-line wallet must be restricted to only sign state transitions where (a)~the wallet is the current owner of the token, and (b)~the wallet has not previously signed any other transition from the same state. With careful implementation, the requirements on the trusted hardware components do not exceed those on the SIM cards of mobile phones. In case one of the devices breaches the protocol, the malfunctioning device can be identified (and appropriate sanctions imposed) when the transition chain is posted on-line.
+
+\paragraph{Based on time-locking of tokens:}
+
+In this mode, a payer prepares for off-line payments to predefined payees by posting special transfers while still on-line. In those special transfers, the control of each token is set to a conditional ``if the next transition is posted before time~$T$, it must be signed by~$X$; otherwise it must be signed by~$Y$'', where $X$ is the prospective payee and $Y$ is the payer. Then, if the payer decides to make the off-line payment, they can do so by handing a copy of the token's current state over to the payee; the payee can verify that they are indeed the sole controller of the token until time~$T$ and can execute any valid transactions (including taking unconditional ownership of the token) by posting them on-line before time~$T$. If the payer decides to not make the payment, they just have to refrain from making the token's current state available to the payee until time~$T$ when the control of the token reverts to the payer.
 
 \section{Decentralized Finance}
 
