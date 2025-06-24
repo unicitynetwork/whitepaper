@@ -7,6 +7,58 @@
 \usepackage{url}
 \usepackage{enumitem}
 
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+% \usepackage{flushend} % balance columns after references
+\usepackage{booktabs} % table
+\usepackage{makecell} % table cell wrapping
+\usepackage{enumitem} % nosep
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{accsupp}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\usepackage{pgfplots}
+
+
+%\usepackage[margin=0.75in]{geometry}
+\usepackage{authblk}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algblockdefx[EVENT]{Event}{EndEvent}%
+  [1]{\textbf{on event}\ \texttt{#1}\ \algorithmicdo}%
+  {\algorithmicend\ \textbf{on}}
+\algblockdefx[MESSAGE]{Message}{EndMessage}%
+  [2][msg]{\textbf{upon message}\ <\texttt{#1}\ |\ #2>\ \algorithmicdo}%
+  {\algorithmicend\ \textbf{upon}}
+\algnewcommand{\Assert}{\textbf{assert}\xspace}
+\MakeRobust{\Call} % for nested Calls
+
+\newtheorem{definition}{Definition}
+
+\tikzset{
+    block/.style={rectangle, draw, text centered, minimum height=2em, minimum width=5cm},
+    triangle/.style={regular polygon, regular polygon sides=3, draw, minimum size=3cm},
+    arrow/.style={-{Latex}},
+    labelstyle/.style={font=\normalsize},
+}
+
+\lstset{
+    showstringspaces=false,
+    basicstyle=\small\ttfamily,
+    numbers=none,
+    breaklines=true,
+    breakatwhitespace=true,
+    columns=fullflexible,
+    %breakindent=2ex,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\BeginAccSupp{ActualText={}}\ensuremath{\color{gray}\hookrightarrow\space}\EndAccSupp{}},
+    tabsize=3
+}
+
 % ABNF listings
 \usepackage[utf8]{inputenc} % Use UTF-8 encoding for modern Unicode handling
 \usepackage{listings}
@@ -72,55 +124,51 @@ Decentralization is not a goal in itself but a means to achieve specific objecti
 
 Historically, the technical approaches to decentralization using blockchains have come with very significant trade-offs including performance, scalability, privacy and cost. Blockchains as computers are orders of magnitude more expensive than their conventional counterparts. The inherent need for global ordering (sequential execution of contracts) and globally shared state creates bottlenecks that limit performance and struggles to meet the performance demands of truly global, high-throughput systems.
 
-\subsection*{Blockchain as a proof generation machine}
-
-One way to conceptualize a blockchain is as a proof generation machine. That is, the blockchain is a distributed computational machine that generates cryptographic proofs of integrity, order, uniqueness, computation, ownership, and more. The machine can be centralized or decentralized, with access either permissioned or permissionless. Various incentive schemes can be devised to encourage users to operate parts of the machine, and the machine can be programmable to varying degrees. The evolution of this programmability has been a defining feature in the blockchain landscape.
-
-Bitcoin, while primarily designed as a peer-to-peer electronic cash system, introduced a basic form of programmability through its scripting language. This limited scripting capability allowed for simple conditions to be attached to transactions, such as multi-signature requirements or time-locked transfers. However, Bitcoin's scripting language was intentionally restricted to maintain the network's security and focus on its primary use case as a digital currency.
-
-The concept of a more expansive, programmable blockchain was significantly advanced by Vitalik Buterin with the introduction of Ethereum in 2015. Buterin envisioned a ``world computer'' - a global, decentralized platform capable of executing arbitrary code in the form of smart contracts. This vision expanded the blockchain's role from a mere ledger of transactions to a general-purpose computational infrastructure. This progression from Bitcoin's basic scripting to Ethereum's world computer marked a paradigm shift, transforming blockchains from specialized tools for cryptocurrency into general-purpose platforms for decentralized computation and application deployment.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{scaling.png}
-    \caption{Approaches to blockchain scaling}
+    \includegraphics[width=0.6\textwidth]{Legacy.png}
+    \caption{Blockchain design}
     \label{fig:scaling}
 \end{figure}
 
 
-As the complexity and usage of these smart contract platforms have grown, fundamental limitations in their design have become increasingly apparent. Blockchain computers are extremely inefficient with throughput many orders of magnitude lower than a traditional computer. More recent concepts such as alternative consensus protocols, layer-two solutions and sharding introduce various incremental innovations, but these are all short-term workarounds attempting to address the limitations of the base layer or compromise either security or decentralization. For instance, layer-two solutions like rollups for Ethereum can increase transaction throughput by one or two orders of magnitude before they reach a hard limit. They also introduce additional complexity, centralization (centralized sequencers with escape hatches etc.) with potential security vulnerabilities at the points where they interface with the main chain. Sharding is another area of scalability research, however it introduces new challenges in cross-shard communication that can potentially fragment the network's security model. The core issue remains: traditional blockchain architectures struggle to scale without sacrificing either security, decentralization, or both.
+The core design principle for blockchains has remained largely the same since the Bitcoin whitepaper was published in 2008. An append only ledger of assets (and contracts which manipulate those assets) is maintained by a network of nodes with the ledger being updated based on pre-agreed consensus rules. This design inevitably leads to competition for resoures.
+
+\subsection{Programmability}
+
+Bitcoin introduced a basic form of programmabilitythrough its scripting language. This limited scripting capability allowed for simple conditionsto be attached to transactions, such as multi-signature requirements or time-locked transfers. However,Bitcoin’s scripting language was intentionally restricted to maintain the network’s security and focus on itsprimary use case as a digital currency. The concept of a more expansive, programmable blockchain was significantly advanced by Vitalik Buterinwith the introduction of Ethereum in 2015. Buterin envisioned a “world computer” - a global, decentralizedplatform capable of executing arbitrary code in the form of smart contracts. This vision expanded theblockchain’s role from a mere ledger of transactions to a general-purpose computational infrastructure. Thisprogression from Bitcoin’s basic scripting to Ethereum’s world computer marked a paradigm shift, transformingblockchains from specialized tools for cryptocurrency into general-purpose platforms for decentralizedcomputation and application deployment.
+
+
+
+As the complexity and usage of these smart contract platforms have grown, fundamental limitations have become increasingly apparent. Blockchain computers are extremely inefficient with throughput many orders of magnitude lower than a traditional computer. More recent concepts such as alternative consensus protocols, layer-two solutions and sharding introduce various incremental innovations, but these are all workarounds attempting to address the limitations of the original design. For instance, layer-two solutions like rollups for Ethereum can increase transaction throughput by one or two orders of magnitude before they reach a hard limit. They also introduce additional complexity, centralization (centralized sequencers with escape hatches etc.) with potential security vulnerabilities at the points where they interface with the main chain. Sharding is another area of scalability research, however it introduces new challenges in cross-shard communication that can potentially fragment the network's security model. The core issue remains: traditional blockchain architectures struggle to scale without sacrificing either security, decentralization, or both.
 
 \subsection{Unicity: A new model for decentralization}
 
-Rather than attempting to optimize within the constraints of traditional blockchain designs, Unicity introduces a fundamentally new approach to building decentralized applications. The core invention is to allow the execution of applications off-chain but with the same cryptographic guarantees as if they were executing on-chain i.e. instead of all contracts being stored in the same shared global ledger and competing for the same resources Unicity introduces a novel approach that allows execution to happen in parallel off-chain.
+Rather than attempting to optimize within the constraints of traditional blockchain designs, Unicity introduces a fundamentally new approach to building decentralized applications. The core invention is to allow the execution of applications off-chain but with the same cryptographic guarantees as if they were executing on-chain. Assets are minted off-chain, smart contracts are executed off-chain and the blockchain is reduced to an infrastructure that prevents double spending (non-forking) of off-chain assets, each of which is an independent blockchain. 
 
 
-The key cryptographic guarantee that is handled differently in Unicity is proof of uniqueness. Proof of uniqueness, or non-forking, is one of the key proofs that a blockchain provides. In Bitcoin, for example, Proof of Work is used to guarantee that there is a single unique version of the blockchain. The proof of uniqueness in this case is probabilistic, i.e. there may be other copies (forks) but over time the incentive scheme ensures that Miners will converge onto the chain with most work (the longest chain rule). This uniqueness proof covers all transactions in a block as all transactions are included in the Proof of Work calculation.
+The key cryptographic guarantee that is handled differently in Unicity is proof of uniqueness. Proof of uniqueness, or non-forking, is one of the key proofs that a blockchain provides. In Bitcoin, for example, Proof of Work is used to guarantee that there is a single unique version of the blockchain. The proof of uniqueness in this case is probabilistic, i.e. there may be other copies (forks) but over time the incentive scheme ensures that miners will converge onto the chain with most work (the longest chain rule). This uniqueness proof covers all transactions in a block as all transactions are included in the Proof of Work calculation.
+
+
 
 \subsection{The Unicity architecture}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.4\textwidth]{ThreeLayers.png}
+    \includegraphics[width=0.8\textwidth]{FullStack.png}
     \caption{Unicity Layered Infrastructure}
     \label{fig:layers}
 \end{figure}
 
-At an abstract level the Unicity design is divided into three layers (four if PoW Consensus is used). The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in Consensus Layer blocks.\footnote{Certain transactions may still necessary. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}
+
+
+
+At an abstract level the Unicity design is divided into three layers. The Consensus layer acts as trust anchor to attest to the uniqueness of local agent state. The public permissionless version of Unicity uses Proof of Work however any Proof system could be used including Proof of Stake, Proof of Authority or trusted hardware. A key point is that the on-chain shared global state is kept to an absolute minimum. Transactions, or more generally \textit{state transitions}, are not included in Consensus Layer blocks.\footnote{Certain transactions may still necessary. For example in the Proof of Work implementation coinbase transactions or the distribution of shares in mining pools are still necessary.}
 	Instead, state transitions happen at the Agent Layer where each agent will order and execute transactions and then send a request to the Proof Aggregation Layer. The requesting agent will receive back a uniqueness proof for the set of transactions that it executed. Effectively, the Proof Aggregation Layer aggregates requests for agents executing in parallel,  commits the aggregate request to the Consensus Layer and returns to each individual agent a proof of uniqueness for that agent's state history.
 
 
-
-\subsection{A comparison with traditional blockchains}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{Comparison.png}
-    \caption{A different approach}
-    \label{fig:comp}
-\end{figure}
-
-Unicity somewhat resembles a (zero transaction) L1 and a set of dynamically spawned, ephemeral L2s, one per contract (agent). Agent instances perform local transaction ordering, obtain a uniqueness proof and synchronize state with other agent instances. There is always an ``interested party'' (players in a game, owners of tokens) to ensure verifiability and availability. For example consider a simple turn-based game played by three players. There are only three interested parties. Running this game on-chain either in an L1 or an L2 implies that all the validators  need to execute the game (and all other games) as part of the consensus process. The Unicity approach would be to define the game logic as an agent template with the three players running agent instances. At each turn the player agent instance would update its state, generate a uniqueness proof and synchronize with other agent instances.
+Agent instances perform local transaction ordering, obtain a uniqueness proof and synchronize state with other agent instances. There is always an ``interested party'' (players in a game, owners of tokens) to ensure verifiability and availability. For example consider a simple turn-based game played by three players. There are only three interested parties. Running this game on-chain either in an L1 or an L2 implies that all the validators  need to execute the game (and all other games) as part of the consensus process. The Unicity approach would be to define the game logic as an agent template with the three players running agent instances. At each turn the player agent instance would update its state, generate a uniqueness proof and synchronize with other agent instances.
 
 
 
@@ -186,18 +234,7 @@ Coin splits (not shown in the diagram above) are allowed as they do break the lo
 
 \section{Implementation: Proof Aggregation Layer}
 
-The Proof Aggregation Layer can be explained in terms of the workflow for an agent to agent interaction.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{Workflow.png}
-    \caption{Agent to Agent Interaction}
-    \label{fig:Workflow}
-\end{figure}
-
-
-An agent will execute locally and send a state transition request to the Aggregation Layer. The Aggregation Layer will generate a uniqueness proof i.e., a proof that shows the state transition is unique, and return it to the agent who then synchronizes its state with a recipient agent who can verify both the correctness of the agent computation and the uniqueness of the state history.
-
+\
 
 
 \begin{figure}[htbp]
@@ -208,190 +245,85 @@ An agent will execute locally and send a state transition request to the Aggrega
 \end{figure}
 
 
- A Sparse Merkle Tree (SMT) is used such that each unique state transition request from the agent layer is allocated a leaf node in the tree. The details of the request will be described in the next section. The SMT is updated in rounds with a batch of state transition requests per round. In each round the SMT state root is calculated, a ZK SMT consistency proof\footnote{The ZK consistency proof proves that no recorded state transitions were modified or removed during the round.} generated and the SMT state transition (previous SMT state root, new SMT state root, ZK SMT consistency proof) is passed to the Consensus Layer. The validators in the Consensus Layer verify the ZK SMT consistency proof and the validity of request, and then commit to the new SMT root and return a certificate, or cryptographic proof of acceptance of the valid change. After that only requests from the SMT which update the new state root can be accepted.\footnote{The design of the SMT is optimized for ZK proving techniques. Batches of up to 10,000 state transitions can be proven per second using the Poseidon2 hash function, a custom Algebraic Intermediate Representation and Plonky3's FRI STARK prover.}
+ A Sparse Merkle Tree (SMT) is used such that each unique state transition request from the agent layer is allocated a leaf node in the tree. The details of the request will be described in the next section. The SMT is updated in rounds with a batch of state transition requests per round. In each round the SMT state root is calculated, a ZK SMT consistency proof\footnote{The ZK consistency proof proves that no recorded state transitions were modified or removed during the round.} generated and the SMT state transition (previous SMT state root, new SMT state root, ZK SMT consistency proof) is passed to the Consensus Layer. The validators in the Consensus Layer verify the ZK SMT consistency proof and the validity of request, and then commit to the new SMT root and return a certificate, or cryptographic proof of acceptance of the valid change. After that only requests from the SMT which update the new state root can be accepted.
  
  
  
-  A uniqueness proof consists of several elements:
-
-\begin{itemize}
-    \item ZK recursively generated cumulative proof at previous ZK checkpoint (common to all requests)
-    \item hash-based proof of non-inclusion (the SMT hash chain from leaf to root) for all SMT rounds since the previous ZK checkpoint up to the previous round.
-    \item Proof of inclusion (the SMT hash chain from leaf to root) for the current round.
-\end{itemize}
 
 
+In a hierarchical trustless system, the principle is that the base layer (e.g., L1 blockchain) provides decentralization, while the layers below it (e.g., rollups) present cryptographic proofs of the correctness of their operation. In scaling Unicity, we have designed efficient data structures to prove the correctness of operation of Aggregation Layer to the Consensus Layer. Based on cryptographic hashes alone, the consistency proof grows linearly with respect to the number of user transactions. This imposes a hard limit of approx. $10\,000$ transactions per second (tx/s), beyond which the networking bandwidth of the Consensus Layer becomes the bottleneck.
 
-The Aggregation Layer is a decentralized permissionless infrastructure built in a hierarchical manner using smaller size SMT sub-trees. An Aggregator, or machine that operates a sub-tree is algorithmically assigned a place in the overall infrastructure according to network demand. Aggregators are incentivized to join the network based on transaction fees that are shared across the Aggregator pool. The infrastructure is designed to be highly redundant and parallelizable i.e. the tree can be dynamically sub-divided into subtrees which operate asynchronously in parallel with redundancy provided by multiple Aggregators processing the same sub-tree. Each sub-tree Aggregator uses a ZK Prover Marketplace to generate a ZK consistency Proof for its sub-tree state transitions and periodically a recursively generated cumulative ZK consistency proof proving the correct operation of the Aggregation Layer for the entire history. 
+To scale further, we must use cryptographic zero-knowledge proofs (ZKPs) to compress the size of the consistency proofs. As an application of ZKPs, this use-case is fundamentally more efficient than using ZKPs to process the transaction data itself, as is done in many privacy coins and ZK-rollups.
 
+ $10\,000$ tx/s \emph{per shard} represents the proving throughput achievable on a single consumer-class computer. Due to the small proof size and efficient verification, the Consensus Layer can support a practically unlimited number of such trustless shards. Table~\ref{tab:zk-comparison} compares different ZKP technologies. We have picked subjectively the most appropriate ZK schemes and supporting front-ends (``stacks''). See bluepaper for full technical details.\footnote{https://github.com/unicitynetwork/aggr-layer-paper/releases/}
+ 
+ \begin{table*}[h!]
+\centering
+\caption{Comparison of zero-knowledge proof technologies for compression of non-deletion proofs.}
+\label{tab:zk-comparison}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+\textbf{ZK Stack} &
+\makecell{\textbf{Hash}\\\textbf{Function}} &
+\makecell{\textbf{Proving}\\\textbf{Speed (tx/s)}} &
+\makecell{\textbf{Proof}\\\textbf{Size}} &
+\makecell{\textbf{Proof Size}\\\textbf{Asymptotics}} &
+\makecell{\textbf{Trusted}\\\textbf{Setup}} &
+%\makecell{\textbf{PQ}\\\textbf{Secure}} &
+\makecell{\textbf{Impl.}\\\textbf{Effort}} \\
+\midrule
+None (``hash based'') & SHA-256 & 10\,000\textsuperscript{*} & 10\;MB & $O(n)$ & No & N/A \\
+CIRCOM + Groth16         & Poseidon & 25 & 250\;b & $O(1)$ & Yes & Lower \\
+Gnark + Groth16          & Poseidon & 30 & 250\;b & $O(1)$ & Yes & Low \\
+SP1 zkVM  & SHA-256 & 1.5 & 2\;MB & $O(\log n)$ & No & Lowest \\
+Cairo~0 + STwo    & Poseidon2 & 60\textsuperscript{†} & 2.4\;MB & $O(\log n)$ & No & Medium \\
+AIR + Plonky3  & Poseidon2 & 10\,000 & 1.7\;MB & $O(\log n)$ & No & High \\
+AIR + Plonky3   & Poseidon2 & 2500 & 0.7\;MB & $O(\log n)$ & No & High \\
+AIR + Plonky3   & Blake3 & 250 & 1.7\;MB & $O(\log n)$ & No & High \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5em}
+\raggedright
+\textsuperscript{*} Bandwidth-limited, no verification effort reduction.\\
+\textsuperscript{†} Trace generation before proving is impractically slow.\\
+
+\end{table*}
+
+
+The Aggregation Layer is built in a hierarchical manner using smaller size SMT sub-trees. An Aggregator, or machine that operates a sub-tree is algorithmically assigned a place in the overall infrastructure according to network demand. Aggregators are incentivized to join the network based on transaction fees that are shared across the Aggregator pool. The infrastructure is designed to be highly redundant and parallelizable i.e. the tree can be dynamically sub-divided into subtrees which operate asynchronously in parallel with redundancy provided by multiple Aggregators processing the same sub-tree. 
+\newline
+\newline
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{SMT-ProverMarketPlace.png}
+    \includegraphics[width=0.7\textwidth]{SMT-ProverMarketPlace.png}
     \caption{Aggregator Hierarchical Infrastructure}
     \label{fig:SMT-Infra}
 \end{figure}
 
 
-
-\subsection{Dimensioning}
-
-We assume one million state transition requests per second, 256-bit hash values, EC digital signatures, one-second round times and 10-minute ZK checkpoints. We assume that the tree size remains around $32 \cdot 10^{12}$~entries ($10^6$~entries per second with an average lifetime of one year $\approx 32 \cdot 10^6$~seconds) giving a hash-chain size of approximately 1.5\;KB.
-A Unicity Proof would be at best case $3$\;KB (just after the ZK checkpoint) and at worst case $900$\;KB (just before the ZK checkpoint).\footnote{The hash-based proof can be discarded after the next ZK checkpoint.}
-
-There is no bottleneck in the system or centralized points of failure. Subtrees operate asynchronously in clusters and their number and location is algorithmically optimized for network conditions.
-
-\section{Implementation: Agent Layer}
-
-The agent layer provides APIs for developers for agent development, agent to agent communication and interfacing with the Unicity Infrastructure for proof generation.
-
-\begin{description}
-    \item[Agent:] an encapsulation of code and state that receives inputs from an external environment, executes its code and updates its state and code accordingly.
-    \item[Agent instance:] an instantiation of an agent in an execution environment. Multiple execution environments can share the same agent by synchronizing their agent instances.
-    \item[Token:] an encapsulation of data that has semantic value.
-\end{description}
-
-
-\subsection{A different programming model}
-
-We will use the example of a Non-Fungible Token (NFT) and highlight the different approach by comparing the operations involved in transferring an NFT in Ethereum and Unicity.  We will assume two users, Alice and Bob. Alice currently owns an NFT and wishes to transfer it to Bob.
-
-In the Ethereum model the NFT exists inside an ERC721 smart contract, executed by the Ethereum Virtual Machine (EVM), the execution environment on the Ethereum Blockchain.
+\section{Token Operations}
 
 
 
-In Unicity the NFT exists inside an agent, instances of which execute locally in their own execution environment(s) (Alice's laptop or mobile device, in the cloud, at the edge or all of the above, simultaneously). Unlike Ethereum ERC721 each NFT is implemented by its own agent.\footnote{A separate agent may act as minting agent, spawning NFT agents.}
+
+The Token Operations SDK is a Unicity TypeScript library\footnote{https://github.com/unicitynetwork/state-transition-sdk} that allows the integration of token operations such as minting or transferring into off-chain applications.
 
 
-In the Ethereum model Alice will send a transaction order to the blockchain network, which will be received by validators, added to a block proposal and then broadcast to the other validators in the network. Alice and Bob can then verify that the transfer took place by checking that the blockchain includes the transaction.
 
-
-In the Unicity model, Alice will send a transaction order to the agent instance in her execution environment that stores the NFT. The agent instance will then execute the transaction order, request a Unicity Proof from the Unicity infrastructure and synchronize with a new agent instance instantiated in Bob's execution environment. At this point there are identical agent instances in both Alice and Bob's environments. Once synchronized the agent instance in Bob's execution environment will verify both the Unicity Proof (verifying that there are no forks, i.e. Alice is not trying to double spend) as well as the integrity of computation.\footnote{This could be by simply rerunning the agent code or verifying a ZK proof.}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.4\textwidth]{UserAgent.png}
-    \caption{Unicity User Agent Interaction}
-    \label{fig:UserAgent}
-\end{figure}
-
-At this point the agent instances can only accept a valid transaction order from Bob to further transfer the NFT. Alice may choose to delete or archive the agent instance that processed the transaction as it can serve no purpose going forward for her.\footnote{Having multiple copies may of course be useful for censorship resistance or fault tolerance depending on the application.}
-
-The major difference in models is the parallelization of compute. There may be an unlimited number of agents all interacting with each other or external parties, and they do not compete for resources on the blockchain. The blockchain still plays a critical role as the trust anchor but does not play a direct role in execution. The model has changed from a sequential to a parallel programming model.
-
-\subsection{State transitions}
-
-The definition of a state transition is agent specific and could be anything from a cryptocurrency transaction, a token mint or player-to-player or agent-to-agent interaction in a multi-player game. In this simple NFT example we use the most basic configuration possible for the purposes of explanatory clarity.
-
-Depending on the application agents may make use of predicates to change their ownership, code or data. Predicates are functions that returns a single TRUE or FALSE, used to check if an input meets certain conditions. Predicates are used in agents to enable customization and programmability. For example the owner predicate is the function that updates the ownership of a agent similar to a Bitcoin unlocking script. The most basic form of an owner predicate would be the verification of a digital signature, i.e., in order to transfer ownership, the signature needs to be signed by a private key that matches the public key stored as part of the predicate.
-
-A data update predicate updates the data field of an agent, a spawn predicate allows an agent to create new agents and a split predicate allows an agent to subdivide into multiple agents which split characteristics of the parent agent (for example an agent that stores a fungible token).
-
-We assume that the current state of the NFT agent consists of:
+A transfer of a token off-chain between a buyer and seller of goods is shown in Figure~\ref{fig:LowLatency1}:
 
 \begin{itemize}
-    \item Alice's address, linked to her Public Key.
-    \item An agent ID, created at genesis.
-    \item Data, which in the case of an NFT could be an image or a link to an image.
-    \item Owner  predicate, this is the unlocking condition i.e. only Alice can unlock the owner predicate and transfer ownership.
-\end{itemize}
-
- Similar to standards such as ERC721, the genesis state and allowable state changes are standardized and encoded in the logic of the agent.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\textwidth]{CurrentStateAndStateTransition.png}
-    \caption{Current State and State Transition}
-    \label{fig:CurrentState}
-\end{figure}
-
-
-
-The first step in the transfer of the NFT to Bob is for Alice to create a state transition. The state transition consists of the hash of the current state and Bob's address.
-
-
-The second step is for Alice to generate a state transition request, a tuple \{RequestID, Payload, Authenticator\}.
-
-\begin{description}
-    \item[RequestID] is the address of Alice concatenated with the hash of the current state.
-    \item[Payload] is the hash of the state transition.
-    \item [Authenticator] is the digital signature of the payload, signed using Alice’s private key.
-\end{description}
-
-The state transition request is then sent to the Unicity Infrastructure where a leaf node is added to the SMT at the address defined by the RequestID and content equal to payload plus authenticator.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{STR.png}
-    \caption{State Transition Request}
-    \label{fig:STR}
-\end{figure}
-
-Alice's agent instance will then synchronize its state with Bob's agent instance. To verify that Bob is the new owner the agent instance in Bob's execution environment checks that the state transition is valid and that the Unicity Proof verifies that the state transition is unique. The leaf address of the SMT (the RequestID) is defined by the current state and Alice’s public key only.  Any attempt to double spend would require the generation of an identical leaf node address for which it would be impossible to create a Unicity Proof.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{AgentSynchronization.png}
-    \caption{Agent Synchronization}
-    \label{fig:AgentSynch}
-\end{figure}
-
-
-A critical point is that settlement is local i.e. agents do not depend on the state of other agents to execute. All agents are independent and execute locally in their own environments without referring to the state of other agents. This is in contrast to smart contract platforms such as Ethereum in which smart contracts have full access to other smart contracts' state, as all code and state exists within the memory of a single instance of the Ethereum Virtual Machine. Whilst contracts such as flash loans in Ethereum, i.e., contracts that rely on global state, could be built in Unicity it would defeat the purpose of the parallelization.
-
-\subsection{Analogy with Kubernetes: an agent approach to application deployments}
-
-The Unicity model is a radical departure from traditional blockchain design, allowing massive scale parallelization of agents which interact to execute a decentralized application. An analogy with microservices and Kubernetes is relevant. A microservices architecture involves breaking down an application into small, independent services that can be developed, deployed, and scaled independently, with Kubernetes providing the platform for management and orchestration. The Unicity platform involves breaking down a decentralized application into small independent agents that can be developed, deployed and scaled without a centralized gatekeeper.
-
-
-\subsection{Zero knowledge: combining verifiable compute and  uniqueness}
-
-As a result of the increased use of blockchain technologies there has been the surge in research and development of Zero Knowledge (ZK) technology. Zcash pioneered the use of zk-SNARKs (Zero-Knowledge Succinct Non-Interactive Argument of Knowledge) in 2016, enabling fully private transactions on a public blockchain. This breakthrough spurred further innovations, such as Ethereum's implementation of zk-rollups for scalability, reducing transaction costs and increasing throughput. As described earlier, Unicity uses ZK extensively at the Proof Aggregation Layer to provide succinct proofs of non-deletion. ZK techniques can also be applied at the Agent Layer enabling agents to provide verifiable proof of computation to other agents.
-
-ZK and Unicity solve different problems that when combined represent a powerful approach to building decentralized applications. ZK provides proof of computation but not proof of uniqueness. Many client side ZK proof generation platforms such a Aztec, ZKSync, Aleo etc. can be used in combination with Unicity to provide proof of computation \textbf{and} proof of uniqueness, effectively moving all compute to the client side and reducing the verification task of a recipient to verifying a single ZK Proof. In the simple example above Bob's agent instance must re-execute the state transition to verify the correctness of computation. If Alice's agent generated a ZK Proof of the state transition, it would reduce the work necessary for Bob's agent instance, and also for future recipients of the NFT to verify the correctness of previous computations.
-
-
-\section{Off-chain Peer to Peer Transactions}
-
-Bitcoin provided a practical implementation of the ideological commitment to freedom, self-sovereignty, and resistance to government censorship.  It marked a significant advance towards censorship-resistant money with predictable and transparent issuance rules, preventing the kinds of fiscal mismanagement that are inevitable under fiat systems. However, whilst it has proven to be a resilient store of value, it has not seen widespread adoption as a medium of exchange. In this section we show how Unicity can be used to allow off-chain peer to peer transactions, effectively replicated the properties of physical cash for tokens of any chain.
-
-\begin{figure}[htbp]
-    \centering
-    \vspace{2\baselineskip}
-    \includegraphics[width=0.5\textwidth]{Unicity_Offchain.png}
-    \caption{Off-Chain Applications}
-    \label{fig:GenesisEvent}
-\end{figure}
-
-In the above diagram Token Operations SDK is a Unicity TypeScript library\footnote{https://github.com/unicitynetwork/state-transition-sdk} that allows the integration of token operations such as minting or transferring into off-chain applications.
-
-
-
-
-An off-chain token's genesis (value, initial state, etc.) is proved by the PoW coinbase transaction and the PoW Block Headers. The proof of the current state is the sequence of valid state transitions starting at the genesis and leading to the latest state.\footnote{The PoW block headers are strictly only necessary for maximalist zero-trust verification in off-line environments.}
-
-To transfer a token to Bob, Alice creates a state transition and proves no double-spend with an inclusion proof that this state change has been registered. The updated token structure can then be transferred directly to Bob with no further on-chain actions required, as shown on Figure~\ref{fig:OffChain}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{OffChain.png}
-    \caption{An off-chain token}
-    \label{fig:OffChain}
-\end{figure}
-
-\subsection{Low-latency transactions}
-
-Normally, when a Buyer wants to buy some goods from a Seller, the process is as shown on Figure~\ref{fig:LowLatency1}:
-\begin{itemize}
-  \item The Buyer creates a commitment that authorizes transfer to the Seller and, a state transition request.
-  \item The Buyer sends the state transition request to the Prover which will return an inclusion proof in approximately 2~seconds.
+  \item The Buyer creates a commitment\footnote{the unlocking condition for the ownership predicate e.g. a digital signature} that authorizes transfer to the Seller
+  \item The Buyer sends the state transition request to the Unicity Infrastructure (Proof Aggregation Layer) which will return an inclusion proof in approximately two seconds. An inclusion proof proves that a state transition is unique i.e., it has happened precisely once. 
   \item The Buyer then sends the token + commitment + inclusion proof to the Seller.
   \item The Seller verifies the inclusion proof and releases the goods.\footnote{Note that, for trustless exchange of digital assets, the token transfer and goods release steps can be made atomic using the token predicate system.}
 \end{itemize}
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{LowLatency1.png}
+    \includegraphics[width=0.6\textwidth]{Transaction1.png}
     \caption{Regular transaction flow with proof of inclusion before the transfer}
     \label{fig:LowLatency1}
 \end{figure}
@@ -401,15 +333,15 @@ To reduce latency, an extension of the protocol for high frequency trading is as
   \item The Buyer produces the commitment that authorizes transfer to the Seller.
   \item The Buyer sends the token + commitment to the Seller.
   \item The Seller generates the state transition request, sends it to the Prover, and receives back an immediate exclusion proof: a confirmation that this state transition has not been registered before and is now scheduled to be registered.
-  \item The Seller then releases the goods immediately.
-  \item Finally, the Seller waits (approximately 2~seconds) for the inclusion proof before the received token can be added to usable inventory.
+  \item The Seller releases the goods.
+  \item Finally, the Seller waits (approximately two seconds) for the inclusion proof before the received token can be added to usable inventory.
 \end{itemize}
 
-Provided that participants have sufficient inventory of tokens for the 2-second latency, extreme volumes of high frequency transactions can be achieved.
+Provided that participants have sufficient inventory of tokens for the two second latency, extreme volumes of high frequency transactions can be achieved.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{LowLatency2.png}
+    \includegraphics[width=0.6\textwidth]{Transaction2.png}
     \caption{Low-latency transaction flow with proof of inclusion after the transfer}
     \label{fig:LowLatency2}
 \end{figure}
@@ -418,21 +350,121 @@ Provided that participants have sufficient inventory of tokens for the 2-second 
 
 Unicity can support off-line transactions in two distinct ways: assisted by certified secure hardware or using time-locking of tokens designated for off-line spending to predefined recipients.
 
+\paragraph{Zero Trust:}
+
+In this mode, a payer prepares for off-line payments to predefined payees by posting special transfers while still on-line. In those special transfers, the control of each token is set to a conditional ``if the next transition is posted before time~$T$, it must be signed by~$X$; otherwise it must be signed by~$Y$'', where $X$ is the prospective payee and $Y$ is the payer. Then, if the payer decides to make the off-line payment, they can do so by handing a copy of the token's current state over to the payee; the payee can verify that they are indeed the sole controller of the token until time~$T$ and can execute any valid transactions (including taking unconditional ownership of the token) by posting them on-line before time~$T$. If the payer decides to not make the payment, they just have to refrain from making the token's current state available to the payee until time~$T$ when the control of the token reverts to the payer.
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{offline_lock.png}
+    \caption{off-line zero trust}
+    \label{fig:LowLatency2}
+\end{figure}
+
+
 \paragraph{Assisted by secure hardware:}
 
 In this mode, tokens are moved from on-line usage to off-line usage by first executing an on-line transaction transferring the ownership to a certified hardware device. After that, all off-line transfers must be signed by certified devices (and this property must be verified by each subsequent recipient) until the whole chain is eventually posted on-line by the last off-line recipient. Each off-line wallet must be restricted to only sign state transitions where (a)~the wallet is the current owner of the token, and (b)~the wallet has not previously signed any other transition from the same state. With careful implementation, the requirements on the trusted hardware components do not exceed those on the SIM cards of mobile phones. In case one of the devices breaches the protocol, the malfunctioning device can be identified (and appropriate sanctions imposed) when the transition chain is posted on-line.
 
-\paragraph{Based on time-locking of tokens:}
 
-In this mode, a payer prepares for off-line payments to predefined payees by posting special transfers while still on-line. In those special transfers, the control of each token is set to a conditional ``if the next transition is posted before time~$T$, it must be signed by~$X$; otherwise it must be signed by~$Y$'', where $X$ is the prospective payee and $Y$ is the payer. Then, if the payer decides to make the off-line payment, they can do so by handing a copy of the token's current state over to the payee; the payee can verify that they are indeed the sole controller of the token until time~$T$ and can execute any valid transactions (including taking unconditional ownership of the token) by posting them on-line before time~$T$. If the payer decides to not make the payment, they just have to refrain from making the token's current state available to the payee until time~$T$ when the control of the token reverts to the payer.
+\subsection{Cross-chain  transactions}
+
+The network supports minting tokens directly off-chain (e.g. stablecoins) or efficient and secure bridging of tokens minted on external blockchains. Bridged token’s genesis record is 1) ZK proof of external blockchain block header's correctness 2) (appropriately locked) token, 3) hash chain certifying the token. This information is verified by every subsequent recipient of token transactions.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{crosschain.png}
+    \caption{cross chain transactions}
+    \label{fig:LowLatency2}
+\end{figure}
+
+
+Bridged tokens are first-class citizens. Token type meta-data and verification code is available to transaction recipients. Elective token history compression by out-of-band ZK prover merges this check into one recursive ZK proof. If the origin blockchain does not support contract verification (e.g. Bitcoin) then a committee-based approach with economic security must be used.
+
+
+
+\section{Trust Model}
+There are effectively two trust models in Unicity. One is the maximalist zero trust Bitcoin model and the other is a more practical “trust an honest majority of validators” seen in today’s Proof of Stake chains. The Aggregation Layer is always trustless, as its outputs carry the proof of correct execution and there are no feasible attacks beyond denial of service.
+
+\subsection{Maximalist Trust Model}
+
+In the maximalist model, we assume that users are capable of validating all aspects of system operation that are relevant to their own assets. This level of trustlessness is close to the strong guarantees introduced by Bitcoin, where each “client” functions as a full validator, downloading and verifying the blockchain from the genesis block. The Root of Trust is the PoW blockchain. A maximalist user maintains a full node of this chain. This is relatively lightweight, as there are no user transactions, growing at a few MB a year. 
+
+
+
+Upon receiving a token, the user must be able to efficiently verify the following:
+
+1. The token is valid,
+
+2. The Aggregation Layer has not forked
+
+3. The Aggregation Layer has not certified conflicting states of the same token.
+
+The second point is addressed by validating a unique state root snapshot embedded in the PoW block header. Since the cumulative state snapshot appears with a delay, the block can only be considered final after a snapshot publishing and block confirmation period; hence, maximalist verification is not instantaneous.
+
+The third point is addressed by auditing the operation of the Aggregation Layer, specifically, ensuring that no inclusion Proofs have been generated for the token that are not reflected in its recorded history. To achieve this, all non-deletion proofs from the token’s genesis up to its current state must be validated. This is made efficient through the use of recursive zero-knowledge proofs (ZKPs), which show that each round’s non-deletion proof is valid and that no rounds were skipped from verification. These recursive proofs are generated periodically and are made available with some latency.
+
+\subsection{Practical Trust Model}
+
+If we relax the model by assuming that a majority of BFT consensus nodes exhibit economically rational behavior and do not collude maliciously with the Aggregation
+Layer, the user can enjoy significantly more practical operational parameters. BFT layer forking (case 2 above) or certifying conflicting states (case 3 above) produces strong cryptographic evidence (enables slashing and other after-the-fact measures) which is processed out of the critical path of serving users.
+
+In this scenario, a transaction is finalized, and an inclusion proof is returned within a few seconds, allowing the transaction to be immediately verified by independent, non-connected parties.
+
+\section{Implementation: Agent Layer}
+
+The Agent layer is used to build decentralized censorship resistant applications in Unicity. Each application may consist of multiple agents (eg trading pair CLOBs, game NPCs etc.) This replicates the functionality of on-chain smart contracts in traditional blockchains, with the obvious difference that the execution is local and running off-chain in parallel.The agent layer provides APIs for developers for agent development, agent to agent communication and interfacing with the Unicity Infrastructure for proof generation.
+
+
+
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{AgentContracts.png}
+    \caption{Unicity Agents}
+    \label{fig:AgentContracts}
+\end{figure}
+
+
+Agents can be composed for building online applications with familiar web2 development experience and performance while possessing web3 security properties (decentralization, censorship-resistance, verifiability).A critical point is that settlement is local i.e. agents do not depend on the state of other agents to execute. All agents are independent and execute locally in their own environments without referring to the state of other agents. This is in contrast to smart contract platforms such as Ethereum in which smart contracts have full access to other smart contracts' state, as all code and state exists within the memory of a single instance of the Ethereum Virtual Machine.  
+
+Agents are agnostic to the execution environment i.e. they can run on backend, frontend, stand-alone app, part of some other application, process, etc., with communication/storage infrastructure depending on the application requirements
+
+Agents are agnostic to transport/communication and data sharing channels agents  used, direct TCP/IP, UDP, WebRTC, cloud-based shared documents, app-based instant messaging  etc. 
+
+Agents can be non-deterministic (though verifiable), and can be written in any language and tech stack
+
+Agent instances are self-authenticated and universally addressable (no matter where and how an agent instance is running, it can be addressed and connected to by its unique self-authenticated id). 
+
+Agents manage their verifiable execution state snapshots within Unicity token state transition framework and exchange verifiable state with other agents i.e. state changes are registered in the Proof Aggregation Layer can can be verified by other agents.
+
+
+
+
+
+\subsection{Analogy with Kubernetes: an agent approach to application deployments}
+
+The Unicity model is a radical departure from traditional blockchain design, allowing massive scale parallelization of agents which interact to execute a decentralized application. An analogy with microservices and Kubernetes is relevant. A microservices architecture involves breaking down an application into small, independent services that can be developed, deployed, and scaled independently, with Kubernetes providing the platform for management and orchestration. The Unicity platform involves breaking down a decentralized application into small independent agents that can be developed, deployed and scaled without a centralized gatekeeper.
+
+
+\section{Trade Offs}
+
+As there is no shared global state there are no globally synchronized state-dependent operations such as flash loans or MEV.
+
+Unlike traditional blockchains, there is no public global ledger of asset ownership and unless additional steps are taken the ownership history of a token cannot be traced.  For regulated financial markets it is necessary to introduce additional proofs into the token history for KYC/AML procedures, ensuring compliant transfers at each step.
+
+Traditional blockchains rely on users trusting a validator set who verify computation on the user’s behalf. In a client-side model, the user verifies incoming transactions. This approach enhances privacy and censorship resistance by eliminating reliance on third-party validators for direct transaction validation. The client's core task is the deterministic verification of these network-anchored proofs and the token's internal consistency, a focused process designed for security and efficiency.
 
 \section{Decentralized Finance}
 
 There are two compelling reasons for decentralized finance (DeFi). For individuals, the appeal is freedom - the elimination of intermediaries, allowing direct engagement in financial transactions without relying on centralized entities such as banks or payment processors. This provides greater financial autonomy and protection against authoritarian government censorship, ensuring the freedom to transact and access financial services without external control or intervention. For institutions, incorporating elements of DeFi can enhance security and automation by eliminating the need for human oversight. Processes can be streamlined, operational costs reduced, and risks associated with human error or fraud mitigated, while enforcing regulatory compliance at the code level. Whilst these are two very different perspectives, it is clear that DeFi has the potential to revolutionize financial services, driving innovation and empowerment at both the individual and institutional levels.
 
 
-
-While significant progress has been made in productizing DeFi and enhancing the user experience, much work remains. Just as no one is currently running Call of Duty or fully self-driving software in a smart contract today, no one is operating the New York Stock Exchange (NYSE) on a smart contract either. The agent-based approach of Unicity offers a potential path forward by breaking down the components of an exchange into independent agents that execute off-chain in parallel.
 
 \begin{figure}[H]
     \centering
