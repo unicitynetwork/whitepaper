@@ -160,11 +160,11 @@ A more fundamental example would be digital cash or agents as fungible currency 
 
 \subsection{Optimal Efficiency}
 
-Unicity is designed to achieve optimal efficiency with practical parameters while retaining full decentralization. This is achieved through a hierarchical architecture where decentralization is provided by a single permissionless Proof-of-Work (PoW) chain at the Consensus Layer. Security propagates downward—similar to how traditional L1s secure L2 ZK-rollups—while the amount of data and validation effort passed upward is significantly reduced. Table~\ref{tab:efficiency} illustrates how decentralization overhead is handled across the layers.
+Unicity is designed to achieve optimal efficiency with practical parameters while retaining full decentralization. This is achieved through a hierarchical architecture where decentralization is provided by a single permissionless Proof of Work (PoW) chain at the Consensus Layer. Security propagates downward---similar to how traditional L1s secure L2 ZK-rollups---while the amount of data and validation effort passed upward is significantly reduced. Table~\ref{tab:efficiency} illustrates how decentralization overhead is handled across the layers.
 
 \begin{table}[htb]
     \centering
-    \caption{Unicity's layers, their roles and decentralization overhead.}
+    \caption{Unicity's layers, their roles and decentralization overhead}
     \label{tab:efficiency}
     \begin{tabular}{@{}lcccccc@{}}
         \toprule
@@ -175,20 +175,19 @@ Unicity is designed to achieve optimal efficiency with practical parameters whil
         \textbf{Redundancy} &
         \makecell{\textbf{Validation}\\\textbf{Effort}} \\
         \midrule
-Consensus: PoW & \makecell{Decentralization \\ \& tokenomics} & \makecell{Permissionless \\ PoW} & 30\,kB/day & PoW mining & Tokenomics \\
-Consensus: BFT & \makecell{Fast, deterministic \\ finality} & $\uparrow$ & 100\,B/day & $\approx21\times$ & \makecell{Aggregation Layer's \\ consistency proofs }\\
-Proof Aggregation & \makecell{Recording token \\ state transitions} & $\uparrow$ & 50\,B/TX & Few replicas & Proof generation  \\
+Consensus: PoW & \makecell{Decentralization \\ \& tokenomics} & \makecell{Permissionless \\ PoW} & 30\;kB/day & PoW mining & Tokenomics \\
+Consensus: BFT & \makecell{Fast, deterministic \\ finality} & $\uparrow$ & 100\;B/day & $\approx21\times$ & \makecell{Aggregation Layer's \\ consistency proofs }\\
+Proof Aggregation & \makecell{Recording token \\ state transitions} & $\uparrow$ & 50\;B/TX & Few replicas & Proof generation  \\
 Token Operations & \makecell{User TXs} & $\uparrow$ \& recipients & Own tokens & Recipients & Relevant TXs \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-The PoW chain records only transactions relevant to its functions: executing the native token's tokenomics, selecting permissionless validators for the BFT cluster, and recording the BFT cluster's periodic state snapshots. The growth rate of the PoW blockchain is only a few megabytes (MB) per year. The BFT cluster returns certificates to the Aggregation Layer, and these certificates are stored by the end users. Instead of maintaining a full blockchain, the BFT cluster keeps only its epoch change records. This set of records grows by one aggregate BLS signature per epoch (typically a few days). Once the network achieves sufficient scale, the PoW layer can be made redundant by introducing a Proof-of-Stake (PoS) consensus mechanism executed directly by the BFT cluster.
+The PoW chain records only transactions relevant to its functions: executing the native token's tokenomics, selecting permissionless validators for the BFT cluster, and recording the BFT cluster's periodic state snapshots. The growth rate of the PoW blockchain is only a few megabytes (MB) per year. The BFT cluster returns certificates to the Aggregation Layer, and these certificates are stored by the end users. Instead of maintaining a full blockchain, the BFT cluster keeps only its epoch change records. This set of records grows by one aggregate BLS signature per epoch (typically a few days). Once the network achieves sufficient scale, the PoW layer can be made redundant by introducing a Proof of Stake (PoS) consensus mechanism executed directly by the BFT cluster.
 
 The Proof Aggregation Layer records token state transitions, which amounts to one hash per user transaction. Here, the computational effort of transaction validation is replaced by the simpler task of ensuring the persistence of recorded hashes. The Proof Aggregation Layer is made trustless through the creation of cryptographic non-deletion proofs for its recorded hashes. Instead of a traditional ledger, this layer uses a simple transaction log for persistence and replica synchronization. Crucially, as the Proof Aggregation Layer is fully trustless, its security does not depend on the number of validators per shard. Only a few machines are required to provide redundancy.
 
-Tokens are self-contained; no external blockchain must be consulted for validation. Validation is the responsibility of the transaction's recipient---the party with a direct interest in its validity---who is also responsible for their own token storage.
-
+Tokens are self-contained; no external blockchain needs to be consulted for validation. Validation is the responsibility of the transaction's recipient---the party with a direct interest in its validity---who is also responsible for their own token storage.
 
 \section{Implementation: Consensus Layer}
 
