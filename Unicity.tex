@@ -466,23 +466,22 @@ To enable this mobility, agents operate within a standardized \textbf{Agentic Ru
     \label{fig:Orchestrator2}
 \end{figure}
 
-TODO - JJB add one paragraph to dscribe what this is - the text here is wrong
+The Neuro-Symbolic Orchestrator is the execution core of Unicity. It combines neural embedding models with deterministic symbolic reasoning to translate user or agent intent into concrete, type-safe operations over a heterogeneous ecosystem of MCP services. Rather than relying on LLMs to infer schemas or mediate execution flows, the orchestrator maintains a unified semantic space of all known tools, types, and services, alongside a typed knowledge graph that encodes compatibility, dataflow constraints, and historical usage patterns. This hybrid architecture allows the system to generalize when needed while still producing reliable, reproducible, and verifiable execution plans.
 
-A primary challenge in decentralized microservices is coordination: how does Agent A know how to format a request for Agent B without a rigid, pre-shared API specification? Unicity solves this through neuro-symbolic negotiation.
-Agents are equipped with Large Language Model (LLM) interfaces provided by the runtime. When two agents connect, they perform a semantic handshake:
+A central challenge in a decentralized MCP environment is that tools are independently authored and exposed by different service providers, each with its own capabilities and schemas. The orchestrator resolves this fragmentation through neuro-symbolic interpretation:
 
 \begin{itemize}
-    \item \textbf{Natural Language Discovery:}
-    Agent A describes its intent in natural language (e.g., ``I need to purchase storage space'').
+    \item \textbf{Semantic Intent Mapping:}
+    The orchestrator embeds the incoming natural-language request and retrieves semantically relevant MCP tools, ranked by vector similarity and augmented by graph constraints.
 
-    \item \textbf{Dynamic Protocol Generation:}
-    Agent B's LLM interprets the request, explains its capabilities, and the two agents negotiate a specific interface for that session.
+    \item \textbf{Type-Safe Symbolic Planning:}
+    Candidate tools are filtered through the knowledge graph, ensuring input/output compatibility. Symbolic rules guide the construction of multi-step workflows that satisfy the intended transformation or task.
 
-    \item \textbf{Strict Execution:}
-    Once the protocol is agreed upon, the agents revert to symbolic, deterministic code to execute the transaction and generate the Unicity proofs.
+    \item \textbf{Deterministic Execution:}
+    Once a plan is finalized, the orchestrator executes each MCP call deterministically,enforcing strict argument schemas and producing verifiable state transitions and proofs. Neural components are not used during execution, only during interpretation.
 \end{itemize}
 
-This allows for a ``loose coupling'' of agents. Developers do not need to build rigid adapters for every possible service provider; they simply instruct their agents on the goal, and the agents negotiate the technical implementation on the fly.
+This architecture creates a form of ``loose coupling'' across MCP services: developers do not manually integrate or design adapters for every service provider. Instead, they expose capabilities through MCP, and the orchestrator autonomously determines how to compose,route, and sequence them to satisfy user intent. The result is a scalable, interoperable ecosystem where complex behavior emerges from neuro-symbolic reasoning over a shared tool universe, rather than brittle point-to-point integrations.\subsection{Verifiable Execution }
 
 \subsection{Verifiable Execution }
 
