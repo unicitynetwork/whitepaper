@@ -88,7 +88,9 @@
 \setlength{\parskip}{1.5ex}
 
 % Number sections within parts
-\setcounter{secnumdepth}{2}
+\usepackage{chngcntr}
+\counterwithin{section}{part}
+\renewcommand{\thesection}{\arabic{section}}
 
 \title{An Autonomous Agentic Internet}
 \author{The Unicity Developers\\info@unicity-labs.com}
@@ -117,7 +119,7 @@ The internet is being rebuilt for machines: autonomous AI agents operating and t
     \item \textbf{Tokens:}
     Verifiable state. Self-contained blockchains of individual assets that are minted directly off-chain or detached from other blockchains. To execute a transaction, a payor will send a transaction request to the uniqueness oracle and receive back an inclusion proof which is appended to the token. The payor then sends the updated token directly to the payee. Similar to physical cash in that only the payee is responsible for verification.
     \item \textbf{Verifiable Agents:}
- 	Equivalent to traditional smart contracts enabling verifiable execution of multi-token applications such as decentralized exchange. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Agents are runtime-agnostic and independent, uniquely addressable computational entities that can migrate between environments. 
+ 	Equivalent to traditional smart contracts enabling verifiable execution of multi-token applications such as decentralized exchange. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Agents are runtime-agnostic and independent, uniquely addressable computational entities that can migrate between environments.
     \item \textbf{AI Agents:} Agents augmented with AI inference for intent interpretation, planning, and adaptive behavior. The verifiable execution environment ensures cryptographic verifiability while AI inference enables natural language interaction and autonomous decision-making. Probabilistic inference is constrained by strictly typed program graphs (neuro-symbolic logic) ensuring every decision, connection, and outcome is explainable, traceable, precise, and verifiable.
     \item \textbf{Agentic Internet:} A decentralized platform for autonomous agent operations. Agents can be developed, deployed, discovered, and orchestrated without centralized gatekeepers. Protocol agnostic P2P transport, Decentralized storage where agents carry state in tokens rather than host filesystems. Integrated micro-payments and infrastructure marketplace for compute, bandwidth, and proving services. \end{itemize}
 
@@ -190,7 +192,7 @@ The architecture is presented in three parts:
 
 \medskip
 
-\textbf{Part III: Applications} demonstrates decentralized applications built on this infrastructure: finance, commerce, and gaming. 
+\textbf{Part III: Applications} demonstrates decentralized applications built on this infrastructure: finance, commerce, and gaming.
 
 \medskip
 
@@ -216,7 +218,7 @@ The validator set operating on a shared ledger is also the fundamental bottlenec
 This is true for all Layer 1 implementations. Bitcoin, Ethereum, Solana, Sui, Monad and every major blockchain maintain a single shared ledger. Each optimizes for different points across the decentralization-security-scalability tradeoff space, yet all remain constrained by the same fundamental architecture: a shared ledger managed by validators.
 
 \medskip
-Proposed optimizations reproduce this model at different scales. Layer 2 solutions move execution off-chain but route transactions through centralized sequencers who see, order and settle periodically to the L1. Sidechains create separate ledgers with their own validator sets. Sharding partitions state but maintains validators within each shard. 
+Proposed optimizations reproduce this model at different scales. Layer 2 solutions move execution off-chain but route transactions through centralized sequencers who see, order and settle periodically to the L1. Sidechains create separate ledgers with their own validator sets. Sharding partitions state but maintains validators within each shard.
 \medskip
 
 \begin{figure}[htbp]
@@ -255,13 +257,13 @@ Unicity implements a hierarchical architecture designed to minimize on-chain ove
 The Consensus Layer provides the system's root of trust through a minimal "headers only" Proof of Work blockchain.
 
 
-The Uniqueness Oracle represents Unicity's core innovation: a mechanism for proving that off-chain assets have not been double-spent without recording the transactions themselves. This layer generates cryptographic proofs - unicity proofs - that certify the non-existence of conflicting transactions for any given asset. These proofs are anchored to the Consensus Layer's timeline but do not require recording transaction details on-chain. 
+The Uniqueness Oracle represents Unicity's core innovation: a mechanism for proving that off-chain assets have not been double-spent without recording the transactions themselves. This layer generates cryptographic proofs - unicity proofs - that certify the non-existence of conflicting transactions for any given asset. These proofs are anchored to the Consensus Layer's timeline but do not require recording transaction details on-chain.
 
 
 
 At the agent layer, tokens exist as independent cryptographic objects, functioning as independent blockchains. A token carries its complete validation rules, state, and transaction history within itself. The Uniqueness Oracle ensures these independent chains cannot fork, while the Proof of Work consensus provides the same trust model as Bitcoin - recipients can independently verify ownership with zero trust assumptions. Assets move peer-to-peer across the network, requiring no global coordination or shared ledger for transfer.
 
-Agents serve as Unicity's equivalent to smart contracts. Agents receive tokens from users or other agents, redistribute ownership based on application logic and generate a proof of correct execution. 
+Agents serve as Unicity's equivalent to smart contracts. Agents receive tokens from users or other agents, redistribute ownership based on application logic and generate a proof of correct execution.
 
 \subsection{Hierarchical Efficiency}
 
@@ -459,9 +461,9 @@ Agents provide equivalent functionality in Unicity without global shared state. 
 
 \begin{itemize}
     \item \textbf{Simple ownership:} In its simplest form, a token owned by a single public key requires a valid signature to transfer.
-    
+
     \item \textbf{Conditional ownership:} Predicates generalize ownership to arbitrary logical conditions. These include multi-signature requirements (all of $n$ keys must sign), threshold signatures ($k$-of-$n$ keys), time-locks (the token cannot be transferred before time $\tau$), and hash-locks (the token can be transferred by anyone who knows a particular secret).
-    
+
     \item \textbf{Agent-locked tokens:} Participants can lock tokens to an agent using predicates that release only when the agent provides valid execution proofs. In this arrangement, the agent becomes a temporary custodian whose actions are constrained by cryptographically enforced rules.
 \end{itemize}
 
@@ -469,11 +471,11 @@ Using these primitives, a multi-party application operates as follows:
 
 \begin{enumerate}
     \item \textbf{Lock:} Participants transfer their tokens to their local agents, attaching predicates that define the conditions under which the tokens may be released.
-    
+
     \item \textbf{Execute:} The agents executes application logic over the locked tokens - matching orders, resolving game state, or computing payouts according to the application's rules.
-    
+
     \item \textbf{Prove:} The agent generates cryptographic proofs demonstrating that execution followed the agreed rules.
-    
+
     \item \textbf{Release:} Output tokens are released to participants, with each token carrying the execution proof. The predicates ensure that release can only occur when valid proofs are presented.
 \end{enumerate}
 
@@ -503,13 +505,13 @@ This construction achieves several important properties:
 
 \begin{itemize}
     \item \textbf{No custody risk:} The agent never has unilateral control over the tokens. Predicates enforce that tokens can only move according to the rules agreed upon by the participants.
-    
+
     \item \textbf{No global order book:} Order state exists only within the locked tokens themselves. The agent matches orders as they arrive but does not maintain any persistent global state.
-    
+
     \item \textbf{Privacy:} Only Alice, Bob, and the agent observe the trade. No validators witness the transaction, and no public ledger records the exchange.
-    
+
     \item \textbf{Atomic settlement:} The interlocking predicates ensure that both sides of the trade settle together. There is no counterparty risk - neither party can be left holding worthless commitments.
-    
+
     \item \textbf{Parallel execution:} Every trade is independent of every other trade. A thousand trading pairs can execute simultaneously without contention for shared resources.
 \end{itemize}
 
@@ -662,10 +664,10 @@ The appropriate mechanism depends on application requirements:
     \item \textbf{Complex financial logic}: ZK proofs. Expensive computation, cheap verification.
     \item \textbf{High-frequency trading}: Fraud proofs. Minimize latency, penalize cheaters.
     \item \textbf{AI inference}: TEE attestation.
-    \item \textbf{High-value settlements}: Validator committee. 
+    \item \textbf{High-value settlements}: Validator committee.
 \end{itemize}
 
-Unicity infrastructure does not mandate a verification mechanism. The Uniqueness Oracle records state transitions regardless of how they are verified. The verification logic is embedded in the agent itself, allowing different applications to use different verification mechanisms within the same ecosystem. 
+Unicity infrastructure does not mandate a verification mechanism. The Uniqueness Oracle records state transitions regardless of how they are verified. The verification logic is embedded in the agent itself, allowing different applications to use different verification mechanisms within the same ecosystem.
 This flexibility is essential for the Agentic Internet, where different agents will have different verification requirements based on their computational complexity and  latency constraints.
 
 
@@ -768,11 +770,11 @@ Unicity's architecture eliminates these constraints:
 
 \begin{itemize}
     \item \textbf{True decentralization:} No validator set processes transactions. No sequencer orders them. Trades execute peer-to-peer between counterparties, coordinated by agents but settled directly.
-    
+
     \item \textbf{Censorship resistance:} There is no mempool to monitor, no block producer to bribe, and no validator to pressure. A trade between two willing parties cannot be stopped by any third party.
-    
+
     \item \textbf{Unlimited throughput:} Every trade is independent. There is no shared state to contend for, no block space to compete over. A million trades can settle simultaneously without interference.
-    
+
     \item \textbf{Privacy by default:} Only the counterparties observe a trade. No public ledger records the exchange. No chain analysis can trace the flow of funds. Privacy is not an add-on requiring expensive cryptography - it is the default.
 \end{itemize}
 
@@ -812,7 +814,7 @@ The common thread across existing solutions is that someone always sees the trad
 
 \section{Decentralized Agentic Commerce}
 
-Agentic commerce - autonomous agents transacting for goods, services, and data, is projected to exceed \$3 trillion by 2030. Yet the infrastructure for agents to discover each other, negotiate terms, and settle transactions remains nascent. 
+Agentic commerce - autonomous agents transacting for goods, services, and data, is projected to exceed \$3 trillion by 2030. Yet the infrastructure for agents to discover each other, negotiate terms, and settle transactions remains nascent.
 
 Unicity enables decentralized agentic commerce where these functions are provided by independent agents rather than a monolithic platform.
 
