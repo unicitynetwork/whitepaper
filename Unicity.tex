@@ -790,7 +790,7 @@ Table~\ref{tab:defi-comparison} compares Unicity's approach to existing trading 
 \toprule
 \textbf{Platform} & \textbf{Structural Problem} & \textbf{Privacy Issues} & \textbf{Unicity Advantage} \\
 \midrule
-AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; Transactions are private and do not move the market \\
+AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; transactions are private and do not move the market \\
 \addlinespace
 CEXs  & Counterparty risk, KYC, withdrawal limits & Full KYC required; exchange sees all orders; data breaches expose history; government subpoenas & Trustless, self-custodial; no KYC; no central database; only counterparty knows terms \\
 \addlinespace
@@ -798,9 +798,9 @@ OTC Desks & Trust required, manual, slow, high fees & Desk sees both sides; empl
 \addlinespace
 Intent Protocols  & Ethereum-centric, solver centralization & Solvers see full order details; solver can extract value; settlement visible on-chain & Cross-chain native; no solver sees plaintext; truly decentralized matching; private settlement \\
 \addlinespace
-Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything;  & Same order privacy without custody risk or  KYC \\
+Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything & Same order privacy without custody risk or  KYC \\
 \addlinespace
-P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC;\\
+P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -833,8 +833,8 @@ Examples of intents:
 
 \begin{itemize}
     \item \textbf{Physical goods}: ``Purchase 100 units of component X, delivered to location Y, within 7 days, maximum price Z''
-    \item \textbf{Services}: ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B-C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''.
-    \item \textbf{Data}: ``Seeking real-time feed of market data D, latency under 10ms, willing to pay E per hour''
+    \item \textbf{Services}: ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B--C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''
+    \item \textbf{Data}: ``Seeking real-time feed of market data D, latency under 10\;ms, willing to pay E per hour''
     \item \textbf{Prediction}: ``I predict the NY Giants beat the Chicago Bears by 15 points''
 \end{itemize}
 
@@ -892,12 +892,12 @@ Once agents discover matching intents, they negotiate directly. Communication oc
 Settlement occurs through coordinated state transitions. A typical transaction flow:
 
 \begin{enumerate}
-    \item Buyer and seller discover matching intents on bulletin board
-    \item Agents negotiate terms, select escrow and fulfillment providers
-    \item Buyer transfers payment to escrow agent
-    \item Seller delivers goods/services via fulfillment agent
-    \item Fulfillment agent confirms delivery
-    \item Escrow agent releases payment to seller
+    \item Buyer and seller discover matching intents on bulletin board.
+    \item Agents negotiate terms, select escrow and fulfillment providers.
+    \item Buyer transfers payment to escrow agent.
+    \item Seller delivers goods/services via fulfillment agent.
+    \item Fulfillment agent confirms delivery.
+    \item Escrow agent releases payment to seller.
 \end{enumerate}
 
 No centralized platform coordinates the flow  --- agents interact directly, using specialized service agents as needed.
@@ -911,12 +911,12 @@ Disputes arise when parties disagree on whether transaction terms have been fulf
 The dispute resolution process:
 
 \begin{enumerate}
-    \item \textbf{Initiation}: Either party initiates a dispute, posting a bond to prevent frivolous claims
-    \item \textbf{Arbitrator Selection}: Parties select an arbitration agent from a registry, or use one specified in the original transaction terms
-    \item \textbf{Evidence Submission}: Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents
-    \item \textbf{Deliberation}: The arbitration agent evaluates evidence against the original transaction terms
-    \item \textbf{Ruling}: The arbitrator issues a signed ruling specifying escrow disposition
-    \item \textbf{Enforcement}: The escrow agent executes the ruling automatically
+    \item \textbf{Initiation}: Either party initiates a dispute, posting a bond to prevent frivolous claims.
+    \item \textbf{Arbitrator Selection}: Parties select an arbitration agent from a registry, or use one specified in the original transaction terms.
+    \item \textbf{Evidence Submission}: Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents.
+    \item \textbf{Deliberation}: The arbitration agent evaluates evidence against the original transaction terms.
+    \item \textbf{Ruling}: The arbitrator issues a signed ruling specifying escrow disposition.
+    \item \textbf{Enforcement}: The escrow agent executes the ruling automatically.
 \end{enumerate}
 
 \textbf{Appeals} provide recourse against incorrect rulings. A party can appeal by posting a larger bond and escalating to a panel of arbitrators. The panel reviews the original evidence and ruling. If the appeal succeeds, the original arbitrator's stake is slashed and the appellant's bond is returned. If the appeal fails, the bond is forfeited.
@@ -928,10 +928,10 @@ The dispute resolution process:
 This architecture inverts the platform model. Traditional commerce platforms capture both sides of every transaction, extracting fees and controlling relationships. In decentralized agentic commerce:
 
 \begin{itemize}
-    \item Discovery is public infrastructure, not a proprietary advantage
-    \item Escrow, reputation, fulfillment, and insurance are competitive services
-    \item Agents choose providers based on price, reputation, and terms
-    \item No single entity can censor transactions or extract monopoly rent
+    \item Discovery is public infrastructure, not a proprietary advantage.
+    \item Escrow, reputation, fulfillment, and insurance are competitive services.
+    \item Agents choose providers based on price, reputation, and terms.
+    \item No single entity can censor transactions or extract monopoly rent.
 \end{itemize}
 
 The result is a composable commerce stack where agents assemble the services they need for each transaction. A simple digital goods purchase might require only escrow. A complex physical goods transaction might involve fulfillment, insurance, and arbitration. Agents pay only for the services they use.
