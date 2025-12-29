@@ -358,7 +358,7 @@ $10\,000$ tx/s \emph{per shard} represents the proving throughput achievable on 
     \textsuperscript{†} Trace generation before proving is impractically slow.\\
 \end{table*}
 
-The Uniqueness Oracle is built in a hierarchical manner using smaller size SMT sub-trees. An Aggregator, or machine that operates a sub-tree is algorithmically assigned a place in the overall infrastructure according to network demand. Aggregators are incentivized to join the network based on transaction fees that are shared across the Aggregator pool. The infrastructure is designed to be highly redundant and parallelizable i.e.\ the tree can be dynamically sub-divided into sub-trees which operate asynchronously in parallel with redundancy provided by multiple Aggregators processing the same sub-tree.
+The Uniqueness Oracle is built in a hierarchical manner using smaller size SMT sub-trees. An Aggregator, or machine that operates a sub-tree is algorithmically assigned a place in the overall infrastructure according to network demand. Aggregators are incentivized to join the network based on transaction fees that are shared across the Aggregator pool. The infrastructure is designed to be highly redundant and parallelizable i.e., the tree can be dynamically sub-divided into sub-trees which operate asynchronously in parallel with redundancy provided by multiple Aggregators processing the same sub-tree.
 
 \begin{figure}[htbp]
     \centering
@@ -403,9 +403,9 @@ There are three different types of assets that can be minted using the Unicity S
 
 a) The Unicity native currency mined through Proof of Work and migrated off-chain for transacting. This is done by the miner who originally won the block reward as recorded in the Proof of Work header. The miner can then mint a token by creating an off-chain genesis transaction.
 
-b) Native assets i.e.\ those whose genesis event occurs off-chain and does not depend on an external reference. This can be trivially minted by defining the genesis data of the token and generating a unicity proof for the genesis transaction.
+b) Native assets i.e., those whose genesis event occurs off-chain and does not depend on an external reference. This can be trivially minted by defining the genesis data of the token and generating a unicity proof for the genesis transaction.
 
-c) Tokens from external chains. The exact steps depend on the capabilities of the source blockchain, specifically, the programmability and the efficiency of ZK proof verification (``cryptographic builtins''). The Unicity infrastructure does not have to know anything about the source blockchain and does not have to validate blocks. The validation is performed by the recipients of the token transactions. The State Transition SDK allows users to plug in local validation of source blockchain's headers, typically as a light client, or by the use of a trusted RPC node. Token type meta-data and verification code is available to transaction recipients. Elective token history compression by out-of-band ZK prover merges this check into one recursive ZK proof. If the origin blockchain does not support contract verification (e.g.\ Bitcoin) then a committee-based approach with economic security must be used.
+c) Tokens from external chains. The exact steps depend on the capabilities of the source blockchain, specifically, the programmability and the efficiency of ZK proof verification (``cryptographic builtins''). The Unicity infrastructure does not have to know anything about the source blockchain and does not have to validate blocks. The validation is performed by the recipients of the token transactions. The State Transition SDK allows users to plug in local validation of source blockchain's headers, typically as a light client, or by the use of a trusted RPC node. Token type meta-data and verification code is available to transaction recipients. Elective token history compression by out-of-band ZK prover merges this check into one recursive ZK proof. If the origin blockchain does not support contract verification (e.g., Bitcoin) then a committee-based approach with economic security must be used.
 
 \subsection{Transfer}
 
@@ -613,7 +613,7 @@ An Agent in Unicity is defined by its cryptographic identity and its verificatio
     Agents address each other via self-authenticated IDs rather than IP addresses. An agent can physically migrate from a server in London to a laptop in Tokyo without interrupting its ability to communicate or transact.
 
     \item \textbf{Censorship Resistance:}
-    Because agents are self-contained and mobile, they cannot be easily shut down by targeting a specific physical location or hosting provider. If a host becomes unavailable or hostile, the agent can be instantiated elsewhere, resuming execution from its last verifiable state (verifiable through the state being tokenized)
+    Because agents are self-contained and mobile, they cannot be easily shut down by targeting a specific physical location or hosting provider. If a host becomes unavailable or hostile, the agent can be instantiated elsewhere, resuming execution from its last verifiable state (verifiable through the state being tokenized).
 
     \item \textbf{Trustless Execution:}
     The separation of the \textit{Execute} and \textit{Verify} functions allows agents to run on untrusted hardware. A host provides CPU cycles and storage, but the correctness of the computation is mathematically proven by the agent and verified by the recipient.
@@ -634,7 +634,7 @@ The key property is verifiable execution: any party can confirm that a state tra
 \caption{Verification mechanisms for Verifiable Executors}
 \begin{tabular}{p{3cm}p{4.5cm}p{3cm}p{3cm}}
 \hline
-\textbf{Mechanism} & \textbf{How it works} & \textbf{Trust assumption} & \textbf{Cost} \\
+\textbf{Mechanism} & \textbf{How it works} & \makecell[l]{\textbf{Trust}\\\textbf{assumption}} & \textbf{Cost} \\
 \hline
 Re-execution & Verifier re-runs computation, confirms result & Deterministic runtime & Compute = prover \\
 Zero-knowledge proof & Prover generates succinct proof of correctness & Cryptographic & High prover, low verifier \\
@@ -737,10 +737,10 @@ A central challenge in a decentralized agent environment is that tools are indep
     Candidate tools are filtered through the knowledge graph, ensuring input/output compatibility. Symbolic rules guide the construction of multi-step workflows that satisfy the intended transformation or task.
 
     \item \textbf{Deterministic Execution:}
-    Once a plan is finalized, the orchestrator executes each agent call deterministically,enforcing strict argument schemas and producing verifiable state transitions and proofs. Neural components are not used during execution, only during interpretation.
+    Once a plan is finalized, the orchestrator executes each agent call deterministically, enforcing strict argument schemas and producing verifiable state transitions and proofs. Neural components are not used during execution, only during interpretation.
 \end{itemize}
 
-This architecture creates a form of ``loose coupling'' across agent services: developers do not manually integrate or design adapters for every service provider. Instead, they expose capabilities through agents, and the orchestrator autonomously determines how to compose,route, and sequence them to satisfy user intent. The result is a scalable, interoperable ecosystem where complex behavior emerges from neuro-symbolic reasoning over a shared tool universe, rather than brittle point-to-point integrations.
+This architecture creates a form of ``loose coupling'' across agent services: developers do not manually integrate or design adapters for every service provider. Instead, they expose capabilities through agents, and the orchestrator autonomously determines how to compose, route, and sequence them to satisfy user intent. The result is a scalable, interoperable ecosystem where complex behavior emerges from neuro-symbolic reasoning over a shared tool universe, rather than brittle point-to-point integrations.
 
 
 
@@ -790,7 +790,7 @@ Table~\ref{tab:defi-comparison} compares Unicity's approach to existing trading 
 \toprule
 \textbf{Platform} & \textbf{Structural Problem} & \textbf{Privacy Issues} & \textbf{Unicity Advantage} \\
 \midrule
-AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; Transactions are private and do not move the market \\
+AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; transactions are private and do not move the market \\
 \addlinespace
 CEXs  & Counterparty risk, KYC, withdrawal limits & Full KYC required; exchange sees all orders; data breaches expose history; government subpoenas & Trustless, self-custodial; no KYC; no central database; only counterparty knows terms \\
 \addlinespace
@@ -798,9 +798,9 @@ OTC Desks & Trust required, manual, slow, high fees & Desk sees both sides; empl
 \addlinespace
 Intent Protocols  & Ethereum-centric, solver centralization & Solvers see full order details; solver can extract value; settlement visible on-chain & Cross-chain native; no solver sees plaintext; truly decentralized matching; private settlement \\
 \addlinespace
-Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything;  & Same order privacy without custody risk or  KYC \\
+Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything & Same order privacy without custody risk or  KYC \\
 \addlinespace
-P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC;\\
+P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -833,8 +833,8 @@ Examples of intents:
 
 \begin{itemize}
     \item \textbf{Physical goods}: ``Purchase 100 units of component X, delivered to location Y, within 7 days, maximum price Z''
-    \item \textbf{Services}: ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B-C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''.
-    \item \textbf{Data}: ``Seeking real-time feed of market data D, latency under 10ms, willing to pay E per hour''
+    \item \textbf{Services}: ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B--C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''
+    \item \textbf{Data}: ``Seeking real-time feed of market data D, latency under 10\;ms, willing to pay E per hour''
     \item \textbf{Prediction}: ``I predict the NY Giants beat the Chicago Bears by 15 points''
 \end{itemize}
 
@@ -892,12 +892,12 @@ Once agents discover matching intents, they negotiate directly. Communication oc
 Settlement occurs through coordinated state transitions. A typical transaction flow:
 
 \begin{enumerate}
-    \item Buyer and seller discover matching intents on bulletin board
-    \item Agents negotiate terms, select escrow and fulfillment providers
-    \item Buyer transfers payment to escrow agent
-    \item Seller delivers goods/services via fulfillment agent
-    \item Fulfillment agent confirms delivery
-    \item Escrow agent releases payment to seller
+    \item Buyer and seller discover matching intents on bulletin board.
+    \item Agents negotiate terms, select escrow and fulfillment providers.
+    \item Buyer transfers payment to escrow agent.
+    \item Seller delivers goods/services via fulfillment agent.
+    \item Fulfillment agent confirms delivery.
+    \item Escrow agent releases payment to seller.
 \end{enumerate}
 
 No centralized platform coordinates the flow  --- agents interact directly, using specialized service agents as needed.
@@ -911,12 +911,12 @@ Disputes arise when parties disagree on whether transaction terms have been fulf
 The dispute resolution process:
 
 \begin{enumerate}
-    \item \textbf{Initiation}: Either party initiates a dispute, posting a bond to prevent frivolous claims
-    \item \textbf{Arbitrator Selection}: Parties select an arbitration agent from a registry, or use one specified in the original transaction terms
-    \item \textbf{Evidence Submission}: Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents
-    \item \textbf{Deliberation}: The arbitration agent evaluates evidence against the original transaction terms
-    \item \textbf{Ruling}: The arbitrator issues a signed ruling specifying escrow disposition
-    \item \textbf{Enforcement}: The escrow agent executes the ruling automatically
+    \item \textbf{Initiation}: Either party initiates a dispute, posting a bond to prevent frivolous claims.
+    \item \textbf{Arbitrator Selection}: Parties select an arbitration agent from a registry, or use one specified in the original transaction terms.
+    \item \textbf{Evidence Submission}: Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents.
+    \item \textbf{Deliberation}: The arbitration agent evaluates evidence against the original transaction terms.
+    \item \textbf{Ruling}: The arbitrator issues a signed ruling specifying escrow disposition.
+    \item \textbf{Enforcement}: The escrow agent executes the ruling automatically.
 \end{enumerate}
 
 \textbf{Appeals} provide recourse against incorrect rulings. A party can appeal by posting a larger bond and escalating to a panel of arbitrators. The panel reviews the original evidence and ruling. If the appeal succeeds, the original arbitrator's stake is slashed and the appellant's bond is returned. If the appeal fails, the bond is forfeited.
@@ -928,10 +928,10 @@ The dispute resolution process:
 This architecture inverts the platform model. Traditional commerce platforms capture both sides of every transaction, extracting fees and controlling relationships. In decentralized agentic commerce:
 
 \begin{itemize}
-    \item Discovery is public infrastructure, not a proprietary advantage
-    \item Escrow, reputation, fulfillment, and insurance are competitive services
-    \item Agents choose providers based on price, reputation, and terms
-    \item No single entity can censor transactions or extract monopoly rent
+    \item Discovery is public infrastructure, not a proprietary advantage.
+    \item Escrow, reputation, fulfillment, and insurance are competitive services.
+    \item Agents choose providers based on price, reputation, and terms.
+    \item No single entity can censor transactions or extract monopoly rent.
 \end{itemize}
 
 The result is a composable commerce stack where agents assemble the services they need for each transaction. A simple digital goods purchase might require only escrow. A complex physical goods transaction might involve fulfillment, insurance, and arbitration. Agents pay only for the services they use.
