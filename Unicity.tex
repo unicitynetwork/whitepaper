@@ -103,7 +103,7 @@
 
 \begin{abstract}
 
-The internet is being rebuilt for machines: autonomous AI agents operating and transacting continuously. To enable agents to transact with the throughput, latency, and privacy required, we present Unicity, a new blockchain architecture that eliminates the shared ledger/validator construct of previous blockchain designs. On-chain state is reduced to the minimum necessary to prove uniqueness of off-chain transactions. Assets themselves are blockchains, self-authenticating cryptographic objects that move peer-to-peer without intermediary validation. This eliminates the fundamental bottlenecks of traditional blockchain designs: throughput becomes unconstrained, execution parallelizes without limit, and privacy is preserved by default. On this foundation, we construct the Autonomous Agentic Internet, a decentralized platform for the discovery, orchestration and execution of autonomous agents, with safety, explainability and verifiability by design.
+The internet is being rebuilt for machines: autonomous intelligent agents operating and transacting continuously. To enable agents to transact with the throughput, latency, and security required, we present Unicity, a new blockchain architecture that eliminates the shared ledger/validator construct of previous blockchain designs. On-chain state is reduced to the minimum necessary to prove uniqueness of off-chain transactions. Assets are self-authenticating cryptographic objects, that live off-chain and move peer-to-peer without intermediary validation. This eliminates the fundamental bottlenecks of traditional designs: throughput becomes unconstrained, execution parallelizes without limit, and privacy is preserved by default. On this foundation, we construct the Autonomous Agentic Internet, a decentralized platform for the discovery, orchestration and execution of autonomous agents, with safety, explainability and verifiability by design.
 
 \end{abstract}
 \vspace{-1em}
@@ -117,11 +117,10 @@ The internet is being rebuilt for machines: autonomous AI agents operating and t
     \item \textbf{Uniqueness Oracle:}
     Public permissionless infrastructure maintaining an append-only sharded Sparse Merkle Tree (SMT). Users send cryptographic digests of transactions and are returned proofs of inclusion (transactions have been recorded) and proofs of exclusion (transactions have not been recorded before). The SMT is anchored in the blockchain, built hierarchically and operates in rounds. A recursive ZK prover is used to prove consistency of the SMT.
     \item \textbf{Tokens:}
-    Verifiable state. Self-contained blockchains of individual assets that are minted directly off-chain or detached from other blockchains. To execute a transaction, a payor will send a transaction request to the uniqueness oracle and receive back an inclusion proof which is appended to the token. The payor then sends the updated token directly to the payee. Similar to physical cash in that only the payee is responsible for verification.
-    \item \textbf{Verifiable Agents:}
- 	Equivalent to traditional smart contracts enabling verifiable execution of multi-token applications such as decentralized exchange. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Agents are runtime-agnostic and independent, uniquely addressable computational entities that can migrate between environments.
-    \item \textbf{AI Agents:} Agents augmented with AI inference for intent interpretation, planning, and adaptive behavior. The verifiable execution environment ensures cryptographic verifiability while AI inference enables natural language interaction and autonomous decision-making. Probabilistic inference is constrained by strictly typed program graphs (neuro-symbolic logic) ensuring every decision, connection, and outcome is explainable, traceable, precise, and verifiable.
-    \item \textbf{Agentic Internet:} A decentralized platform for autonomous agent operations. Agents can be developed, deployed, discovered, and orchestrated without centralized gatekeepers. Protocol agnostic P2P transport, Decentralized storage where agents carry state in tokens rather than host filesystems. Integrated micro-payments and infrastructure marketplace for compute, bandwidth, and proving services. \end{itemize}
+    Verifiable state. Self-contained ledgers of individual assets that are minted directly off-chain or detached from other blockchains. To execute a transaction, a payor will send a transaction request to the uniqueness oracle and receive back an inclusion proof which is appended to the token. The payor then sends the updated token directly to the payee. Similar to physical cash in that only the payee is responsible for verification.
+    \item \textbf{Verifiable Agents:} The power of smart contracts without the bottleneck of shared state. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Unlike smart contracts bound to a single chain, agents are portable runtime-agnostic entities that can migrate between execution environments while maintaining cryptographic continuity.
+    \item \textbf{Intelligent Agents:} Agents augmented with inference for intent interpretation, planning, and adaptive behavior. The verifiable execution environment ensures cryptographic verifiability while inference enables natural language interaction and autonomous decision-making. Probabilistic inference is constrained by strictly typed program graphs (neuro-symbolic logic) ensuring every decision, connection, and outcome is explainable, traceable, precise, and verifiable.
+    \item \textbf{Agentic Internet:} A decentralized platform for autonomous agent operations. Agents can be developed, deployed, discovered, and orchestrated without centralized gatekeepers. Protocol agnostic P2P transport. Decentralized storage where agents carry state in tokens rather than host filesystems. Integrated micro-payments and infrastructure marketplace for storage, compute, bandwidth, and proving services. \end{itemize}
 
 \clearpage
 \newlength{\saveparskip}
@@ -160,7 +159,7 @@ Neuro-symbolic AI has emerged to address the behavioral challenge. By combining 
 
 \medskip
 
-What is missing is an architecture that addresses both challenges together. Transaction infrastructure that operates at machine scale without trusted intermediaries, combined with execution infrastructure that makes AI agent behavior cryptographically verifiable.
+What is missing is an architecture that addresses both challenges together. Transaction infrastructure that operates at machine scale without trusted intermediaries, combined with execution infrastructure that makes agent behavior cryptographically verifiable.
 
 \subsection*{Architecture Overview}
 
@@ -172,7 +171,7 @@ This paper introduces Unicity, an architecture built on two foundations.
 
 \medskip
 
-\textbf{Neuro-Symbolic Execution} solves the behavioral challenge. By separating neural interpretation from symbolic execution, Unicity constrains AI agent behavior to typed, deterministic operations. Neural components handle intent, parsing natural language, identifying relevant actions. Symbolic components handle execution, type-checked operations with cryptographic proofs of correctness. The result is AI agents whose decisions are explainable, whose actions are bounded to declared capabilities, and whose outputs carry cryptographic proof that execution followed the rules.
+\textbf{Neuro-Symbolic Execution} solves the behavioral challenge. By separating neural interpretation from symbolic execution, Unicity constrains agent behavior to typed, deterministic operations. Neural components handle intent, parsing natural language, identifying relevant actions. Symbolic components handle execution, type-checked operations with cryptographic proofs of correctness. The result is intelligent agents whose decisions are explainable, whose actions are bounded to declared capabilities, and whose outputs carry cryptographic proof that execution followed the rules.
 
 \medskip
 
@@ -196,7 +195,7 @@ The architecture is presented in three parts:
 
 \medskip
 
-\noindent\textit{A note on terminology:} Within the AI community, ``agent'' has come to mean an LLM with tool-calling capabilities. We use both this and the traditional computer science definition. Verifiable Agents are autonomous computational entities in the traditional sense with cryptographic execution guarantees. AI Agents extend Verifiable Agents with LLM inference --- the modern sense. Both can hold tokens, transact, and cooperate autonomously. The terms are used interchangeably except where the distinction matters.
+\noindent\textit{A note on terminology:} Within the AI community, ``agent'' has come to mean an LLM with tool-calling capabilities. We use both this and the traditional computer science definition. Verifiable Agents are autonomous computational entities in the traditional sense with cryptographic execution guarantees. Intelligent Agents extend Verifiable Agents with LLM inference --- the modern sense. Both can hold tokens, transact, and cooperate autonomously. The terms are used interchangeably except where the distinction matters.
 
 \newpage
 
@@ -389,7 +388,7 @@ Each inclusion or exclusion proof generated by the Uniqueness Oracle is accompan
 
 The State Transition SDK\footnote{\url{https://github.com/unicitynetwork/state-transition-sdk}} allows the integration of token operations (mint, burn, transfer) into off-chain applications.
 
-\subsection{Mint: Chain Agnostic ``Detached'' Tokens}
+\subsection{Mint: Chain Agnostic ``Detached'' Assets}
 
 There are three different types of assets that can be minted using the Unicity State Transition SDK:
 
@@ -468,12 +467,12 @@ Agents provide equivalent functionality in Unicity without global shared state. 
     \item \textbf{Agent-locked tokens:} Participants can lock tokens to an agent using predicates that release only when the agent provides valid execution proofs. In this arrangement, the agent becomes a temporary custodian whose actions are constrained by cryptographically enforced rules.
 \end{itemize}
 
-Using these primitives, a multi-party application operates as follows:
+Using these primitives, a multi-agent application that operates on multiple tokens (the equivalent of a smart contract shared state) operates as follows:
 
 \begin{enumerate}
-    \item \textbf{Lock:} Participants transfer their tokens to their local agents, attaching predicates that define the conditions under which the tokens may be released.
+    \item \textbf{Lock:} Participants transfer their tokens to agents, attaching predicates that define the conditions under which the tokens may be released.
 
-    \item \textbf{Execute:} The agents executes application logic over the locked tokens --- matching orders, resolving game state, or computing payouts according to the application's rules.
+    \item \textbf{Execute:} The agents execute application logic over the locked tokens --- matching orders, resolving game state, or computing payouts according to the application's rules.
 
     \item \textbf{Prove:} The agent generates cryptographic proofs demonstrating that execution followed the agreed rules.
 
@@ -539,6 +538,7 @@ Traditional blockchains rely on users trusting a validator set who verify comput
 \hline
 Throughput & Bottlenecked by block size and validator limitations  & Unlimited parallelization \\
 Fee Model & Congestion requires dynamic gas markets & Static (microcent/tx) \\
+Verifiability & Validators (global and public; on-chain only) & Clients (local and private; off-chain) \\
 Privacy & All transactions visible to all participants; privacy requires additional cryptography & Transactions visible only to parties involved; private by default \\
 Atomicity & Global atomic operations possible (flash loans, MEV) & No global atomicity; local settlement between parties \\
 Composability & Universal; any contract can readwrite any other contract's state & On-demand; parties explicitly coordinate and verify interactions \\
@@ -587,7 +587,7 @@ The Unicity blockchain provides cryptographic proof of uniqueness for off-chain 
 
 \textbf{Verifiable Agents} are independent computational entities with verifiable execution. They extend tokens with the ability to act autonomously while maintaining cryptographic guarantees equivalent to on-chain smart contracts.
 
-\textbf{AI Agents} extend Verifiable Agents with AI inference. They combine cryptographic verifiability with neural capabilities for intent interpretation, planning, and adaptive behavior.
+\textbf{Intelligent Agents} extend Verifiable Agents with AI inference. They combine cryptographic verifiability with neural capabilities for intent interpretation, planning, and adaptive behavior.
 
 \textbf{Platform Services} provide the infrastructure agents need to operate: peer-to-peer transport, decentralized storage, A2A micropayments and Verifiable Execution Environments.
 
@@ -631,7 +631,7 @@ The key property is verifiable execution: any party can confirm that a state tra
 
 \begin{table}[h]
 \centering
-\caption{Verification mechanisms for Verifiable Executors}
+\caption{Verification mechanisms for Verifiable Execution}
 \begin{tabular}{p{3cm}p{4.5cm}p{3cm}p{3cm}}
 \hline
 \textbf{Mechanism} & \textbf{How it works} & \makecell[l]{\textbf{Trust}\\\textbf{assumption}} & \textbf{Cost} \\
@@ -653,7 +653,7 @@ Validator committee & Committee attests to correct execution & Honest majority &
 
 \textbf{TEE attestation} relies on trusted hardware. A Trusted Execution Environment (Intel SGX, ARM TrustZone) attests that specific code executed in a secure enclave. The verifier trusts the hardware manufacturer's attestation rather than re-executing.
 
-\textbf{Validator committees} provide verification through consensus. A set of validators independently execute and attest to correctness. This reintroduces coordination overhead but may be appropriate for high-value transactions requiring additional assurance.
+\textbf{Validator committees} provide verification through consensus. A set of validators independently execute and attest to correctness. This reintroduces coordination overhead but may be appropriate for certain applications.
 
 \subsection{Choosing a Verification Model}
 
@@ -664,8 +664,8 @@ The appropriate mechanism depends on application requirements:
     \item \textbf{Complex financial logic}: ZK proofs. Expensive computation, cheap verification.
     \item \textbf{High-frequency trading}: Fraud proofs. Minimize latency, penalize cheaters.
     \item \textbf{AI inference}: TEE attestation.
-    \item \textbf{High-value settlements}: Validator committee.
 \end{itemize}
+
 
 Unicity infrastructure does not mandate a verification mechanism. The Uniqueness Oracle records state transitions regardless of how they are verified. The verification logic is embedded in the agent itself, allowing different applications to use different verification mechanisms within the same ecosystem.
 This flexibility is essential for the Agentic Internet, where different agents will have different verification requirements based on their computational complexity and  latency constraints.
@@ -813,7 +813,7 @@ The common thread across existing solutions is that someone always sees the trad
 
 \section{Decentralized Agentic Commerce}
 
-Agentic commerce --- autonomous agents transacting for goods, services, and data, is projected to exceed \$3 trillion by 2030. Yet the infrastructure for agents to discover each other, negotiate terms, and settle transactions remains nascent.
+Agentic commerce - autonomous agents transacting for goods, services, and data, is projected to exceed \$3 trillion by 2030 [TOOD add reference]. Yet the infrastructure for agents to discover each other, negotiate terms, and settle transactions remains nascent.
 
 Unicity enables decentralized agentic commerce where these functions are provided by independent agents rather than a monolithic platform.
 
