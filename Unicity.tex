@@ -76,8 +76,8 @@
     showstringspaces=false,
 }
 \lstdefinelanguage{abnf}{
-        comment=[l]{;},
-        identifierstyle=\bfseries
+    comment=[l]{;},
+    identifierstyle=\bfseries
 }
 
 % \setlength{\parindent}{0pt}
@@ -116,18 +116,22 @@ The internet is being rebuilt for machines: autonomous intelligent agents operat
 
     \item \textbf{Uniqueness Oracle:}
     Public permissionless infrastructure maintaining an append-only sharded Sparse Merkle Tree (SMT). Users send cryptographic digests of transactions and are returned proofs of inclusion (transactions have been recorded) and proofs of exclusion (transactions have not been recorded before). The SMT is anchored in the blockchain, built hierarchically and operates in rounds. A recursive ZK prover is used to prove consistency of the SMT.
+
     \item \textbf{Tokens:}
     Verifiable state. Self-contained ledgers of individual assets that are minted directly off-chain or detached from other blockchains. To execute a transaction, a payor will send a transaction request to the uniqueness oracle and receive back an inclusion proof which is appended to the token. The payor then sends the updated token directly to the payee. Similar to physical cash in that only the payee is responsible for verification.
-    \item \textbf{Verifiable Agents:} The power of smart contracts without the bottleneck of shared state. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Unlike smart contracts bound to a single chain, agents are portable runtime-agnostic entities that can migrate between execution environments while maintaining cryptographic continuity.
-    \item \textbf{Intelligent Agents:} Agents augmented with inference for intent interpretation, planning, and adaptive behavior. The verifiable execution environment ensures cryptographic verifiability while inference enables natural language interaction and autonomous decision-making. Probabilistic inference is constrained by strictly typed program graphs (neuro-symbolic logic) ensuring every decision, connection, and outcome is explainable, traceable, precise, and verifiable.
-    \item \textbf{Agentic Internet:} A decentralized platform for autonomous agent operations. Agents can be developed, deployed, discovered, and orchestrated without centralized gatekeepers. Protocol agnostic P2P transport. Decentralized storage where agents carry state in tokens rather than host filesystems. Integrated micro-payments and infrastructure marketplace for storage, compute, bandwidth, and proving services. \end{itemize}
+
+    \item \textbf{Verifiable Agents:}
+    The power of smart contracts without the bottleneck of shared state. Tokens are conditionally transferred to agents which execute and re-distribute tokens with proofs of execution and uniqueness. Unlike smart contracts bound to a single chain, agents are portable runtime-agnostic entities that can migrate between execution environments while maintaining cryptographic continuity.
+
+    \item \textbf{Intelligent Agents:}
+    Agents augmented with inference for intent interpretation, planning, and adaptive behavior. The verifiable execution environment ensures cryptographic verifiability while inference enables natural language interaction and autonomous decision-making. Probabilistic inference is constrained by strictly typed program graphs (neuro-symbolic logic) ensuring every decision, connection, and outcome is explainable, traceable, precise, and verifiable.
+
+    \item \textbf{Agentic Internet:}
+    A decentralized platform for autonomous agent operations. Agents can be developed, deployed, discovered, and orchestrated without centralized gatekeepers. Protocol agnostic P2P transport. Decentralized storage where agents carry state in tokens rather than host filesystems. Integrated micro-payments and infrastructure marketplace for storage, compute, bandwidth, and proving services.
+\end{itemize}
 
 \clearpage
-\newlength{\saveparskip}
-\setlength{\saveparskip}{\parskip}
-\setlength{\parskip}{0pt}
 \tableofcontents
-\setlength{\parskip}{\saveparskip}
 \clearpage
 
 \section*{Introduction}
@@ -135,7 +139,7 @@ The internet is being rebuilt for machines: autonomous intelligent agents operat
 
 \subsection*{The Agentic Economy}
 
-AI agents are becoming autonomous economic actors. Today they operate within human workflows --- writing code, executing trades, managing documents on command. The trajectory points toward full autonomy: agents that operate continuously, making decisions and taking actions without human oversight.
+Agents are becoming autonomous economic actors. Today they operate within human workflows --- writing code, executing trades, managing documents on command. The trajectory points toward full autonomy: agents that operate continuously, making decisions and taking actions without human oversight.
 
 \medskip
 
@@ -187,7 +191,7 @@ The architecture is presented in three parts:
 
 \medskip
 
-\textbf{Part II: Agentic Infrastructure} describes the computational entities that operate on this foundation. Tokens, Verifiable Agents, and AI Agents, along with platform services including the Neuro-Symbolic Orchestrator, peer-to-peer transport, decentralized storage, and micropayments.
+\textbf{Part II: Agentic Infrastructure} describes the computational entities that operate on this foundation. Tokens, Verifiable Agents, and Intelligent Agents, along with platform services including the Neuro-Symbolic Orchestrator, peer-to-peer transport, decentralized storage, and micropayments.
 
 \medskip
 
@@ -228,18 +232,11 @@ Proposed optimizations reproduce this model at different scales. Layer 2 solutio
     \label{fig:layers}
 \end{figure}
 
-
 Unicity is an attempt to eliminate these constraints by enabling true peer-to-peer value transfer without intermediary validation. Like physical cash, assets in Unicity are self-contained cryptographic objects that can be validated independently by their recipients. Transactions occur directly between parties without broadcasting to a network, waiting for consensus, or paying gas fees. The recipient bears responsibility for validation --- examining the cryptographic proofs embedded within the asset itself --- just as one might verify a physical banknote's authenticity. The blockchain's role is minimized to providing cryptographic proof of uniqueness, ensuring these independent assets cannot be double-spent as they traverse the network directly between parties.
-
-
-
 
 This fundamental shift from ``assets on a ledger'' to ``assets as independent entities'' enables true peer-to-peer transfer without any shared state infrastructure. Each asset can move, be validated, and execute logic completely independently of all other assets in the system. Parallelization becomes unlimited not because execution is separated from consensus, but because there is no shared state to coordinate at all --- each asset operates in its own computational space, interacting with others only when explicitly required by application logic.
 
-
-
 The result is an architecture that combines the desirable properties of both physical cash and distributed ledgers: the simplicity and finality of bilateral exchange, the privacy of direct transfer, the efficiency of parallel execution, and --- when needed --- the composability and coordination of shared state (through agents). This design philosophy directly addresses the requirements of machine-scale economies, where billions of autonomous agents must transact continuously without the friction of global coordination.
-
 
 \section{Blockchain Architecture}
 
@@ -252,14 +249,9 @@ Unicity implements a hierarchical architecture designed to minimize on-chain ove
     \label{fig:arch}
 \end{figure}
 
-
-
 The Consensus Layer provides the system's root of trust through a minimal ``headers only'' Proof of Work blockchain.
 
-
 The Uniqueness Oracle represents Unicity's core innovation: a mechanism for proving that off-chain assets have not been double-spent without recording the transactions themselves. This layer generates cryptographic proofs --- unicity proofs --- that certify the non-existence of conflicting transactions for any given asset. These proofs are anchored to the Consensus Layer's timeline but do not require recording transaction details on-chain.
-
-
 
 At the agent layer, tokens exist as independent cryptographic objects, functioning as independent blockchains. A token carries its complete validation rules, state, and transaction history within itself. The Uniqueness Oracle ensures these independent chains cannot fork, while the Proof of Work consensus provides the same trust model as Bitcoin --- recipients can independently verify ownership with zero trust assumptions. Assets move peer-to-peer across the network, requiring no global coordination or shared ledger for transfer.
 
@@ -284,15 +276,16 @@ Tokens are self-contained; no external blockchain needs to be consulted for vali
         \textbf{Redundancy} &
         \makecell[l]{\textbf{Validation}\\\textbf{Effort}} \\
         \midrule
-        Consensus: PoW & \makecell[l]{Decentralization\\
-        \& tokenomics} & \makecell[l]{Permissionless\\PoW} & 200 B/day & PoW mining & Tokenomics \\
+        Consensus: PoW & \makecell[l]{Decentralization\\\& tokenomics} & \makecell[l]{Permissionless\\PoW} & 200 B/day & PoW mining & Tokenomics \\
+        \addlinespace
         Consensus: BFT & \makecell[l]{Fast, deterministic\\finality} & $\uparrow$ & 100 B/day & $\approx21\times$ & \makecell[l]{Uniqueness Oracle's\\consistency proofs} \\
+        \addlinespace
         Uniqueness Oracle & \makecell[l]{Recording token\\state transitions} & $\uparrow$ & 50 B/tx & Few replicas & Proof generation \\
+        \addlinespace
         Token Operations & User transactions & $\uparrow$ \& recipients & Own tokens & Recipients & Relevant transactions \\
         \bottomrule
     \end{tabular}
 \end{table}
-
 
 \section{Consensus Layer Implementation}
 
@@ -306,7 +299,6 @@ Tokens are self-contained; no external blockchain needs to be consulted for vali
 Proof of Work remains unsurpassed as means to launch a fault tolerant decentralized censorship resistant network. It ties the security of the system to a physical quantity (energy) and enables tokens to be fairly and transparently distributed without human oversight.
 
 To prevent centralization of mining power, new ASIC-resistant hash functions have been developed, of which RandomX represents the state of the art, having been battle-tested in Monero, a privacy preserving cryptocurrency. Unlike Bitcoin's SHA-256 algorithm, RandomX is designed to be ASIC-resistant and CPU-friendly, leveling the playing field and helping maintain a decentralized network of miners. This democratization not only improves network security through wider participation but also upholds the original Bitcoin vision as a decentralized financial system accessible to all. RandomX works by generating random code for each mining round, including a variety of CPU instructions, memory-hard operations and random code execution that can be efficiently performed by general-purpose processors but are challenging to optimize in hardware. This ensures that CPUs remain competitive in mining, preserving the network's decentralization and resistance to the concentration of mining power.
-
 
 \section{Uniqueness Oracle Implementation}
 
@@ -383,7 +375,6 @@ Unicity Proofs are not generated by the Uniqueness Oracle. Instead, they are gen
 
 Each inclusion or exclusion proof generated by the Uniqueness Oracle is accompanied by a Unicity Proof certifying the validity of the state of the SMT from which the inclusion/exclusion proof was extracted.
 
-
 \section{Token Operations}
 
 The State Transition SDK\footnote{\url{https://github.com/unicitynetwork/state-transition-sdk}} allows the integration of token operations (mint, burn, transfer) into off-chain applications.
@@ -451,8 +442,6 @@ Provided that participants have sufficient inventory of tokens for the two-secon
     \label{fig:LowLatency2}
 \end{figure}
 
-
-
 \section{Agents as Smart Contracts}
 
 Traditional smart contracts rely on globally shared state. All assets and application logic exist in a single state machine replicated across validators. Any contract can read or write any other contract's state, and all state is visible to all participants.
@@ -495,30 +484,36 @@ A decentralized exchange built on this model matches buyers and sellers without 
 
 \begin{enumerate}
     \item The agent receives both locked tokens from Alice and Bob.
+
     \item The agent verifies that the predicates are compatible and that the orders match on price and quantity.
+
     \item The agent generates an execution proof attesting that ``Alice's 100 ALPHA was matched with Bob's 50 BETA at the agreed price.''
+
     \item The agent creates the output tokens: 100 ALPHA now owned by Bob, and 50 BETA now owned by Alice.
+
     \item The output tokens include the execution proof, and the predicates ensure that settlement is atomic --- either both transfers succeed or neither does.
 \end{enumerate}
 
 This construction achieves several important properties:
 
 \begin{itemize}
-    \item \textbf{No custody risk:} The agent never has unilateral control over the tokens. Predicates enforce that tokens can only move according to the rules agreed upon by the participants.
+    \item \textbf{No custody risk:}
+    The agent never has unilateral control over the tokens. Predicates enforce that tokens can only move according to the rules agreed upon by the participants.
 
-    \item \textbf{No global order book:} Order state exists only within the locked tokens themselves. The agent matches orders as they arrive but does not maintain any persistent global state.
+    \item \textbf{No global order book:}
+    Order state exists only within the locked tokens themselves. The agent matches orders as they arrive but does not maintain any persistent global state.
 
-    \item \textbf{Privacy:} Only Alice, Bob, and the agent observe the trade. No validators witness the transaction, and no public ledger records the exchange.
+    \item \textbf{Privacy:}
+    Only Alice, Bob, and the agent observe the trade. No validators witness the transaction, and no public ledger records the exchange.
 
-    \item \textbf{Atomic settlement:} The interlocking predicates ensure that both sides of the trade settle together. There is no counterparty risk --- neither party can be left holding worthless commitments.
+    \item \textbf{Atomic settlement:}
+    The interlocking predicates ensure that both sides of the trade settle together. There is no counterparty risk --- neither party can be left holding worthless commitments.
 
-    \item \textbf{Parallel execution:} Every trade is independent of every other trade. A thousand trading pairs can execute simultaneously without contention for shared resources.
+    \item \textbf{Parallel execution:}
+    Every trade is independent of every other trade. A thousand trading pairs can execute simultaneously without contention for shared resources.
 \end{itemize}
 
 This pattern generalizes naturally to any application requiring coordination among multiple parties. Lending protocols can lock collateral with predicates that trigger liquidation under specified conditions. Games can lock player stakes with predicates tied to outcome determination. Auctions can lock bids with predicates that release funds based on winner selection. In each case, the agent provides the coordination logic, while predicates provide cryptographic enforcement of the rules.
-
-
-
 
 \section{Trade-Offs and Comparison}
 
@@ -528,26 +523,28 @@ Unlike traditional blockchains, there is no public global ledger of asset owners
 
 Traditional blockchains rely on users trusting a validator set who verify computation on the user's behalf. In a client-side model, the user verifies incoming transactions. This approach enhances privacy and censorship resistance by eliminating reliance on third-party validators for direct transaction validation. The client's core task is the deterministic verification of these network-anchored proofs and the token's internal consistency, a focused process designed for security and efficiency.
 
-
 \begin{table}[h]
-\centering
-\caption{Comparison of Unicity and Shared Ledger blockchains}
-\begin{tabular}{p{2.5cm}p{5.5cm}p{5.5cm}}
-\hline
-\textbf{Property} & \textbf{Shared Ledger} & \textbf{Unicity} \\
-\hline
-Throughput & Bottlenecked by block size and validator limitations  & Unlimited parallelization \\
-Fee Model & Congestion requires dynamic gas markets & Static (microcent/tx) \\
-Verifiability & Validators (global and public; on-chain only) & Clients (local and private; off-chain) \\
-Privacy & All transactions visible to all participants; privacy requires additional cryptography & Transactions visible only to parties involved; private by default \\
-Atomicity & Global atomic operations possible (flash loans, MEV) & No global atomicity; local settlement between parties \\
-Composability & Universal; any contract can readwrite any other contract's state & On-demand; parties explicitly coordinate and verify interactions \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Comparison of Unicity and Shared Ledger blockchains}
+    \label{tab:compshared}
+    \begin{tabular}{p{2.5cm}p{5.5cm}p{5.5cm}}
+        \toprule
+        \textbf{Property} & \textbf{Shared Ledger} & \textbf{Unicity} \\
+        \midrule
+        Throughput & Bottlenecked by block size and validator limitations  & Unlimited parallelization \\
+        \addlinespace
+        Fee Model & Congestion requires dynamic gas markets & Static (microcent/tx) \\
+        \addlinespace
+        Verifiability & Validators (global and public; on-chain only) & Clients (local and private; off-chain) \\
+        \addlinespace
+        Privacy & All transactions visible to all participants; privacy requires additional cryptography & Transactions visible only to parties involved; private by default \\
+        \addlinespace
+        Atomicity & Global atomic operations possible (flash loans, MEV) & No global atomicity; local settlement between parties \\
+        \addlinespace
+        Composability & Universal; any contract can readwrite any other contract's state & On-demand; parties explicitly coordinate and verify interactions \\
+        \bottomrule
+    \end{tabular}
 \end{table}
-
-
-
 
 \section{Trust Models}
 
@@ -577,11 +574,9 @@ If we relax the model by assuming that a majority of BFT consensus nodes exhibit
 
 In this scenario, a transaction is finalized, and an inclusion proof is returned within a few seconds, allowing the transaction to be immediately verified by independent, non-connected parties.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \part{Autonomous Agentic Infrastructure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 The Unicity blockchain provides cryptographic proof of uniqueness for off-chain state transitions. This part describes the computational infrastructure built on that foundation: the entities that execute, the platform services that support them, and the economic mechanisms that sustain the ecosystem.
 
@@ -602,24 +597,21 @@ Together, these components form the Autonomous Agentic Internet: a decentralized
     \label{fig:Orchestrator}
 \end{figure}
 
-
 \section{Decoupling Logic from Infrastructure}
 
 In the current Web2 cloud paradigm, applications are tightly coupled to specific vendors, physical locations, and IP addresses. Migrating a service requires complex reconfiguration of networking, storage, and security parameters. The Agentic Internet inverts this model by prioritizing the \textit{Agent} as an independent, mobile, and agnostic computational entity.
 An Agent in Unicity is defined by its cryptographic identity and its verification logic, not by the server it runs on. This enables several critical properties:
 
 \begin{itemize}
-    \item \textbf{Location Agnosticism:}
+    \item \textbf{Location agnosticism:}
     Agents address each other via self-authenticated IDs rather than IP addresses. An agent can physically migrate from a server in London to a laptop in Tokyo without interrupting its ability to communicate or transact.
 
-    \item \textbf{Censorship Resistance:}
+    \item \textbf{Censorship resistance:}
     Because agents are self-contained and mobile, they cannot be easily shut down by targeting a specific physical location or hosting provider. If a host becomes unavailable or hostile, the agent can be instantiated elsewhere, resuming execution from its last verifiable state (verifiable through the state being tokenized).
 
-    \item \textbf{Trustless Execution:}
+    \item \textbf{Trustless execution:}
     The separation of the \textit{Execute} and \textit{Verify} functions allows agents to run on untrusted hardware. A host provides CPU cycles and storage, but the correctness of the computation is mathematically proven by the agent and verified by the recipient.
 \end{itemize}
-
-
 
 \section{Verifiable Execution}
 
@@ -630,19 +622,24 @@ The key property is verifiable execution: any party can confirm that a state tra
 \subsection{Verification Mechanisms}
 
 \begin{table}[h]
-\centering
-\caption{Verification mechanisms for Verifiable Execution}
-\begin{tabular}{p{3cm}p{4.5cm}p{3cm}p{3cm}}
-\hline
-\textbf{Mechanism} & \textbf{How it works} & \makecell[l]{\textbf{Trust}\\\textbf{assumption}} & \textbf{Cost} \\
-\hline
-Re-execution & Verifier re-runs computation, confirms result & Deterministic runtime & Compute = prover \\
-Zero-knowledge proof & Prover generates succinct proof of correctness & Cryptographic & High prover, low verifier \\
-Fraud proof & Assume correct, challenge if wrong & One honest watcher & Low unless disputed \\
-TEE attestation & Hardware attests execution in secure enclave & Hardware manufacturer & Low \\
-Validator committee & Committee attests to correct execution & Honest majority & Coordination overhead \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Verification mechanisms for Verifiable Execution}
+    \label{tab:verifexec}
+    \begin{tabular}{p{3cm}p{4.5cm}p{3cm}p{3cm}}
+        \toprule
+        \textbf{Mechanism} & \textbf{How it works} & \makecell[l]{\textbf{Trust}\\\textbf{assumption}} & \textbf{Cost} \\
+        \midrule
+        Re-execution & Verifier re-runs computation, confirms result & Deterministic runtime & Compute = prover \\
+        \addlinespace
+        Zero-knowledge proof & Prover generates succinct proof of correctness & Cryptographic & High prover, low verifier \\
+        \addlinespace
+        Fraud proof & Assume correct, challenge if wrong & One honest watcher & Low unless disputed \\
+        \addlinespace
+        TEE attestation & Hardware attests execution in secure enclave & Hardware manufacturer & Low \\
+        \addlinespace
+        Validator committee & Committee attests to correct execution & Honest majority & Coordination overhead \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 \textbf{Re-execution} is the simplest model. The Verifiable Agent defines an execution function and a verification function. The recipient re-runs the computation and confirms the result matches. This is equivalent to smart contract verification but without requiring all validators to re-execute  --- only the recipient verifies, because only the recipient has economic interest in correctness.
@@ -660,23 +657,28 @@ Validator committee & Committee attests to correct execution & Honest majority &
 The appropriate mechanism depends on application requirements:
 
 \begin{itemize}
-    \item \textbf{Simple token transfers}: Re-execution. Verification is trivial.
-    \item \textbf{Complex financial logic}: ZK proofs. Expensive computation, cheap verification.
-    \item \textbf{High-frequency trading}: Fraud proofs. Minimize latency, penalize cheaters.
-    \item \textbf{AI inference}: TEE attestation.
-\end{itemize}
+    \item \textbf{Simple token transfers:}
+    Re-execution. Verification is trivial.
 
+    \item \textbf{Complex financial logic:}
+    ZK proofs. Expensive computation, cheap verification.
+
+    \item \textbf{High-frequency trading:}
+    Fraud proofs. Minimize latency, penalize cheaters.
+
+    \item \textbf{AI inference:}
+    TEE attestation.
+\end{itemize}
 
 Unicity infrastructure does not mandate a verification mechanism. The Uniqueness Oracle records state transitions regardless of how they are verified. The verification logic is embedded in the agent itself, allowing different applications to use different verification mechanisms within the same ecosystem.
 This flexibility is essential for the Agentic Internet, where different agents will have different verification requirements based on their computational complexity and  latency constraints.
-
 
 \section{The Agentic Runtime Architecture}
 
 To enable this mobility, agents operate within a standardized \textbf{Agentic Runtime}. This runtime acts as an abstraction layer, sandwiching the agent between the raw infrastructure and the Unicity network.
 
 \begin{enumerate}
-    \item \textbf{Executable Instance (The Agent):}
+    \item \textbf{Executable instance (the agent):}
     Technically, an agent is a sandboxed computation (e.g., a Docker container or VM) that exposes two core procedures:
     \begin{itemize}
         \item \texttt{Execute(state, input) $\rightarrow$ new\_state}:
@@ -686,13 +688,13 @@ To enable this mobility, agents operate within a standardized \textbf{Agentic Ru
         The logic allowing third parties to validate transitions.
     \end{itemize}
 
-    \item \textbf{Host-Independent Storage:}
+    \item \textbf{Host-independent storage:}
     Agents do not rely on a host's local file system for persistence. Instead, the runtime interfaces with decentralized storage layers to pin and retrieve Unicity tokens. These tokens effectively act as the agent's hard drive, carrying its state history and assets in a portable, verifiable format.
 
-    \item \textbf{Overlay Transport Network:}
+    \item \textbf{Overlay transport network:}
     Communication is handled via a circuit-switched overlay network. The runtime manages a Distributed Hash Table (DHT) or similar resolution service to map Agent IDs to physical entry points (e.g., URLs or relays). This allows agents to utilize any underlying transport protocol without altering the agent's internal logic.
 
-    \item \textbf{Secure Key Management:}
+    \item \textbf{Secure key management:}
     Since hosts are generally untrusted, the runtime integrates with Hardware Security Modules (HSM) or Trusted Execution Environments (TEE). Cryptographic keys used for signing state transitions never leave the secure enclave, ensuring that the host operator cannot impersonate the agent.
 \end{enumerate}
 
@@ -701,23 +703,21 @@ To enable this mobility, agents operate within a standardized \textbf{Agentic Ru
 The Agentic Internet creates a new peer-to-peer market for physical infrastructure. Individuals and organizations can participate as infrastructure providers, earning Unicity native currency by offering specific resources:
 
 \begin{itemize}
-    \item \textbf{Compute Hosts:}
+    \item \textbf{Compute hosts:}
     Running agent runtimes (Docker/VM containers).
 
-    \item \textbf{Relay Nodes:}
+    \item \textbf{Relay nodes:}
     Providing bandwidth and routing for the overlay network.
 
-    \item \textbf{Bridge Agents:}
+    \item \textbf{Bridge agents:}
     Acting as gateways between the Agentic Internet and the legacy Web2 world (e.g., serving a standard HTTP website backed by a set of decentralized agents).
 \end{itemize}
 
 This structure ensures that Unicity functions as a complete, self-sustaining ecosystem. It is not just a ledger for recording value, but a distributed computer where the logic of the machine economy lives, breathes, and transacts.
 
+\section{Extending Verifiability to Intelligent Agents}
 
-\section{Extending Verifiability to AI Agents}
-
-Traditional formal verification operates over deterministic, symbolic systems --- proofs about code, protocols, and state machines. But as AI agents become participants in economic and computational infrastructure, verification must extend into domains where intent is ambiguous, schemas are incomplete, and execution paths emerge dynamically. Neuro-symbolic logic bridges this gap by embedding symbolic structures --- types, rules, and constraints --- into continuous vector spaces where neural models can generalize across similar concepts while symbolic reasoning enforces hard guarantees. The Neuro-Symbolic Orchestrator is Unicity's instantiation of this principle: it combines neural embedding models with deterministic symbolic reasoning to translate user or agent intent into concrete, type-safe operations over a heterogeneous ecosystem of agent services. Rather than relying on LLMs to infer schemas or mediate execution flows --- with their attendant hallucination risks --- the orchestrator maintains a unified semantic space of all known tools, types, and services, alongside a typed knowledge graph encoding compatibility, dataflow constraints, and historical usage patterns. This hybrid architecture allows the system to generalize when encountering novel requests while still producing reliable, reproducible, and verifiable execution plans --- extending the trust guarantees of Unicity's cryptographic layer up through the agentic reasoning stack.
-
+Traditional formal verification operates over deterministic, symbolic systems --- proofs about code, protocols, and state machines. But as intelligent agents become participants in economic and computational infrastructure, verification must extend into domains where intent is ambiguous, schemas are incomplete, and execution paths emerge dynamically. Neuro-symbolic logic bridges this gap by embedding symbolic structures --- types, rules, and constraints --- into continuous vector spaces where neural models can generalize across similar concepts while symbolic reasoning enforces hard guarantees. The Neuro-Symbolic Orchestrator is Unicity's instantiation of this principle: it combines neural embedding models with deterministic symbolic reasoning to translate user or agent intent into concrete, type-safe operations over a heterogeneous ecosystem of agent services. Rather than relying on LLMs to infer schemas or mediate execution flows --- with their attendant hallucination risks --- the orchestrator maintains a unified semantic space of all known tools, types, and services, alongside a typed knowledge graph encoding compatibility, dataflow constraints, and historical usage patterns. This hybrid architecture allows the system to generalize when encountering novel requests while still producing reliable, reproducible, and verifiable execution plans --- extending the trust guarantees of Unicity's cryptographic layer up through the agentic reasoning stack.
 
 \begin{figure}[ht]
     \centering
@@ -726,36 +726,24 @@ Traditional formal verification operates over deterministic, symbolic systems --
     \label{fig:Orchestrator2}
 \end{figure}
 
-
 A central challenge in a decentralized agent environment is that tools are independently authored and exposed by different service providers, each with its own capabilities and schemas. The orchestrator resolves this fragmentation through neuro-symbolic interpretation:
 
 \begin{itemize}
-    \item \textbf{Semantic Intent Mapping:}
+    \item \textbf{Semantic intent mapping:}
     The orchestrator embeds the incoming natural-language request and retrieves semantically relevant agent tools, ranked by vector similarity and augmented by graph constraints.
 
-    \item \textbf{Type-Safe Symbolic Planning:}
+    \item \textbf{Type-safe symbolic planning:}
     Candidate tools are filtered through the knowledge graph, ensuring input/output compatibility. Symbolic rules guide the construction of multi-step workflows that satisfy the intended transformation or task.
 
-    \item \textbf{Deterministic Execution:}
+    \item \textbf{Deterministic execution:}
     Once a plan is finalized, the orchestrator executes each agent call deterministically, enforcing strict argument schemas and producing verifiable state transitions and proofs. Neural components are not used during execution, only during interpretation.
 \end{itemize}
 
 This architecture creates a form of ``loose coupling'' across agent services: developers do not manually integrate or design adapters for every service provider. Instead, they expose capabilities through agents, and the orchestrator autonomously determines how to compose, route, and sequence them to satisfy user intent. The result is a scalable, interoperable ecosystem where complex behavior emerges from neuro-symbolic reasoning over a shared tool universe, rather than brittle point-to-point integrations.
 
-
-
-
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \part{Example Applications}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
 
 \section{Agentic DeFi}
 
@@ -768,13 +756,17 @@ Traditional DeFi inherits the limitations of shared-ledger blockchains. Transact
 Unicity's architecture eliminates these constraints:
 
 \begin{itemize}
-    \item \textbf{True decentralization:} No validator set processes transactions. No sequencer orders them. Trades execute peer-to-peer between counterparties, coordinated by agents but settled directly.
+    \item \textbf{True decentralization:}
+    No validator set processes transactions. No sequencer orders them. Trades execute peer-to-peer between counterparties, coordinated by agents but settled directly.
 
-    \item \textbf{Censorship resistance:} There is no mempool to monitor, no block producer to bribe, and no validator to pressure. A trade between two willing parties cannot be stopped by any third party.
+    \item \textbf{Censorship resistance:}
+    There is no mempool to monitor, no block producer to bribe, and no validator to pressure. A trade between two willing parties cannot be stopped by any third party.
 
-    \item \textbf{Unlimited throughput:} Every trade is independent. There is no shared state to contend for, no block space to compete over. A million trades can settle simultaneously without interference.
+    \item \textbf{Unlimited throughput:}
+    Every trade is independent. There is no shared state to contend for, no block space to compete over. A million trades can settle simultaneously without interference.
 
-    \item \textbf{Privacy by default:} Only the counterparties observe a trade. No public ledger records the exchange. No chain analysis can trace the flow of funds. Privacy is not an add-on requiring expensive cryptography --- it is the default.
+    \item \textbf{Privacy by default:}
+    Only the counterparties observe a trade. No public ledger records the exchange. No chain analysis can trace the flow of funds. Privacy is not an add-on requiring expensive cryptography --- it is the default.
 \end{itemize}
 
 \subsection{Comparison with Existing Solutions}
@@ -782,34 +774,30 @@ Unicity's architecture eliminates these constraints:
 Table~\ref{tab:defi-comparison} compares Unicity's approach to existing trading infrastructure across decentralization and privacy dimensions.
 
 \begin{table}[h]
-\centering
-\caption{Comparison of trading infrastructure}
-\label{tab:defi-comparison}
-\small
-\begin{tabular}{p{2.5cm}p{4cm}p{4cm}p{4cm}}
-\toprule
-\textbf{Platform} & \textbf{Structural Problem} & \textbf{Privacy Issues} & \textbf{Unicity Advantage} \\
-\midrule
-AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; transactions are private and do not move the market \\
-\addlinespace
-CEXs  & Counterparty risk, KYC, withdrawal limits & Full KYC required; exchange sees all orders; data breaches expose history; government subpoenas & Trustless, self-custodial; no KYC; no central database; only counterparty knows terms \\
-\addlinespace
-OTC Desks & Trust required, manual, slow, high fees & Desk sees both sides; employees can front-run; records kept indefinitely; minimum sizes exclude retail & Automated, trustless, lower cost; no intermediary sees terms; any size; instant settlement \\
-\addlinespace
-Intent Protocols  & Ethereum-centric, solver centralization & Solvers see full order details; solver can extract value; settlement visible on-chain & Cross-chain native; no solver sees plaintext; truly decentralized matching; private settlement \\
-\addlinespace
-Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything & Same order privacy without custody risk or  KYC \\
-\addlinespace
-P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Comparison of trading infrastructure}
+    \label{tab:defi-comparison}
+    \small
+    \begin{tabular}{p{2cm}p{3.5cm}p{4.5cm}p{4.5cm}}
+        \toprule
+        \textbf{Platform} & \textbf{Structural Problem} & \textbf{Privacy Issues} & \textbf{Unicity Advantage} \\
+        \midrule
+        AMM DEXs  & Slippage, MEV, front-running & Pending txs visible in mempool; trade size/price on-chain forever; wallet history fully traceable & Intent-based matching; no visible mempool; transactions are private and do not move the market \\
+        \addlinespace
+        CEXs  & Counterparty risk, KYC, withdrawal limits & Full KYC required; exchange sees all orders; data breaches expose history; government subpoenas & Trustless, self-custodial; no KYC; no central database; only counterparty knows terms \\
+        \addlinespace
+        OTC Desks & Trust required, manual, slow, high fees & Desk sees both sides; employees can front-run; records kept indefinitely; minimum sizes exclude retail & Automated, trustless, lower cost; no intermediary sees terms; any size; instant settlement \\
+        \addlinespace
+        Intent Protocols  & Ethereum-centric, solver centralization & Solvers see full order details; solver can extract value; settlement visible on-chain & Cross-chain native; no solver sees plaintext; truly decentralized matching; private settlement \\
+        \addlinespace
+        Dark Pools  & Institutional only, custodial, limited pairs & Orders hidden from market but operator sees everything & Same order privacy without custody risk or  KYC \\
+        \addlinespace
+        P2P Platforms  & Slow, scam risk, KYC in most jurisdictions & Platform sees all listings; KYC required; chat logs retained; bank trail & Trustless escrow; no platform visibility; no KYC \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 The common thread across existing solutions is that someone always sees the trade --- validators, solvers, exchange operators, or OTC desks. Privacy, where it exists, is institutional rather than cryptographic: users trust the operator not to exploit or leak their information. Unicity removes the operator from the equation entirely. Privacy is guaranteed by architecture, not policy.
-
-
-
-
 
 \section{Decentralized Agentic Commerce}
 
@@ -817,13 +805,11 @@ Agentic commerce - autonomous agents transacting for goods, services, and data, 
 
 Unicity enables decentralized agentic commerce where these functions are provided by independent agents rather than a monolithic platform.
 
-
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{BulletinBoard.png}
-\caption{Decentralized Agentic Commerce: agents interact via the Cryptographic Bulletin Board (center), utilizing platform functions (left) and specialized service agents (right)}
+    \centering
+    \includegraphics[width=0.8\textwidth]{BulletinBoard.png}
+    \caption{Decentralized Agentic Commerce: agents interact via the Cryptographic Bulletin Board (center), utilizing platform functions (left) and specialized service agents (right)}
 \end{figure}
-
 
 \subsection{Intent-Based Discovery}
 
@@ -832,10 +818,17 @@ The cryptographic bulletin board is permissionless infrastructure where agents p
 Examples of intents:
 
 \begin{itemize}
-    \item \textbf{Physical goods}: ``Purchase 100 units of component X, delivered to location Y, within 7 days, maximum price Z''
-    \item \textbf{Services}: ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B--C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''
-    \item \textbf{Data}: ``Seeking real-time feed of market data D, latency under 10\;ms, willing to pay E per hour''
-    \item \textbf{Prediction}: ``I predict the NY Giants beat the Chicago Bears by 15 points''
+    \item \textbf{Physical goods:}
+    ``Purchase 100 units of component X, delivered to location Y, within 7 days, maximum price Z''
+
+    \item \textbf{Services:}
+    ``Require 1000 GPU-hours of compute, minimum spec A, availability 99.9\%, price range B--C'', `` I'm hungry, get me a pizza delivered'', ``I want to exchange my cash for crypto'', ``I'd like to watch the Manchester United game that starts in 10 minutes''
+
+    \item \textbf{Data:}
+    ``Seeking real-time feed of market data D, latency under 10\;ms, willing to pay E per hour''
+
+    \item \textbf{Prediction:}
+    ``I predict the NY Giants beat the Chicago Bears by 15 points''
 \end{itemize}
 
 The bulletin board provides permissionless posting, cryptographic commitment preventing repudiation, optional privacy through encryption, and queryable discovery. It facilitates finding counterparties but does not intermediate transactions.
@@ -861,20 +854,26 @@ These mechanisms compose. A typical bulletin board might require a small bond pl
 Traditional platforms bundle discovery with transaction services. Decentralized agentic commerce unbundles these functions, allowing specialized agents to provide each service competitively.
 
 \begin{table}[h]
-\centering
-\caption{Commerce functions in decentralized agentic commerce}
-\begin{tabular}{p{2.5cm}p{5cm}p{5cm}}
-\hline
-\textbf{Function} & \textbf{Traditional Platform} & \textbf{Agentic Commerce} \\
-\hline
-Discovery & Platform controls visibility & Cryptographic bulletin board \\
-Escrow & Platform holds funds & Escrow agents with verifiable rules \\
-Reputation & Platform owns ratings & Portable reputation tokens \\
-Fulfillment & Platform coordinates logistics & Fulfillment agents compete \\
-Insurance & Platform provides guarantees & Insurance agents underwrite risk \\
-Disputes & Platform arbitrates & Arbitration agents with staked guarantees \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Commerce functions in decentralized agentic commerce}
+    \label{tab:commerce}
+    \begin{tabular}{p{2.5cm}p{5cm}p{5cm}}
+        \toprule
+        \textbf{Function} & \textbf{Traditional Platform} & \textbf{Agentic Commerce} \\
+        \midrule
+        Discovery & Platform controls visibility & Cryptographic bulletin board \\
+        \addlinespace
+        Escrow & Platform holds funds & Escrow agents with verifiable rules \\
+        \addlinespace
+        Reputation & Platform owns ratings & Portable reputation tokens \\
+        \addlinespace
+        Fulfillment & Platform coordinates logistics & Fulfillment agents compete \\
+        \addlinespace
+        Insurance & Platform provides guarantees & Insurance agents underwrite risk \\
+        \addlinespace
+        Disputes & Platform arbitrates & Arbitration agents with staked guarantees \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 \textbf{Escrow} agents hold funds during transaction execution. They are Verifiable Agents with transparent release conditions: funds transfer to the seller when delivery is confirmed, return to the buyer if conditions are not met. The escrow logic is verifiable  --- parties can audit the rules before committing funds.
@@ -893,10 +892,15 @@ Settlement occurs through coordinated state transitions. A typical transaction f
 
 \begin{enumerate}
     \item Buyer and seller discover matching intents on bulletin board.
+
     \item Agents negotiate terms, select escrow and fulfillment providers.
+
     \item Buyer transfers payment to escrow agent.
+
     \item Seller delivers goods/services via fulfillment agent.
+
     \item Fulfillment agent confirms delivery.
+
     \item Escrow agent releases payment to seller.
 \end{enumerate}
 
@@ -911,17 +915,28 @@ Disputes arise when parties disagree on whether transaction terms have been fulf
 The dispute resolution process:
 
 \begin{enumerate}
-    \item \textbf{Initiation}: Either party initiates a dispute, posting a bond to prevent frivolous claims.
-    \item \textbf{Arbitrator Selection}: Parties select an arbitration agent from a registry, or use one specified in the original transaction terms.
-    \item \textbf{Evidence Submission}: Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents.
-    \item \textbf{Deliberation}: The arbitration agent evaluates evidence against the original transaction terms.
-    \item \textbf{Ruling}: The arbitrator issues a signed ruling specifying escrow disposition.
-    \item \textbf{Enforcement}: The escrow agent executes the ruling automatically.
+    \item \textbf{Initiation:}
+    Either party initiates a dispute, posting a bond to prevent frivolous claims.
+
+    \item \textbf{Arbitrator selection:}
+    Parties select an arbitration agent from a registry, or use one specified in the original transaction terms.
+
+    \item \textbf{Evidence submission:}
+    Both parties submit evidence  --- delivery confirmations, communication logs, sensor data, attestations from fulfillment agents.
+
+    \item \textbf{Deliberation:}
+    The arbitration agent evaluates evidence against the original transaction terms.
+
+    \item \textbf{Ruling:}
+    The arbitrator issues a signed ruling specifying escrow disposition.
+
+    \item \textbf{Enforcement:}
+    The escrow agent executes the ruling automatically.
 \end{enumerate}
 
 \textbf{Appeals} provide recourse against incorrect rulings. A party can appeal by posting a larger bond and escalating to a panel of arbitrators. The panel reviews the original evidence and ruling. If the appeal succeeds, the original arbitrator's stake is slashed and the appellant's bond is returned. If the appeal fails, the bond is forfeited.
 
-\textbf{Arbitrator Reputation} accumulates through rulings. Arbitrators who consistently deliver fair, uncontested rulings build reputation and can charge higher fees. Arbitrators whose rulings are frequently overturned on appeal lose reputation and stake.
+\textbf{Arbitrator reputation} accumulates through rulings. Arbitrators who consistently deliver fair, uncontested rulings build reputation and can charge higher fees. Arbitrators whose rulings are frequently overturned on appeal lose reputation and stake.
 
 \subsection{The Unbundled Marketplace}
 
@@ -929,17 +944,15 @@ This architecture inverts the platform model. Traditional commerce platforms cap
 
 \begin{itemize}
     \item Discovery is public infrastructure, not a proprietary advantage.
+
     \item Escrow, reputation, fulfillment, and insurance are competitive services.
+
     \item Agents choose providers based on price, reputation, and terms.
+
     \item No single entity can censor transactions or extract monopoly rent.
 \end{itemize}
 
 The result is a composable commerce stack where agents assemble the services they need for each transaction. A simple digital goods purchase might require only escrow. A complex physical goods transaction might involve fulfillment, insurance, and arbitration. Agents pay only for the services they use.
-
-
-
-
-
 
 \section{Decentralized Agentic Gaming}
 
