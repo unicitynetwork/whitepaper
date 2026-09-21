@@ -1,62 +1,62 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\part{The Machine Economy}\label{part:economy}
+\part{The Agentic Economy}\label{part:economy}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Parts~\ref{part:protocol} and~\ref{part:execution} described a settlement platform. This part describes its most demanding users: autonomous programs that transact continuously, at volumes and price points that make per-transaction settlement costs decisive, and that cannot call a bank when something goes wrong.
+Sections~\ref{part:protocol} and~\ref{part:execution} described the settlement platform. This section considers autonomous agents that transact continuously at volumes and price points where per-transaction settlement costs are decisive. These agents require settlement without recourse to bank-mediated intervention.
 
 \section{Agents as Economic Actors}
 
-An \emph{agent}, for the purposes of this paper, is a program that holds tokens, runs on hardware nobody else has to trust, and produces outputs that counterparties accept because they re-verified them rather than because they trusted the program or its operator.
+In this paper, an \emph{agent} is an untrusted, potentially autonomous program that holds tokens. Counterparties accept its outputs after re-verification, without relying on the program or its operator.
 
 \medskip
 
-That definition is narrower than the word's everyday use and deliberately so. It says nothing about whether the program uses machine learning, and the platform's guarantees do not depend on the answer. An agent that runs a fixed algorithm and an agent that runs a language model are the same kind of participant here: both hold tokens, both satisfy spending conditions, and both produce results their counterparties check. The cryptographic guarantees attach to the settlement, not to the reasoning that led to it.
+This definition is narrower than general usage and does not imply AI / machine learning. The platform's guarantees apply equally to agents using deterministic algorithms and LLMs. Both hold tokens, satisfy spending conditions, and produce results checked by counterparties. Cryptographic guarantees apply to settlement and do not establish the validity of the reasoning that led to it.
 
 \medskip
 
-This distinction matters because the two are often conflated. A verifiable payment from an agent proves that the value moved and was not double-spent. It does not prove that the agent was right to send it. Section~\ref{sec:verifiable} in Part~\ref{part:execution} sets out which of an agent's actions can be made verifiable in the strong sense and which cannot.
+A verifiable agent payment proves that value was transferred without double-spending. It does not establish whether the payment decision was correct. Section~\ref{sec:verifiable} in Section~\ref{part:execution} identifies which agent actions support verifiable execution and which require other assurances.
 
 \section{Identity, Storage, and Mobility}
 
-An agent is defined by its cryptographic identity and its verification logic, not by the machine it runs on. Three properties follow, and together they are what allow an agent to be a durable economic participant rather than a process on someone's server.
+An agent's cryptographic identity and verification logic are independent of its host machine. The following properties allow it to retain its identity and state across hosts.
 
 \begin{description}
     \item[Addressing without location.] Agents address one another by self-authenticating identifiers rather than by network address. An agent can move from a server in one jurisdiction to a laptop in another without interrupting its ability to be reached, to be paid, or to transact.
 
-    \item[Storage without a host.] An agent does not depend on a host filesystem for the state that matters. Its assets and its history live in tokens, which are portable, self-verifying, and meaningful to anyone. Tokens are the agent's durable storage, and moving the agent means moving them.
+    \item[Portable storage.] An agent's assets and history are stored in portable, self-verifying tokens that any party can interpret. These tokens provide durable storage independent of the host filesystem and must be transferred when the agent migrates.
 
-    \item[Execution without trust in the host.] A host supplies processor cycles and bandwidth. It does not supply correctness, because correctness is established by the recipient re-checking the result. Signing keys are held in a hardware security module or a secure enclave so that a hostile host cannot impersonate the agent it is running.
+    \item[Execution without trust in the host.] A host supplies processor cycles and bandwidth, while recipients establish correctness by rechecking results. Signing keys are held in a hardware security module or secure enclave to prevent a hostile host from impersonating the agent.
 \end{description}
 
-The consequence is censorship resistance of a practical kind. An agent that is shut down at one host resumes at another from its last verifiable state, because that state is in tokens rather than in the host's disk. There is no registry to be removed from and no address to be blocked.
+An agent shut down on one host can resume on another from its last verifiable state, stored in its tokens. It does not depend on a registry entry or fixed network address that could be removed or blocked.
 
 \section{Agent-to-Agent Payments}
 
-Machine payments differ from human payments in three ways that matter for infrastructure, and each of them is a problem for per-transaction settlement.
+Machine payments impose requirements on settlement frequency, transaction size, and budget predictability.
 
 \medskip
 
-\textbf{They are frequent.} A program metering an API call, buying a second of compute, or settling a data feed transacts at a rate no human does. On a network that charges per transaction, that frequency is itself the cost, and it grows without bound.
+A agent metering API calls, buying seconds of compute, or settling a data feed transacts at rates above those of human users. With per-transaction charges, settlement cost grows without bound as transaction count increases.
 
 \medskip
 
-\textbf{They are small.} Paying a fraction of a cent for a single inference or a single request only works if settlement costs a small fraction of that. Once a fee approaches the value transferred, the transaction stops making sense, and an entire category of machine commerce with it.
+Payments of a fraction of a cent for a single inference or request require settlement costs substantially below the transferred value. Fees approaching that value make these transactions uneconomic.
 
 \medskip
 
-\textbf{They are budgeted in advance.} An autonomous program is given a spending limit by its operator. It cannot renegotiate that limit because an unrelated network became busy. A fee that varies with someone else's demand is not something an agent can plan around.
+Operators assign autonomous agents spending limits in advance. Programs cannot renegotiate those limits in response to unrelated network congestion, so fees that vary with external demand prevent predictable budgeting.
 
 \medskip
 
-Unicity's model addresses all three at once. Settlement capacity is bought as a subscription rather than per transaction, so volume does not change cost. The marginal cost of an additional transfer is close to zero, because there is no block space to auction and no shared state to contend for. And because the fee does not float with congestion, an operator's budget means what it says.
+Unicity provides settlement capacity through subscriptions, making cost independent of transaction volume. The marginal cost of an additional transfer is close to zero because there is no block-space auction or shared-state contention. Fees do not vary with congestion, allowing operators to budget settlement costs in advance.
 
 \medskip
 
-Two further properties matter specifically for agents. Transfers are private to the parties, so an agent's trading pattern, counterparties, and balances are not published to competitors by default. And verification is cheap enough that an agent receiving a payment can validate it completely, in-process, without an external service in the path.
+Transfers are private to the parties, so trading patterns, counterparties, and balances are not published to competitors by default. Verification is inexpensive enough for an agent to validate a received payment completely within its own process, without an external service.
 
 \section{Payments Inside Web Requests}
 
-Most agent interactions are ordinary web requests. A client asks a service for something, and the service wants to be paid. The conventional approach to metering these has been to attach a blockchain settlement flow to the request, which introduces a facilitator to observe the payment, a chain to record it, and a settlement wait before the service can safely respond.
+Most agent interactions use ordinary web requests to obtain paid services. Conventional blockchain-based metering adds a settlement flow to each request. A facilitator observes the payment, a chain records it, and the service waits for settlement before responding.
 
 \begin{figure}[htbp]
     \centering
@@ -75,7 +75,7 @@ Most agent interactions are ordinary web requests. A client asks a service for s
         \draw[diagram double arrow] (s1) -- (f1);
         \draw[diagram double arrow] (f1) -- (b1);
         \node[diagram caption, anchor=west] at (-7.0,-0.1)
-            {payment observed by a third party, recorded publicly, and waited on before the service responds};
+            {a third party observes payment; the service waits for public-chain settlement before responding};
 
         % unicity
         \node[diagram label plain, font=\small\bfseries, anchor=west] at (-7.0,-1.5)
@@ -87,17 +87,17 @@ Most agent interactions are ordinary web requests. A client asks a service for s
         \draw[diagram arrow up] ([yshift=-5pt]s2.west) -- node[diagram label, below]
             {response} ([yshift=-5pt]c2.east);
         \node[diagram caption, anchor=west] at (-7.0,-3.5)
-            {the certified token is the payment: the service verifies it in-process and answers};
+            {the service verifies the certified payment token in-process and responds};
     \end{tikzpicture}
-    \caption{Metering a web request. Because a Unicity token carries its own proof of validity, the payment travels inside the request and the service settles by verifying it, with no facilitator and no external round trip.}
+    \caption{Metering a web request. A Unicity token contains its own proof of validity and is included in the request. The service settles payment by verifying the token, without a facilitator or external round trip.}
     \label{fig:http}
 \end{figure}
 
-On Unicity the payment is the message. A token is self-validating, so a client can attach one to the request itself, and the service establishes that it has been paid by verifying what it received. There is no facilitator to observe the transaction, no public record of it, and no settlement round trip between receiving the request and answering it. The steps that exist to reconcile a payment against an external ledger are not optimized away; they have nothing to do, because there is no external ledger holding the balance.
+A client can attach a self-validating Unicity token to a request. The service verifies the token to establish payment and can then respond without a settlement round trip. No facilitator observes the transaction, and no public transaction record is created. Reconciliation against an external ledger is unnecessary because the balance is held in the token.
 
 \section{The Infrastructure Marketplace}
 
-An economy of autonomous programs needs physical infrastructure, and the platform provides a way for that to be supplied competitively rather than by a single provider. Participants earn the native currency by offering resources that agents consume.
+The platform supports competitive provision of physical infrastructure for autonomous agents. Participants earn the native currency by supplying resources to agents.
 
 \begin{itemize}
     \item \textbf{Compute hosts} run agent workloads, supplying cycles without being trusted for correctness.
@@ -108,8 +108,8 @@ An economy of autonomous programs needs physical infrastructure, and the platfor
     \item \textbf{Gateway operators} connect agents to conventional web services and to legacy payment systems.
 \end{itemize}
 
-None of these roles is trusted for correctness. Each supplies a resource whose correct use is established by proof or by the recipient's own verification, which is what allows the supply side to be open.
+These roles are open to resource providers because correctness is established by proofs or recipient verification, without trusting the provider.
 
-\section{The Agent Platform}
+\section{The Agent Execution Platform}
 
-Unicity also develops a security and runtime stack for AI agents, comprising the Semantic Intercept Fabric for policy enforcement below the model, the Astrid agent operating system for sandboxed execution with auditing and budget enforcement, and associated components for discovery and orchestration. Those systems address a different problem from the one this paper describes, namely constraining what an agent does rather than settling what it owes, and they are documented separately. The settlement platform does not depend on them, and agents built on any framework can use it.
+Unicity also develops a security and runtime stack for AI agents. It comprises the Semantic Intercept Fabric for policy enforcement below the model, the Astrid agent operating system for sandboxed execution with auditing and budget enforcement, and components for discovery and orchestration. These separately documented systems constrain agent behavior. The settlement platform is independent of them and supports agents built on any framework.

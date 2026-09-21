@@ -54,33 +54,33 @@
 
 \begin{abstract}
 
-Machines are becoming economic actors, and they transact at a rate and a scale that ledger-based settlement cannot serve. We present Unicity, a blockchain architecture that removes the shared ledger. On-chain state is reduced to the minimum required to prove that a given asset state has been spent exactly once. Assets are self-contained cryptographic objects that live off-chain and move directly between parties, validated by their recipients rather than by a validator set. Throughput scales horizontally by adding independent shards, transactions are private to their participants, and settlement is final within seconds. The correctness of the recorded history does not rest on trusting the validators: every shard's per-round consistency proof, from genesis onward, folds into a single constant-size proof that any party can verify against the network's genesis configuration alone. On this foundation the platform provides programmable ownership, token standards with locally verifiable issuance rules, trustless bridging of external assets, and an enshrined EVM partition for the cases that genuinely require shared, ordered state.
+Autonomous agents transact at rates and volumes that exceed the capacity of ledger-based settlement. We present Unicity, a blockchain architecture without a shared ledger. On-chain state is limited to the data required to prove that a given asset state has been spent exactly once. Assets are self-contained cryptographic objects stored off-chain, transferred directly between parties, and validated by their recipients. Throughput scales horizontally by adding independent shards. Transactions are private to their participants, and settlement is final within seconds. Recursive aggregation combines every shard's per-round consistency proofs from genesis into a single constant-size proof. Any party can verify this proof against the network's genesis configuration alone, without trusting validators for the correctness of the recorded history. The platform provides programmable ownership, token standards with locally verifiable issuance rules, trustless bridging of external assets, and an enshrined EVM partition for applications that require shared, ordered state.
 
 \end{abstract}
 
-\subsection*{TL;DR}
+\subsection*{TL; DR}
 
 \begin{itemize}
     \item \textbf{Consensus Layer:}
-    A Byzantine fault tolerant core that maintains no blockchain. Its state is the set of certified shard roots and the validator trust base. It verifies each shard's consistency proof and issues certificates with single-round deterministic finality. Governance moves from Proof of Authority at launch to Proof of Stake.
+    The Byzantine fault tolerant core maintains the certified shard roots and the validator trust base, without a blockchain. It verifies each shard's consistency proof and issues certificates with single-round deterministic finality. Decentralized by Proof of Stake.
 
     \item \textbf{Aggregation Layer:}
-    Public infrastructure maintaining an append-only sharded radix Sparse Merkle Tree. Clients submit a cryptographic identifier of the state they are spending and receive proofs of inclusion (the state is now spent), proofs of non-inclusion (the state has not been spent), and a certificate binding those proofs to the one valid history. Shards partition the key space by prefix, prove their transitions independently, and split as demand grows.
+    This public infrastructure maintains an append-only sharded radix Sparse Merkle Tree. Clients submit a cryptographic identifier of the state they are spending. The layer provides inclusion proofs for spent states, non-inclusion proofs for unspent states, and a certificate binding those proofs to the single valid history. Shards partition the key space by prefix, prove their transitions independently, and split as demand grows.
 
     \item \textbf{Trustless Aggregation:}
-    Every per-round consistency proof from every shard since genesis folds recursively into one proof of fixed size. Verifying it establishes, under cryptographic assumptions alone, that no recorded state was ever deleted, modified, or recorded twice. The validator set is not part of that argument.
+    Recursive aggregation combines every per-round consistency proof from every shard since genesis into one fixed-size proof. Verification establishes, under cryptographic assumptions alone and without assumptions about the validator set, that no recorded state was deleted, modified, or recorded twice.
 
     \item \textbf{Tokens:}
-    Self-contained ledgers. A token carries its own genesis, its transfer history, and the certificates proving each step, and a recipient verifies it without consulting any external state. Issuance rules are frozen into the token's type and re-checked by every recipient. Succinct proofs keep history from accumulating without bound.
+    A token is a self-contained ledger containing its genesis, transfer history, and certificates proving each step. A recipient verifies it without consulting external state. Issuance rules are fixed in the token's type and rechecked by every recipient. Succinct proofs bound the size of the stored history.
 
     \item \textbf{Programmability:}
-    Ownership generalises to predicates, spending conditions evaluated off-chain by the parties who care about the outcome. Token types can define state machines that every verifier re-runs, which is enough to build an automated market maker that no party operates and no party can capture.
+    Ownership generalizes to predicates: spending conditions evaluated off-chain by the transaction participants. Token types can define state machines that every verifier reruns. These support automated market makers without an operator or other trusted party.
 
     \item \textbf{Enshrined EVM:}
-    One certified partition running an account-based execution environment, holding governance, the staking contracts, and the native currency. Consensus primitives are callable from contracts, so settlement between the two execution models shares a single root of trust.
+    One certified partition runs an account-based execution environment for governance, staking contracts, and the native currency. Consensus primitives are callable from contracts, so settlement between the two execution models shares a single root of trust.
 
     \item \textbf{Bridging:}
-    External assets enter by locking them in a vault and minting against a backing proof that every recipient re-runs. They leave by burning the Unicity token and presenting a succinct validity proof the vault verifies for constant cost. Neither direction has an operator, a committee, or a challenge window.
+    Assets from external blockchains are locked in a vault and represented by tokens minted against a backing proof that every recipient rechecks. Redemption requires burning the Unicity token and presenting a succinct validity proof that the vault verifies at constant cost. Neither direction requires a trusted operator, a committee, or a challenge window.
 \end{itemize}
 
 \clearpage
