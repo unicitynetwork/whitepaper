@@ -1,0 +1,58 @@
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+\subsection*{Machines as Economic Actors}
+
+Software is becoming an economic participant in its own right. Autonomous programs already execute trades, procure compute, subscribe to data feeds, and pay for services, and the direction of travel is toward programs that do this continuously and without a human authorizing each step.
+
+\medskip
+
+This is a settlement problem before it is anything else. Conventional payment rails assume a human in the loop: banks require authorization, card networks reverse transactions, and contracts are ultimately enforced by courts. A program cannot invoke any of these. It needs infrastructure where correctness is established cryptographically, where a counterparty's claim can be checked rather than believed, and where the cost and latency of a payment do not dominate the value being transferred.
+
+\medskip
+
+Blockchains were built to remove exactly those intermediaries, and they succeeded at it. But every blockchain since Bitcoin provides the property through a shared ledger: a public record maintained by validators who process, order, and witness every transaction. For a person transacting occasionally, the overhead is acceptable. For a population of programs transacting continuously, it is the binding constraint. Throughput is limited by what validators can process. Latency is set by how quickly they reach agreement. Fees emerge from competition for their attention. Privacy is difficult because they see everything. Censorship is possible because they choose what to include.
+
+\medskip
+
+Unicity removes the shared ledger rather than optimizing it. Assets are self-contained cryptographic objects that move directly between parties and are validated by their recipients. The network's only function is to prove that a given asset state is spent exactly once, and that function is implemented by a minimal data structure recording only compact, anonymous indentifiers. Amounts, counterparties, transaction content stays private.
+
+\subsection*{Main Properties}
+
+Removing the shared ledger changes fundamental limitations. This is not just an incremental update.
+
+\medskip
+
+\textbf{Horizontal scaling.} The registry of spent states partitions by key prefix into shards that operate and prove themselves independently. Adding a shard adds capacity without adding work to any existing shard, and the consensus layer's load grows with the number of shards rather than with the number of transactions. There is no global ordering to contend for, because assets do not share state.
+
+\medskip
+
+\textbf{Local verification.} A recipient validates the asset it is being paid, and nothing else. It does not replay the network's history, does not maintain a copy of global state, and does not depend on validators having behaved correctly on transactions it will never see. A browser tab is a sufficient client.
+
+\medskip
+
+\textbf{Privacy by design.} The network learns an unlinkable identifier per spend. It does not learn the amount, the asset, the sender, or the recipient, because those are never submitted. Privacy here is a consequence of what the architecture does not collect, not a feature layered on top with additional cryptography.
+
+\medskip
+
+\textbf{Cryptographic trust only.} Each shard proves, every round, that it preserved everything it had previously recorded. Those proofs fold recursively into a single proof of fixed size covering the entire history of the network. A party that verifies it learns that no recorded state was ever removed, altered, or recorded twice, without assuming anything about the validators who certified the rounds.
+
+\subsection*{Structure of This Paper}
+
+\textbf{Part~\ref{part:protocol}, The Unicity Protocol}, describes the infrastructure: the consensus layer and its governance, the aggregation layer that records spent states and proves it did so faithfully, the recursive aggregation that reduces trust in the validator set to a detectable and attributable residue, and the resulting trust models.
+
+\medskip
+
+\textbf{Part~\ref{part:execution}, The Execution Layer}, describes what is built on it: tokens as self-contained ledgers, token types with issuance rules that every recipient enforces, programmable ownership, verifiable execution, privacy, history compression, the enshrined EVM partition, and trustless bridging of external assets.
+
+\medskip
+
+\textbf{Part~\ref{part:economy}, The Machine Economy}, describes how autonomous programs use the platform: identity, wallets, agent-to-agent micropayments, and payments carried inside ordinary web requests.
+
+\medskip
+
+\textbf{Part~\ref{part:applications}, Applications}, works through the cases the architecture serves best: bridged stablecoins moving at machine speed, tokenized assets with locally verifiable supply, decentralized finance without operators, agentic commerce, and gaming.
+
+\medskip
+
+Unicity Labs also provides a security and runtime stack for AI agents, comprising the Semantic Intercept Fabric, the Astrid agent operating system, and related components. That stack is documented separately and is outside the scope of this paper, which is concerned with the settlement platform.

@@ -1,0 +1,39 @@
+% Shared diagram styles for the Unicity whitepaper.
+% Adapted from the Unicity Bluepaper so that figures across the paper set match.
+
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
+\definecolor{uniInk}{HTML}{1A1A1A}
+\definecolor{uniLine}{HTML}{5A5A5A}
+\definecolor{uniFillA}{HTML}{ECEFF4}   % neutral layer fill
+\definecolor{uniFillB}{HTML}{DDE3EC}   % emphasised layer fill
+\definecolor{uniFillC}{HTML}{F6F6F6}   % background / de-emphasised
+\definecolor{uniAccent}{HTML}{2F5D8C}  % certified / authenticated path
+\definecolor{uniWarn}{HTML}{9C5A2E}    % external / untrusted path
+
+\tikzset{
+    diagram/.style={
+        >={Latex},
+        line width=0.5pt,
+        font=\small,
+        node distance=0.7cm and 0.9cm,
+    },
+    diagram box/.style={
+        rounded corners=2pt, draw=uniLine, fill=uniFillA, align=center,
+        inner sep=5pt, font=\small, text=uniInk,
+    },
+    diagram box emph/.style={diagram box, fill=uniFillB, draw=uniAccent},
+    diagram box faint/.style={diagram box, fill=uniFillC, draw=uniLine!60,
+        text=uniInk!75},
+    diagram box ext/.style={diagram box, fill=white, draw=uniWarn, dashed},
+    diagram arrow/.style={-{Latex}, semithick, draw=uniLine},
+    diagram arrow up/.style={-{Latex}, semithick, draw=uniAccent},
+    diagram double arrow/.style={{Latex}-{Latex}, semithick, draw=uniLine},
+    diagram connector/.style={semithick, draw=uniLine},
+    diagram label/.style={font=\scriptsize, fill=white, inner sep=1.5pt,
+        text=uniInk},
+    diagram label plain/.style={font=\scriptsize, inner sep=1.5pt, text=uniInk},
+    diagram caption/.style={font=\scriptsize\itshape, text=uniInk!70},
+    diagram brace/.style={decorate, decoration={brace, amplitude=4pt},
+        draw=uniLine!70},
+}
