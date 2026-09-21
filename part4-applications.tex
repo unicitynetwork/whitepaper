@@ -1,0 +1,238 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Applications}\label{part:applications}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Stablecoins at Machine Speed}
+
+The most immediate application of the platform is not a new asset. It is an existing one, moved somewhere it works better.
+
+\medskip
+
+Stablecoins are the settlement instrument the machine economy is converging on, and they are issued on chains that were designed for human transaction volumes. A transfer costs a fee that varies with unrelated demand, settles in seconds to minutes depending on the chain and the moment, and is published permanently to a ledger anyone can analyze. For a payment between two people that is tolerable. For a program metering an API, settling a data feed, or paying per inference, each of those properties is a problem, and the fee is usually the decisive one.
+
+\medskip
+
+Unicity does not compete with the issuer. It provides a venue where the issued asset circulates under different mechanics.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram,
+        ph/.style={diagram box, minimum width=3.0cm, minimum height=1.15cm,
+                   align=center, font=\scriptsize}]
+        \node[diagram box ext, minimum width=3.0cm, minimum height=1.15cm,
+              align=center, font=\scriptsize] (a) at (-5.5,0)
+            {\textbf{Issuing chain}\\stablecoin locked\\in the vault};
+        \node[ph, fill=uniFillB, draw=uniAccent] (b) at (-1.4,0)
+            {\textbf{Bridge in}\\backing proof\\checked by recipients};
+        \node[ph] (c) at (2.7,0)
+            {\textbf{Circulates}\\peer to peer,\\private, subscription};
+        \node[diagram box ext, minimum width=3.0cm, minimum height=1.15cm,
+              align=center, font=\scriptsize] (d) at (6.8,0)
+            {\textbf{Bridge out}\\burn, then one\\succinct proof};
+        \draw[diagram arrow] (a) -- (b);
+        \draw[diagram arrow] (b) -- (c);
+        \draw[diagram arrow] (c) -- (d);
+        \draw[diagram arrow up] (6.8,-0.575) -- (6.8,-1.55) --
+            node[diagram label, below] {released from the same vault} (-5.5,-1.55) -- (-5.5,-0.575);
+        \node[diagram caption, text width=13.5cm, align=center] at (0.65,-2.5)
+            {The only steps touching the issuing chain are entry and exit.
+             Everything in between settles in one to two seconds at a cost that does not vary with volume.};
+    \end{tikzpicture}
+    \caption{The lifecycle of a bridged stablecoin. Custody stays on the issuing chain throughout, and no operator or committee stands between the asset and its holder in either direction.}
+    \label{fig:stablecoin}
+\end{figure}
+
+The asset enters by being locked in the vault and minted against a backing proof that every recipient re-runs, as described in Section~\ref{sec:bridging}. From that point it is an ordinary Unicity token, which means the following.
+
+\begin{itemize}
+    \item \textbf{Transfers settle in one to two seconds}, deterministically, with no confirmation depth and no reorganization risk. The low-latency path releases goods before the round completes.
+
+    \item \textbf{Cost does not scale with volume.} Settlement is bought as a subscription. An agent making a million small payments pays what an agent making a thousand pays, which is what makes per-request payment viable at all.
+
+    \item \textbf{Transfers are private to the parties.} Balances, counterparties, and payment patterns are not published. For a business paying suppliers or an agent trading, this is the difference between using the rail and not.
+
+    \item \textbf{Verification is local.} A recipient validates the token in hand. There is no node to run, no chain to sync, and no RPC provider in the path who sees every payment and can decline to serve it.
+
+    \item \textbf{Redemption is trustless.} The holder burns the token and presents a proof the vault verifies. No operator can refuse, and no committee has to agree.
+\end{itemize}
+
+The custody argument is the part worth dwelling on, because it is where bridged assets normally fail. Value is held in a vault on the issuing chain, and it is released only against a valid succinct proof. There is no multisig, no operator key, no committee vote, and no challenge window during which a fraudulent withdrawal might succeed if nobody is watching. Solvency is structural: every circulating token traces to a lock, split verification prevents children exceeding their parent, and so valid redemptions cannot exceed what was deposited. A party wishing to redeem does not need the cooperation of anyone who ran the bridge, because whoever holds the burned token can produce the proof.
+
+\section{Tokenization}
+
+An issued asset on Unicity is a token type with frozen rules. That structure suits tokenization better than a contract on a shared ledger does, for a reason that becomes clear when considering what a holder of a tokenized asset actually needs to establish.
+
+\medskip
+
+A holder needs to know that the asset was issued by the party entitled to issue it, that no more of it exists than was supposed to, and that it reached them through a chain of valid transfers. On a shared ledger all three are established indirectly: by trusting that the contract implements the rules correctly and that the chain executed it faithfully. On Unicity all three are checked directly, by the holder, against rules fixed when the type was defined.
+
+\medskip
+
+\textbf{Issuer-gated assets} use UTS-1. The type pins the issuer's key, and every mint carries a signature the recipient verifies. Transfers are divisible by split, with value conservation checked by each recipient rather than assumed.
+
+\medskip
+
+\textbf{Unique items} use UTS-2. The genesis commits to immutable content by hash, and the content itself lives wherever it is convenient to store, since the hash is what authenticates it. Curated collections gate minting by issuer signature; open collections allow anyone to mint, with provenance established at the application layer.
+
+\medskip
+
+\textbf{Capped supply} uses UTS-3, and this is the capability with the least precedent elsewhere. The cap is enforced by requiring every valid issuance to consume one member of a bounded set of genesis states, each admitted at most once by the aggregation layer. A recipient verifies that the cap held for the token in its hands without observing any other issuance and without trusting the issuer not to have minted more. Several profiles are available depending on whether the supply is distributed from a treasury, issued as independent items over time, or pre-committed to specific denominations. The cap is per network, so deploying the same definition on a second network does not create a combined cap across both.
+
+\medskip
+
+\textbf{Compliance requirements} are expressed as part of the type rather than bolted on. A regulated instrument can require an attestation from an accredited party at each transfer, which every recipient enforces before accepting. The check happens before acceptance rather than as an analysis performed afterwards on a public ledger, and it does not require the asset's entire transfer history to be public in order to work.
+
+\medskip
+
+Registry metadata carries the display name, symbol, decimals, and icons, none of which are consensus-relevant. Only the frozen definition governs validity, so a misleading display name cannot make an invalid token acceptable.
+
+\section{Decentralized Finance}
+
+Section~\ref{sec:pools} described an automated market maker that no party operates. Its properties are the ones decentralized finance has been trying to obtain, and several of them are obtained here by construction rather than by audit.
+
+\medskip
+
+There is no custody at any point. A depositor's value is in the pool's reserves, governed by rules every verifier re-runs, and there is no administrator key, no upgrade path, and no privileged party. Solvency and conservation are properties the recipients of pool-derived tokens check, not properties an auditor asserts about a contract's source. A swapper's downside is bounded by a minimum-output commitment and a guaranteed refund path, so a hostile party who wins the race to advance the pool can cancel a trade but cannot take it.
+
+\medskip
+
+The honest comparison also has to include what is given up. A pool instance serializes, so a single pool cannot match the throughput of an order book on a fast chain. Whoever advances the pool orders the operations it applies, so reordering is possible within that batch. And the pool's state and every transition are visible to verifiers of any token the pool produces, so pool activity is not private in the way an ordinary transfer is.
+
+\medskip
+
+Beyond pools, the platform serves the parts of finance that suit bilateral settlement particularly well. Atomic swaps between two parties require no venue at all. Lending can lock collateral under conditions that release it on agreed terms. The comparison in Table~\ref{tab:defi-comparison} is with the venues these replace.
+
+\begin{table}[h]
+    \centering
+    \caption{Trading and settlement venues compared}
+    \label{tab:defi-comparison}
+    \small
+    \begin{tabular}{p{2.0cm}p{3.4cm}p{4.4cm}p{4.4cm}}
+        \toprule
+        \textbf{Venue} & \textbf{Structural constraint} & \textbf{What is exposed} & \textbf{On Unicity} \\
+        \midrule
+        AMM DEXs & Slippage and reordering by block producers & Pending transactions in the mempool; size and price on chain permanently; wallet history traceable & No mempool to observe; bilateral transfers are private and do not move a market \\
+        \addlinespace
+        Centralized exchanges & Counterparty risk, withdrawal limits & Full identity verification; the operator sees every order; breaches expose history & Self-custodial throughout; no central order database \\
+        \addlinespace
+        OTC desks & Manual, slow, minimum sizes exclude smaller participants & The desk sees both sides and retains records & Automated bilateral settlement at any size \\
+        \addlinespace
+        Intent protocols & Solver centralization & Solvers see order details and can extract value & Settlement is private and requires no solver \\
+        \addlinespace
+        Dark pools & Institutional access only, custodial & Orders hidden from the market, but the operator sees everything & Comparable order privacy without custody \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The pattern across the first column is that someone always sees the trade: validators, solvers, exchange operators, or desks. Where privacy exists in these venues it is institutional, meaning the operator has undertaken not to exploit what it sees. On Unicity the operator is absent from the bilateral cases, so there is nothing to undertake.
+
+\section{Agentic Commerce}
+
+Autonomous commerce between programs requires three functions that platforms normally bundle: a way to find a counterparty, a way to agree terms, and a way to settle. Unbundling them lets each be provided competitively.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/BulletinBoard.png}
+    \caption{Agents interact through a cryptographic bulletin board, using platform functions and specialized service agents rather than a single intermediating platform.}
+\end{figure}
+
+\subsection{Discovery}
+
+A cryptographic bulletin board is permissionless infrastructure where agents post intents, meaning signed declarations of what they wish to buy, sell, or exchange. Unlike an order book requiring exact matching, intents express constraints that agents resolve by negotiating. An intent might specify a quantity of a component delivered to a location within a deadline under a maximum price, a quantity of compute at a minimum specification within a price range, a market data feed under a latency bound, or a position on an event.
+
+\medskip
+
+The board provides permissionless posting, cryptographic commitment so that a posted intent cannot be repudiated, optional encryption, and queryable discovery. It helps parties find one another and does not intermediate what follows.
+
+\subsection{Spam Resistance}
+
+Permissionless posting invites abuse, and the defenses are economic rather than editorial. A posting bond is returned when an intent expires or is fulfilled and forfeited when it is flagged, which makes sustained spam costly. Reputation staking requires agents with poor histories to stake more or accept rate limits. Tiered visibility shows established agents broadly while requiring explicit queries to surface new ones. Recipient filtering lets each agent set its own thresholds on bond size, reputation, and intent type. A small payment can be required from agents with no reputation at all.
+
+\medskip
+
+These compose. A typical configuration requires a bond plus reputation from established agents and a bond plus payment from new ones, so the cost of spam scales with volume while a single legitimate posting stays cheap.
+
+\subsection{Unbundled Services}
+
+\begin{table}[h]
+    \centering
+    \caption{Commerce functions, bundled and unbundled}
+    \label{tab:commerce}
+    \begin{tabular}{p{2.5cm}p{5cm}p{5cm}}
+        \toprule
+        \textbf{Function} & \textbf{Traditional platform} & \textbf{Agentic commerce} \\
+        \midrule
+        Discovery & Platform controls visibility & Cryptographic bulletin board \\
+        \addlinespace
+        Escrow & Platform holds funds & Conditions on the tokens themselves \\
+        \addlinespace
+        Reputation & Platform owns ratings & Portable reputation tokens \\
+        \addlinespace
+        Fulfillment & Platform coordinates logistics & Fulfillment agents compete \\
+        \addlinespace
+        Insurance & Platform provides guarantees & Insurance agents underwrite risk \\
+        \addlinespace
+        Disputes & Platform arbitrates & Arbitration agents with staked guarantees \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Escrow} does not require a custodian. Funds are transferred under conditions that release them to the seller on confirmed delivery and return them to the buyer otherwise, and both parties can inspect those conditions before committing anything.
+
+\medskip
+
+\textbf{Reputation} is held as tokens recording transaction history. Unlike a platform rating, it travels with the agent between marketplaces, and it can be staked when entering an agreement.
+
+\medskip
+
+\textbf{Fulfillment} agents coordinate delivery of physical goods and compete on price, speed, and reliability. For digital goods, delivery is a peer-to-peer transfer and is immediate.
+
+\medskip
+
+\textbf{Insurance} agents underwrite transaction risk, assessing counterparty reputation and transaction size and offering coverage under verifiable policy terms.
+
+\subsection{Settlement and Disputes}
+
+Once matching intents are found, the parties negotiate directly and agree which escrow, insurance, and fulfillment providers to use. Settlement is a sequence of transfers under agreed conditions. No platform coordinates the flow.
+
+\medskip
+
+Disputes are adjudicated by arbitration agents that stake tokens as a guarantee of impartiality. A party initiates by posting a bond, which discourages frivolous claims. Both sides submit evidence, the arbitrator issues a signed ruling, and the ruling determines how the escrowed funds are released. Appeals escalate to a panel against a larger bond, and an overturned ruling costs the original arbitrator part of its stake. Arbitrators accumulate reputation through uncontested rulings and can charge accordingly.
+
+\section{Gaming}
+
+Blockchain in games has so far mostly meant tokenizing assets inside an otherwise centralized architecture, because using a chain for actual game execution is impractical at the transaction rates and latencies games require. The benefits of getting it right are nonetheless clear: genuine ownership of assets that work across titles, transparent and community-governed rules, censorship resistance, and business models that pay creators directly.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/AgenticGaming.png}
+    \caption{Game logic as agents. Player agents synchronize directly with one another, with verifiable state transitions proving that the rules were followed.}
+    \label{fig:game}
+\end{figure}
+
+The industry has converged on client-server architectures, and those impose their own ceiling: it is difficult to have many players interacting in real time on one server instance, which is why large simulations cap the number of participants sharing a world. Moving execution to the client removes the ceiling but reintroduces the problem client-server solves, namely that clients cheat.
+
+\medskip
+
+Unicity's model fits this well, because it is the same problem the platform solves generally. Players interact through agents that execute game mechanics, and when players encounter one another their agents synchronize with verifiable state transitions proving the rules were followed. Assets are tokens, so they are genuinely owned and genuinely portable. A failed verification is handled by the game's own logic, for instance by rewinding to the last state both parties agree on. Execution scales because interactions are local: two players meeting in a world affect each other and nobody else, which is exactly the structure the platform is built for.
+
+\section{Further Reading}
+
+This paper is an overview. The following describe the protocol in full detail and contain the formal security arguments summarized here.
+
+\begin{description}
+    \item[Unicity Yellowpaper] The protocol specification: consensus, the certificate framework, the execution layer, token encoding, governance, the enshrined EVM partition, and bridging.\\
+    \url{https://github.com/unicitynetwork/unicity-yellowpaper-tex}
+
+    \item[Unicity Bluepaper] The aggregation layer in depth: the radix tree design, the security model, the formal statement and proof of append-only consistency, the arithmetization, measured performance, and recursive aggregation.\\
+    \url{https://github.com/unicitynetwork/aggr-layer-paper}
+
+    \item[Unicity Execution Layer] Formal security model and proofs for off-chain execution, covering double-spending resistance, non-blocking, and service-side privacy, together with the unlinkable-key protocols.\\
+    \url{https://github.com/unicitynetwork/execution-model-tex}
+
+    \item[Predicates and Atomic Swaps] Programmable spending conditions, the proof that the security properties are preserved under generalization from keys to predicates, and trustless atomic swaps.\\
+    \url{https://github.com/unicitynetwork/unicity-predicates-tex}
+
+    \item[State Transition SDK] Client libraries for token operations.\\
+    \url{https://github.com/unicitynetwork/state-transition-sdk}
+\end{description}

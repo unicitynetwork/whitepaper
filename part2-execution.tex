@@ -1,0 +1,528 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{The Execution Layer}\label{part:execution}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Part~\ref{part:protocol} described infrastructure that proves one thing: that a given asset state is spent exactly once. This part describes what can be built on a guarantee that narrow. The answer turns out to be most of what a blockchain is used for, including issued currencies, non-fungible assets, programmable ownership, automated market making, and bridges to external chains, with the notable difference that none of it requires a globally shared state machine.
+
+\section{Tokens}
+
+A token is a self-contained ledger. It carries its own genesis, the complete sequence of transfers that followed, and the certificate proving that each of those transfers was recorded exactly once. Nothing else is required to establish that it is genuine. A recipient checks it against the trust base and against no external state, which is why a wallet can be a browser tab and a verifier can be offline.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram,
+        tx/.style={diagram box, minimum width=2.75cm, minimum height=1.25cm, align=center,
+                   font=\scriptsize},
+        cert/.style={diagram box faint, minimum width=2.15cm, minimum height=0.5cm,
+                     font=\scriptsize}]
+        \node[tx, fill=uniFillB, draw=uniAccent] (g) at (0,0)
+            {\textbf{Genesis}\\token type\\mint reason\\first owner};
+        \node[tx] (t1) at (3.55,0) {\textbf{Transfer}\\new owner\\condition};
+        \node[tx] (t2) at (7.1,0) {\textbf{Transfer}\\new owner\\condition};
+        \node[tx] (t3) at (10.65,0) {\textbf{Transfer}\\current\\owner};
+
+        \foreach \a/\b in {g/t1, t1/t2, t2/t3}{
+            \draw[diagram arrow] (\a) -- (\b);
+        }
+
+        \foreach \n in {g,t1,t2,t3}{
+            \node[cert] (c\n) at ($(\n)+(0,-1.35)$) {certificate};
+            \draw[diagram connector, draw=uniLine!55] (\n) -- (c\n);
+        }
+
+        \node[diagram box emph, minimum width=2.5cm, align=center] (r) at (13.6,0)
+            {Recipient};
+        \draw[diagram arrow] (t3) -- (r);
+
+        \draw[diagram brace] (-1.5,-2.15) -- (12.15,-2.15);
+        \node[diagram caption, align=center] at (5.3,-2.6)
+            {verified end to end by the recipient, against the trust base alone};
+    \end{tikzpicture}
+    \caption{A token is its own ledger. Each step carries the certificate that recorded it, and the recipient re-verifies the whole chain without consulting external state.}
+    \label{fig:token}
+\end{figure}
+
+\subsection{States and Identifiers}
+
+A token state is a spending condition together with a hash linking it to the token's history. The \emph{state identifier} is derived from that pair, and it is the key the aggregation layer records when the state is spent. Each transfer introduces fresh randomness into the next state hash, so the next state identifier is unpredictable to anyone who has not seen the transaction. The aggregation layer therefore cannot connect one spend of a token to the next, even though it records both.
+
+\medskip
+
+This is the mechanism that keeps the network's view minimal. It sees a sequence of unrelated-looking identifiers. It does not see amounts, asset types, owners, or any relationship between two spends of the same token.
+
+\subsection{Minting Is Permissionless, Issuance Is Not}
+
+The minting key pair is a public constant of the protocol. Anyone can construct a syntactically valid mint transaction, and a certified mint proves only that the token identifier was fresh. By itself it conveys no authority whatsoever.
+
+\medskip
+
+Authority comes from two fields in the genesis, and from the fact that every subsequent recipient re-checks them.
+
+\medskip
+
+The \textbf{token type} classifies the token and selects the rules that govern it for its entire life. A type definition fixes how the token's payload is decoded, which justifications for minting are admissible, and what issuance policy applies. Once published, a definition is frozen. Every verifier must apply byte-identical rules indefinitely, because otherwise the same token would be good for one recipient and bad for another.
+
+\medskip
+
+The \textbf{mint reason} justifies this particular act of minting under those rules. It might be an issuer's authorization signature, a value-conservation proof showing the token is change from a split, a proof that a matching asset is locked on an external chain, or a zero-knowledge proof of any statement the type chooses to accept.
+
+\medskip
+
+Issuance rules are therefore enforced by recipients rather than by consensus. A counterfeit is not blocked by validators refusing to include it. It is blocked because nobody will accept it, since accepting it means running a check that fails. On the public network this behavior is mandatory and fail-shut. A token whose type is unknown to the verifier, or whose reason format is unregistered, or whose reason is not admissible for its type, is rejected rather than treated as unvalidated.
+
+\subsection{How Tokens Come Into Existence}
+
+\begin{description}
+    \item[Native issuance.] An issuer defines a type pinning its own key and authorizes each mint with a signature. This is the ordinary case for a currency or a collection.
+
+    \item[Derived issuance.] The token is change. A split burns a source token and mints outputs whose combined value provably equals it. A merge does the reverse. In both cases the reason is a conservation proof, and the rule is network-wide rather than issuer-specific.
+
+    \item[Bridged issuance.] The reason is a proof that a matching amount is locked in a vault on another chain, checked by every recipient against that chain's own consensus. Section~\ref{sec:bridging} covers this in full.
+
+    \item[Proof-carrying issuance.] The reason is a succinct proof of an arbitrary statement the type defines. This is the general hook: anything a verifier can check in constant time can authorize a mint.
+\end{description}
+
+\subsection{Value, Splitting, and Conservation}
+
+A fungible token carries a collection of assets, each an identifier and a non-negative amount. Splitting divides it while preserving every enclosed asset independently.
+
+\medskip
+
+The construction is a sum tree. The owner allocates the source value across the intended outputs, builds one tree per asset identifier whose leaves are the outputs and whose root commits to the total, and then burns the source token in a transfer whose data is exactly that commitment. Each output is then minted carrying the burned source token and an inclusion proof against the committed allocation.
+
+\medskip
+
+A verifier of any single output re-derives the output's commitment from the mint fields, verifies its inclusion in the allocation tree, and, critically, requires the total committed by that tree to equal the source token's amount. Value conservation is checked by the recipient, not asserted by the wallet that performed the split. A recipient of one output learns the source amount, verifies the source token completely, and accepts only if no value could have been created.
+
+\medskip
+
+The failure direction is uniform across the platform and deliberately so: value can be destroyed through negligence, never created. A party that burns a source token and then loses the data needed to mint an output has destroyed that output's value. No party can inflate.
+
+\subsection{Token Standards}
+
+Type definitions are published in a registry, and a set of standard shapes covers the common cases.
+
+\begin{table}[ht]
+    \centering
+    \caption{Standard token types}
+    \label{tab:uts}
+    \begin{tabular}{@{}llp{7.7cm}@{}}
+        \toprule
+        \textbf{Standard} & \textbf{Shape} & \textbf{Notes} \\
+        \midrule
+        UTS-0 & Blank container & Unrestricted minting, application-defined payload. Proves only that someone minted it. Wallets must not present these as carrying value. \\
+        \addlinespace
+        UTS-1 & Issued fungible asset & The analogue of ERC-20. Issuer-gated primary issuance, divisible by split, optionally consolidatable by merge. \\
+        \addlinespace
+        UTS-2 & Non-fungible token & The analogue of ERC-721. The payload commits to immutable content by hash. Curated collections gate minting by issuer; open collections do not. \\
+        \addlinespace
+        UTS-3 & Capped-issuance series & A supply cap that recipients verify locally. Every valid issuance consumes one of a bounded set of genesis states, so no party needs to observe all issuance to know the cap held. \\
+        \addlinespace
+        UTS-4 & Pooled assets & Value aggregated under type-defined rules rather than under an owner. See Section~\ref{sec:pools}. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+UTS-3 deserves a comment, because a locally verifiable supply cap is unusual. On a shared ledger, believing that a token's supply is capped means believing that the contract enforcing the cap is correct and that the chain executed it faithfully. Here the cap is a property of the type definition, and each issuance must consume one member of a bounded set of genesis states, each of which the aggregation layer admits at most once. A recipient checks the cap held for the token in its hands without observing any other issuance. The cap applies per network, and deploying the same definition on a second network does not create a combined cap across the two.
+
+\section{Transaction Flow and Latency}
+
+A transfer involves three parties and one round trip to the network. The recipient supplies the spending condition under which it wishes to receive the token. The sender builds the transaction, satisfies the current condition, and asks the aggregation layer to record the state being spent. The layer returns a proof. The sender passes the token, now extended by one transfer and its proof, to the recipient, who verifies it.
+
+\medskip
+
+Settlement is final when the proof is issued, in one to two seconds. For most payments that is the end of the matter. For workloads where even that is too slow, the protocol supports a second ordering of the same steps.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram,
+        stepbox/.style={diagram box, minimum width=2.45cm, minimum height=1.3cm,
+                     align=center, font=\scriptsize},
+        donebox/.style={diagram box emph, minimum width=2.45cm, minimum height=1.3cm,
+                     align=center, font=\scriptsize}]
+
+        % ---------- Standard path ----------
+        \node[diagram label plain, font=\small\bfseries, anchor=west] at (-6.95,1.35)
+            {Standard path};
+        \node[stepbox] (a1) at (-5.72,0) {Sender builds\\the transfer};
+        \node[stepbox, fill=uniFillB, draw=uniAccent] (a2) at (-2.86,0)
+            {Aggregation\\records the state};
+        \node[stepbox] (a3) at (0,0) {Sender passes\\token and proof};
+        \node[stepbox] (a4) at (2.86,0) {Recipient\\verifies};
+        \node[donebox] (a5) at (5.72,0) {Goods\\released};
+        \foreach \x/\y in {a1/a2, a2/a3, a3/a4, a4/a5}{\draw[diagram arrow] (\x) -- (\y);}
+        \draw[diagram brace] (-4.15,-0.82) -- (-1.57,-0.82);
+        \node[diagram caption, align=center] at (-2.86,-1.3)
+            {settled here: one to two seconds};
+
+        % ---------- Low-latency path ----------
+        \node[diagram label plain, font=\small\bfseries, anchor=west] at (-6.95,-2.35)
+            {Low-latency path};
+        \node[stepbox] (b1) at (-5.72,-3.7) {Sender passes\\token and transfer};
+        \node[stepbox] (b2) at (-2.86,-3.7) {Recipient submits\\to aggregation};
+        \node[stepbox, fill=uniFillB, draw=uniAccent] (b3) at (0,-3.7)
+            {Non-inclusion\\returns at once};
+        \node[donebox] (b4) at (2.86,-3.7) {Goods\\released};
+        \node[stepbox] (b5) at (5.72,-3.7) {Inclusion follows:\\token spendable};
+        \foreach \x/\y in {b1/b2, b2/b3, b3/b4, b4/b5}{\draw[diagram arrow] (\x) -- (\y);}
+        \draw[diagram brace] (-1.28,-4.52) -- (1.28,-4.52);
+        \node[diagram caption, align=center] at (0,-5.0)
+            {goods released before the round completes};
+    \end{tikzpicture}
+    \caption{Two orderings of the same transfer. In the low-latency path the recipient submits the request itself and acts on the immediate confirmation that the state had not been spent, waiting for the inclusion proof only before treating the received token as spendable inventory.}
+    \label{fig:latency}
+\end{figure}
+
+In the low-latency path the sender hands over the token and the transaction directly, and the recipient submits the request. The layer answers immediately that the state has not been spent before and is now scheduled for recording. That answer is enough for the recipient to release goods, because the only party who could have spent that state already is the sender, and the recipient now controls the request. The inclusion proof follows in the next round, and the recipient waits for it only before treating the token as spendable inventory. Given sufficient inventory to cover the round time, a participant can transact continuously without ever waiting.
+
+\medskip
+
+Neither path involves a mempool, a block, a fee auction, or a confirmation depth. A party that is offline can verify a token it received an hour ago or a year ago with the same procedure and the same result.
+
+\section{Programmable Ownership}
+
+Ownership in Unicity is not restricted to a public key. A token's spending condition is a \emph{predicate}, an arbitrary rule that determines when the token may be transferred, and predicates are evaluated off-chain by the parties who care about the outcome.
+
+\medskip
+
+The standard set covers the usual requirements: a signature under a given key, payment to a key hash, payment to a script hash, multi-signature requiring all of a set, threshold signature requiring some of a set, a timelock that forbids transfer before a reference time, a hashed timelock combining a secret with a deadline, a burn predicate that can never be unlocked, and an open predicate that anyone may satisfy. Time-dependent predicates read their reference time from the certified round rather than from any local clock, so two verifiers always agree about whether a deadline had passed.
+
+\medskip
+
+The security argument is formal rather than asserted. The execution layer's three properties, namely that a state cannot be spent twice, that only the legitimate owner can prevent a token from being spent, and that the network cannot link transactions of the same token, are proved to be preserved when ownership is generalized from public keys to predicates, under a reduction to unforgeability of the predicate family.
+
+\subsection{Atomic Swaps}
+
+Two parties can exchange tokens without trusting each other or any intermediary, using interlocking predicates that guarantee either both transfers complete or neither does. Correctness is enforced by the predicates themselves. There is no custodian, no escrow contract holding both sides, and no global state in which the swap is arranged.
+
+\medskip
+
+This is the smallest interesting case of a general pattern. Whenever an application needs several parties to agree on an outcome, the coordination happens between them and the enforcement happens in the conditions attached to their tokens.
+
+\section{Verifiable Execution}\label{sec:verifiable}
+
+The phrase means something specific here, so we define it before using it.
+
+\medskip
+
+\begin{quote}
+Execution is \emph{verifiable} when acceptance of its output is a deterministic function of that output and a rule set fixed in advance, identical for every party, so that a recipient accepts because it re-checked the result rather than because it trusted the producer.
+\end{quote}
+
+That definition has teeth. It requires the rules to be frozen, so two verifiers cannot disagree. It requires checking to be cheap enough that recipients actually do it. It requires failure to be well-defined, so that an unverifiable token is rejected rather than accepted provisionally. And it requires the resources consumed by a check to be bounded, so that a maliciously constructed input exhausts a budget and is rejected instead of exhausting the verifier.
+
+\medskip
+
+Unicity provides three mechanisms that satisfy it, and they differ in cost rather than in kind.
+
+\subsection{Re-Verification Against a Frozen Rule}
+
+The default. The producer of a token does some computation, and the rules governing the token's type say what a valid result looks like. Every recipient re-runs those rules. This is what makes issuance policies, value conservation, and type-defined state machines enforceable without consensus.
+
+\medskip
+
+The cost of this approach is that a recipient's work grows with the provenance of what it is accepting. Verification is driven by a worklist: the recipient verifies the token in hand, which may reveal that the token's genesis depends on an earlier token, which is then added to the list, and so on until the list is empty. A single cumulative budget covers the entire run, counting bytes, items, nesting depth, and proof steps. A deliberately deep or wide provenance graph exhausts that budget and is rejected as invalid. Two verifiers configured alike accept exactly the same tokens, which is what makes the rule deterministic rather than merely usually consistent.
+
+\subsection{Succinct Proofs}
+
+Where re-verification is too expensive, a proof replaces it. The producer generates a succinct argument that the computation was performed correctly, and the verifier checks it at a cost independent of the work it attests to. This is the mechanism behind split conservation over large allocations, token history compression, and the redemption path of the bridge, where the verifier is a contract on another chain that cannot afford to replay anything.
+
+\subsection{Shared, Ordered State}
+
+Some applications genuinely need many parties writing to one object in a defined order. An order book with a single matching queue is the obvious example. For those, the enshrined EVM partition provides a conventional execution environment with conventional guarantees, certified by the same consensus layer. Section~\ref{sec:evm} describes it.
+
+\subsection{Execution That Cannot Be Re-Checked}
+
+Not all useful work is deterministic. Model inference is the clearest case: the output is not a function that a recipient can cheaply recompute, and often not one it can recompute at all. For these, the available mechanisms are of a different character, and they carry trust assumptions the cryptographic core does not.
+
+\begin{table}[h]
+    \centering
+    \caption{Assurance mechanisms for computation that recipients cannot re-run}
+    \label{tab:verifexec}
+    \begin{tabular}{@{}lp{5.4cm}p{4.3cm}@{}}
+        \toprule
+        \textbf{Mechanism} & \textbf{How it works} & \textbf{What must be trusted} \\
+        \midrule
+        Trusted execution & Hardware attests that specific code ran in an enclave & The hardware manufacturer \\
+        \addlinespace
+        Fraud proofs & Assume correct, allow a challenge within a window & At least one honest watcher, plus the delay \\
+        \addlinespace
+        Attestation committee & A set of parties independently execute and attest & An honest majority of that set \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+These are useful and Unicity does not prevent their use. An agent that performs inference can hold tokens, be paid, and settle on the platform, and its payments carry the full cryptographic guarantees regardless of how its inference was produced. But the guarantees attach to the settlement, not to the inference. Nothing in this paper claims that a model's output is cryptographically verified, because it is not, and a design that pretended otherwise would be making a claim the mathematics does not support.
+
+\section{Autonomous Pools}\label{sec:pools}
+
+The clearest demonstration that this model supports real applications is an automated market maker with no operator.
+
+\medskip
+
+A pool is a single token. Its state holds the reserves of two assets, the total shares outstanding, and an accumulator recording every deposit and withdrawal it has absorbed. Its owner predicate is the open predicate, so anyone may spend the pool's current state, but the type's rules permit only transitions that satisfy the pool's equations, and they require the successor to be the open predicate again. The pool cannot be taken private, and it has no administrator, because there is no key that grants any privilege over it.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram,
+        act/.style={diagram box, minimum width=2.6cm, minimum height=0.95cm,
+                    align=center, font=\scriptsize}]
+        \node[diagram box emph, text width=4.3cm, align=center, minimum height=1.9cm]
+            (st) at (0,0)
+            {\textbf{Pool state}\\[2pt]
+             {\scriptsize reserves of two assets}\\
+             {\scriptsize shares outstanding}\\
+             {\scriptsize accumulator of consumed burns}\\[3pt]
+             {\scriptsize owner: \emph{open predicate}}};
+
+        \node[act] (dep) at (-5.0,1.7) {\textbf{Deposit}\\burn assets};
+        \node[act] (swp) at (-5.0,0.0) {\textbf{Swap}\\burn input asset};
+        \node[act] (wd)  at (-5.0,-1.7) {\textbf{Withdraw}\\burn shares};
+
+        \foreach \n in {dep,swp,wd}{
+            \draw[diagram arrow] (\n.east) -- (st.west);
+        }
+
+        \node[act] (osh) at (5.2,1.7) {shares\\minted};
+        \node[act] (oas) at (5.2,0.0) {output asset\\minted};
+        \node[act] (ow)  at (5.2,-1.7) {reserves\\returned};
+        \foreach \n in {osh,oas,ow}{
+            \draw[diagram arrow up] (st.east) -- (\n.west);
+        }
+
+        \node[diagram caption, text width=13.6cm, align=center] at (0,-3.0)
+            {Every transition is re-checked by every verifier of every token the pool produces.
+             Whoever advances the state pays for it and gains nothing by doing so.};
+    \end{tikzpicture}
+    \caption{An autonomous pool. Value enters by burning a token bound to the pool, and leaves as a commitment the claimant mints against. No party holds custody at any point.}
+    \label{fig:pool}
+\end{figure}
+
+A depositor burns a token committing to this pool and to the recipient of the shares it expects. A swapper burns an input asset committing to a minimum acceptable output and a refund recipient. A withdrawer burns shares. In each case the burn does not name a particular pool state, only the pool, which matters below. Whoever advances the pool consumes one of these burns, applies the corresponding equation, inserts the burn into the accumulator so it can never be consumed twice, and commits to the output the claimant will mint.
+
+\medskip
+
+The properties follow from the rules rather than from anyone's good behavior.
+
+\begin{description}
+    \item[Solvency.] Every unit of value in the reserves entered through a certified burn counted exactly once, and every exit decrements the reserves by construction. The pool cannot commit to releasing more than it holds.
+
+    \item[Conservation across types.] The total supply of the underlying asset, counting ordinary tokens plus everything sitting in pools, is invariant. This is not an assumption: every verifier of a token minted by a withdrawal re-verifies the pool's history through the same worklist that verifies any other provenance.
+
+    \item[No dilution.] Value per share is non-decreasing under deposits and withdrawals, and the constant-product rule with a fee means the reserve product never decreases across a swap. No sequence of trades, at any prices, pushes the value backing a share below the curve.
+
+    \item[No capture.] Every transition must hand the pool back to the open predicate and must satisfy the state equations. There is no code path by which any party, including whoever created the pool, extracts value except by burning shares.
+
+    \item[Race safety.] Two parties attempting to advance the same pool state race, and exactly one succeeds. The loser's burn is not lost, because it committed to the pool rather than to a state, and it is simply consumed by a later transition.
+
+    \item[No stranding.] A burn whose bound has become unsatisfiable, a swap whose minimum output no longer clears, can be consumed by a refund transition that returns its exact contents to the committed refund recipient. A hostile party who wins the race can decline to execute a trade, but cannot confiscate it.
+\end{description}
+
+Two limitations are real and we state them rather than leaving them to be discovered. A pool instance has one spendable state, so operations on it serialize, and contention is inherent to the design. And whoever wins the race to advance a pool chooses the order of the pending operations it applies, so reordering of the kind familiar from other automated market makers is possible. The minimum-output bound caps the damage to any single trade and the refund path bounds the downside to a cancelled one, but the exposure exists. It exists because the application deliberately introduced a contended object, not because the platform has one.
+
+\medskip
+
+The pattern generalizes. Lending can lock collateral under conditions that release it on liquidation terms. Auctions can hold bids under conditions keyed to winner selection. Games can hold stakes under conditions keyed to outcomes. In each case the coordinating logic is ordinary software and the enforcement is in the rules that every recipient re-runs.
+
+\section{Privacy}
+
+Privacy on Unicity is a consequence of what the architecture does not collect. The network is shown a state identifier and the data satisfying a spending condition. It is not shown the amount, the asset, the sender, the recipient, or the token. There is no sense in which this information is encrypted or hidden, because it is never submitted.
+
+\medskip
+
+Two consecutive spends of the same token are unlinkable to the network, because the state mask makes the next identifier unpredictable. What remains is that a party holding the token can see its history, and that a party who transacts repeatedly under one key can be recognized by counterparties who see that key.
+
+\medskip
+
+The remedy is a fresh spending condition per transaction, which would ordinarily mean managing a fresh keypair per transaction. Unicity provides protocols that derive unlinkable conditions from a single persistent keypair, in interactive and non-interactive forms, the latter allowing a published address to receive payments that share no visible key. These operate at the wallet level and require no support from the protocol, so a user chooses per transaction whether to use them.
+
+\medskip
+
+Being precise about the boundary matters. Compression, described next, reduces what a recipient is shown, but it is a reduction in disclosure rather than a hiding property, and applications must not treat it as a privacy mechanism. Every party that held a token earlier retains whatever it saw. Where unlinkability is required, it comes from the protocols above.
+
+\medskip
+
+Where the opposite is required, it is expressed as a token type. A regulated instrument can define transfer rules that every recipient enforces, such as requiring an attestation from an accredited party at each step. Compliance is then a property of the asset, checked before acceptance, rather than an analysis performed on a public ledger afterwards.
+
+\section{History Compression}
+
+A token accumulates one certified transaction per transfer, so an unmodified token grows with use. Compression replaces a prefix of that history with a succinct proof that the prefix was a valid, certified chain.
+
+\medskip
+
+Compression is a change of representation and not a transaction. No state is spent and none is created. The token identifier, its genesis, and its current state are unchanged, the aggregation layer is not involved, and it observes nothing. A compressed token and the token it was derived from are the same token in the same state, and spending either consumes the same state identifier. There is therefore no opt-in required from the token's type and no risk of a token existing twice.
+
+\medskip
+
+The construction rests on the append-only property established in Part~\ref{part:protocol}. Because nothing is ever removed from the tree, one recent certificate anchors inclusion of arbitrarily old entries, which replaces one certificate check per transfer with one certificate plus a hash path per transfer. The validity of the transfer chain and the fact of its certification are proved separately, which is what allows a holder to fold an accumulated history back down to constant size rather than merely appending to it.
+
+\medskip
+
+A second dimension is the ancestor graph. A token created by a split depends on its source, which may itself have been a split. Provenance compression collapses that graph into a certificate that speaks about the source alone, which is why one such certificate can serve all outputs of a split.
+
+\medskip
+
+Three practical properties shape how this is used. It is discretionary and off the critical path, performed as a background job rather than while preparing a payment. It is lossy and irreversible, so a holder that compresses and discards its records cannot reconstruct the original form, which matters if a future counterparty's verifier lacks the relevant verification keys. And it pays only above a break-even point, since compressing a short history produces a larger token than leaving it alone. Wallets should retain raw history independently and treat the compressed form as a transport representation.
+
+\section{The Enshrined EVM Partition}\label{sec:evm}
+
+One partition of the network runs an account-based execution environment compatible with the Ethereum Virtual Machine. Its state is certified by the same consensus layer, through the same interface used by aggregation partitions. It holds governance and the staking contracts, and it is where the native currency lives.
+
+\medskip
+
+The word enshrined is precise. The partition's validator set and voting weights derive from the consensus layer's own configuration rather than being chosen separately, and its execution requires an authenticated input originating from the consensus layer. It is an internal channel of one system, not a second system connected by a bridge with an operator. Aggregation partitions continue independently alongside it, and a lagging EVM does not delay certification of unrelated shards.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram]
+        \node[diagram box emph, minimum width=11.6cm, minimum height=0.95cm] (core) at (0,2.4)
+            {\textbf{Consensus Layer} \quad {\scriptsize orders and certifies}};
+
+        \node[diagram box, minimum width=3.0cm, minimum height=1.5cm, align=center,
+              fill=uniFillB, draw=uniAccent] (seal) at (-3.9,0.05)
+            {\textbf{Seal}\\\textbf{transaction}\\[2pt]{\scriptsize privileged,}\\{\scriptsize always first}};
+        \node[diagram box, minimum width=3.6cm, minimum height=1.5cm, align=center] (user) at (0.2,0.05)
+            {\textbf{User transactions}\\[2pt]{\scriptsize ordinary EVM}\\{\scriptsize execution}};
+        \node[diagram box, minimum width=3.0cm, minimum height=1.5cm, align=center] (res) at (4.4,0.05)
+            {\textbf{New state}\\\textbf{root}\\[2pt]{\scriptsize and block hash}};
+
+        \draw[diagram arrow] (seal) -- (user);
+        \draw[diagram arrow] (user) -- (res);
+
+        \draw[diagram arrow] (-3.9,1.925) -- node[diagram label, left, align=right]
+            {certified root origin:\\round, time, tree root} (-3.9,0.8);
+        \draw[diagram arrow up] (4.4,0.8) -- node[diagram label, right, align=left]
+            {certification request} (4.4,1.925);
+
+        \node[diagram box faint, minimum width=11.6cm, minimum height=0.7cm] (note) at (0,-1.5)
+            {\scriptsize Contracts read protocol authority only from state written by the seal transaction. Never from a local clock, file, or network response.};
+        \draw[diagram connector, draw=uniLine!45] (seal.south) -- (seal.south |- note.north);
+        \draw[diagram connector, draw=uniLine!45] (user.south) -- (user.south |- note.north);
+    \end{tikzpicture}
+    \caption{One EVM block. A privileged system operation imports the certified consensus state before any user transaction runs, and the resulting state root is certified in turn.}
+    \label{fig:evm}
+\end{figure}
+
+\subsection{The Seal Feed}
+
+Before any user transaction executes, the environment performs exactly one protocol operation that imports the consensus layer's certified state: the round, the epoch, the reference time, the global tree root, and the committed configuration transitions needed to interpret them. Its origin, destination, data, and position are fixed by the protocol, and no private key confers the right to originate it. If the input is missing, forged, stale, or inconsistent, the block is invalid.
+
+\medskip
+
+This is the mechanism that makes contract-level protocol authority sound. A contract obtains authority only from state written by that operation. Execution never reads a node-local trust base, a clock, a file, or a network response, so a party that verifies a certificate permissionlessly cannot thereby advance the privileged clock or activate a validator set.
+
+\subsection{What It Enables}
+
+\textbf{Governance with certified inputs.} The staking contracts execute here, and their certified output is what the consensus layer adopts. Validators do not independently re-run the election algorithm; they verify the certified result of the contract that ran it.
+
+\medskip
+
+\textbf{Consensus primitives inside contracts.} Three functions are callable at fixed addresses with deterministic cost: verification of a complete Unicity Certificate against authenticated trust-base state, verification of a canonical consensus vote including its voting metadata, and verification of an inclusion proof against a supplied authenticated root. A contract can therefore reason directly about the state of the aggregation layer, which is what allows the slashing contract to accept evidence from anyone and the bridge vault to verify redemptions natively.
+
+\medskip
+
+\textbf{A settlement chain with no external wait.} When the vault backing a bridged asset lives here, a lock is authenticated by a certificate and a storage proof rather than by waiting out another chain's probabilistic finality. Both sides share one root of trust, which is what makes movement between the two execution models efficient.
+
+\medskip
+
+\textbf{Familiar tooling.} Contracts, wallets, and development tools that target the EVM work here, which matters for the parts of an application that genuinely want shared state.
+
+\subsection{Native Currency}
+
+UCT is the native currency. It pays gas, it is the bonded stake, and it is what rewards are denominated in. Its supply is allocated at genesis, and protocol execution creates none, so supply is the genesis allocation less whatever has been burned. There is no mining, no issuance schedule, and no earlier supply to migrate.
+
+\medskip
+
+Staking rewards are transfers from an allocated pool rather than new issuance. Slashing transfers collateral to the treasury and neither creates nor destroys currency. Where UCT is represented in another form, as a wrapped contract token for composability or as an execution-layer token claim backed by currency held in a vault, neither representation increases supply, and the accounting keeps the backing from being counted twice.
+
+\medskip
+
+Two boundaries are drawn deliberately. Custody, withdrawal accounting, allocation, and vault contracts are immutable in the initial profile. Stake custody and its slashing and exit rules are separated from election policy, so a change to who gets elected cannot grant an authority to withdraw or to slash arbitrarily. Parameter governance is not a treasury spending key.
+
+\section{Bridging}\label{sec:bridging}
+
+Bridges are where value is usually lost, and almost always because the bridge has an operator, a committee, or a multisig that can be compromised or can decide to act. Unicity's construction has none of these in either direction.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[diagram]
+        % external chain column
+        \node[diagram box ext, minimum width=4.0cm, minimum height=1.15cm, align=center]
+            (vault) at (-4.6,0) {\textbf{Vault}\\{\scriptsize pooled custody, external chain}};
+        \node[diagram box ext, minimum width=4.0cm, minimum height=0.8cm, align=center]
+            (acc) at (-4.6,-1.85) {\textbf{Nullifier root}\\{\scriptsize one value on chain}};
+        \draw[diagram connector, draw=uniWarn!70] (vault) -- (acc);
+
+        % unicity column
+        \node[diagram box emph, minimum width=4.2cm, minimum height=1.15cm, align=center]
+            (tok) at (4.6,0.75) {\textbf{Unicity token}\\{\scriptsize backing proof in its genesis}};
+        \node[diagram box, minimum width=4.2cm, minimum height=1.15cm, align=center]
+            (burn) at (4.6,-1.85) {\textbf{Burn}\\{\scriptsize commits recipient and amount}};
+
+        % bridge in
+        \draw[diagram arrow] (vault.east) -- node[diagram label, above, align=center]
+            {\textbf{in:} lock, then mint against\\a proof every recipient re-runs} (tok.west);
+        % bridge out
+        \draw[diagram arrow up] (burn.west) -- node[diagram label, below, align=center]
+            {\textbf{out:} one succinct proof\\releases a batch of burns} (acc.east);
+        \draw[diagram arrow] (tok.south) -- node[diagram label, right, align=left]
+            {redeem} (burn.north);
+
+        \node[diagram caption, text width=14.0cm, align=center] at (0,-3.0)
+            {No operator, no committee, no challenge window. The vault releases funds only against a valid proof,
+             and the prover can stall but cannot alter the recipient or the amount.};
+    \end{tikzpicture}
+    \caption{Bridging in both directions. Entry is authorized by a proof that recipients check; exit is authorized by a proof the vault checks for constant cost.}
+    \label{fig:bridge}
+\end{figure}
+
+\subsection{Bringing an Asset In}
+
+The party bringing an asset in calls the vault on the external chain, which escrows it into pooled custody, assigns a lock number, and emits an event committing to the identifier of the Unicity token that will represent it, to the recipient's spending condition, and to the amount. A Unicity token is then minted whose reason points at that lock.
+
+\medskip
+
+Because minting is permissionless, the mint itself grants nothing. Every recipient runs the type's reason verifier, which confirms that a final lock with that number exists at the configured vault and asset on the configured chain, and that the lock's committed identifier, recipient condition, and amount match the genesis exactly. Six properties follow, and each is a check rather than a promise:
+
+\begin{itemize}
+    \item \textbf{No mint without a lock.} A token minted without a matching final lock fails verification and is never accepted.
+    \item \textbf{No double mint.} The genesis of a token is recorded at a single state determined by its identifier, and the lock commits to that identifier, so one lock funds exactly one token.
+    \item \textbf{No theft.} The lock commits to the recipient's spending condition, so although anyone may construct the genesis, only the intended recipient can spend the result.
+    \item \textbf{No inflation.} The declared value must equal the locked amount.
+    \item \textbf{No rogue contract.} The chain, vault, and asset must equal the pinned configuration.
+    \item \textbf{No reversed deposit.} The lock must be final on the external chain.
+\end{itemize}
+
+That last point has a practical consequence. Bringing an asset in cannot be instantaneous, because a reorganization of the external chain could undo the lock after the token is already circulating. This wait is intrinsic to accepting a deposit from a chain with probabilistic finality and is not a weakness of the bridge. It is enforced by each verifier for itself rather than attached to the token as a global condition, which has a pleasant consequence: a party minting to a condition it already controls needs no wait at all, because it knows whether its own deposit exists. The wait binds the first party that did not witness the lock.
+
+\subsection{Taking an Asset Out}
+
+In this direction the asymmetry reverses. A Unicity burn is final the instant it is certified and can be verified offline against the trust base alone, with no waiting and no node to query. The weak party is the vault, which is a contract that cannot afford to replay a token's history. A succinct validity proof compresses that history-dependent check into a single verification of constant cost.
+
+\medskip
+
+Replay is prevented by an accumulator whose root is the only bridge state the external chain stores. The nullifier of a burn derives from its certified state, which the aggregation layer records at most once, so it is globally unique by the same mechanism that prevents double-spending. A release proves the nullifier is absent from the accumulator and inserts it, and the vault advances its stored root. The on-chain state required for replay prevention is therefore one value, regardless of how many redemptions have occurred, and anyone can rebuild the accumulator from the external chain's own transaction history.
+
+\medskip
+
+One proof can cover a batch of burns. It establishes that a single recent certificate anchors every transition involved, that each burned token verifies completely and ends in a burn committing to its stated recipient and amount, that each amount traces through split conservation back to a genesis whose backing references a lock the vault itself recorded, and that each nullifier was absent and is now inserted. The vault verifies the proof, checks its configuration and that the trust base is allow-listed, requires the accumulator to match its stored root, confirms each referenced lock against its own records, advances the root, and pays. It makes no external query, because the backing was committed locally when the asset was locked.
+
+\subsection{Why This Is Trustless}
+
+Solvency holds by construction. Every circulating bridged token is backed by an equal lock, split verification guarantees children never exceed their parent, and so the sum of valid burns cannot exceed the sum of locks. Over-release would require burning an unbacked token, which the backing check and the vault's own lock records exclude.
+
+\medskip
+
+Double release is excluded because the nullifier is unique, a release both proves its absence and inserts it, and the vault gates on its stored root. A replayed proof fails because the root has moved, and a freshly built one cannot prove absence of something already inserted.
+
+\medskip
+
+Authenticity is enforced inside the proof, which embeds full token verification against the pinned trust base, so a forged or non-final burn is unrepresentable under the proof system's soundness.
+
+\medskip
+
+And no party is trusted. Whoever produces the proof cannot alter the recipient or the amount, both of which were fixed in the certified burn, and cannot fabricate a release. The worst it can do is stall, and any party holding the burned token can produce the proof itself.
+
+\medskip
+
+One limitation follows from the same property that provides the guarantee. The verification key is immutable once a vault is deployed, which is precisely what prevents anyone, including the deployer, from silently substituting a different relation later. The consequence is that correcting or extending the proving relation requires deploying a new vault, and value locked under the old one is returned under the old relation.
