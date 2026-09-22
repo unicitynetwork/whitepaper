@@ -76,6 +76,9 @@ Autonomous agents transact at rates and volumes that exceed the capacity of ledg
     \item \textbf{Programmability:}
     Ownership generalizes to predicates: spending conditions evaluated off-chain by the transaction participants. Token types can define state machines that every verifier reruns. These support automated market makers without an operator or other trusted party.
 
+    \item \textbf{Privacy:}
+    The network receives one unlinkable identifier per spend and no transaction content. One-time addresses, derived non-interactively from a single published address, remove the linkage between payments and any persistent identity. A recipient still reads the history of the token it accepts, because accepting it means rechecking that history.
+
     \item \textbf{Enshrined EVM:}
     One certified partition runs an account-based execution environment for governance, staking contracts, and the native currency. Consensus primitives are callable from contracts, so settlement between the two execution models shares a single root of trust.
 
@@ -101,5 +104,8 @@ Autonomous agents transact at rates and volumes that exceed the capacity of ledg
 
 \newpage
 \input{part4-applications}
+
+\newpage
+\input{references}
 
 \end{document}
