@@ -38,21 +38,15 @@ Unicity provides a settlement venue for these assets while retaining the existin
     \label{fig:stablecoin}
 \end{figure}
 
-The asset is locked in the vault and represented by a token minted against a backing proof checked by every recipient, as described in Section~\ref{sec:bridging}. The resulting Unicity token has the following properties.
+The asset is locked in the vault and represented by a token minted against a backing proof checked by every recipient, as described in Section~\ref{sec:bridging}. From that point it behaves as any other Unicity token, which changes the economics of stablecoin payment in four ways.
 
-\begin{itemize}
-    \item Transfers settle deterministically in one to two seconds, with no confirmation depth or reorganization risk. The low-latency path permits goods to be released before the round completes.
+\medskip
 
-    \item Subscription settlement costs are independent of volume. An agent making a million small payments pays the same amount as one making a thousand, enabling per-request payment.
+A payment settles deterministically in one to two seconds, so a merchant releases goods against settlement rather than against a confirmation count. Settlement is bought as a subscription, so an agent making a million small payments pays what one making a thousand pays, which is what makes per-request pricing viable at all. Transfers are private to the parties, so a business does not publish its supplier relationships and an agent does not publish its trading pattern. Recipients validate locally, without a node, a chain synchronization, or an RPC provider that observes every payment and can decline to serve it.
 
-    \item Transfers are private to the parties. Balances, counterparties, and payment patterns are not published. This privacy is necessary for adoption by businesses paying suppliers and agents conducting trades.
+\medskip
 
-    \item Recipients validate tokens locally without running a node, synchronizing a chain, or using an RPC provider that can observe or refuse payments.
-
-    \item Redemption is trustless. The holder burns the token and presents a proof for vault verification. Redemption requires no committee agreement and cannot be refused by an operator.
-\end{itemize}
-
-The vault on the issuing chain releases value only against a valid succinct proof. It uses no multisig, operator key, committee vote, or challenge window that requires monitoring to prevent fraudulent withdrawals. Every circulating token traces to a lock, and split verification prevents child values from exceeding the parent value. Valid redemptions therefore cannot exceed deposits. Any holder of the burned token can produce the proof without cooperation from a bridge operator.
+Redemption is equally unconditional. The holder burns the token and presents a proof the vault verifies, with no operator to refuse it and no committee to convene. Solvency is structural rather than monitored, for the reasons given in Section~\ref{sec:bridging}, so there is no challenge window during which an unnoticed fraudulent withdrawal could succeed.
 
 \section{Tokenization}
 
@@ -214,21 +208,16 @@ In Unicity's model, players interact through agents that execute game mechanics.
 
 \section{Further Reading}
 
-The following documents provide detailed protocol specifications and the formal security arguments summarized in this overview.
+This paper is an overview. The protocol specification and the formal security arguments summarized here are given in the companion documents.
 
-\begin{description}
-    \item[Unicity Yellowpaper] The protocol specification: consensus, the certificate framework, the execution layer, token encoding, governance, the enshrined EVM partition, and bridging.\\
-    \url{https://github.com/unicitynetwork/unicity-yellowpaper-tex}
+\medskip
 
-    \item[Unicity Bluepaper] The aggregation layer in depth: the radix tree design, the security model, the formal statement and proof of append-only consistency, the arithmetization, measured performance, and recursive aggregation.\\
-    \url{https://github.com/unicitynetwork/aggr-layer-paper}
+The Yellowpaper~\cite{yellowpaper} specifies the protocol in full: the consensus layer, the certificate framework, the execution layer and its token encoding, governance, the enshrined EVM partition, and bridging. The Bluepaper~\cite{bluepaper} treats the aggregation layer in depth, including the radix tree design, the security model, the formal Zero Knowledge setup and proof of append-only consistency, the AIR arithmetization, the measured performance reported in Table~\ref{tab:perf}, and recursive aggregation.
 
-    \item[Unicity Execution Layer] Formal security model and proofs for off-chain execution, covering double-spending resistance, non-blocking, and service-side privacy, together with the unlinkable-key protocols.\\
-    \url{https://github.com/unicitynetwork/execution-model-tex}
+\medskip
 
-    \item[Predicates and Atomic Swaps] Programmable spending conditions, the proof that the security properties are preserved under generalization from keys to predicates, and trustless atomic swaps.\\
-    \url{https://github.com/unicitynetwork/unicity-predicates-tex}
+Two academic papers carry the formal results. The execution-layer paper~\cite{exemodel} develops the security model for off-chain execution and proves resistance to double-spending and to blocking, together with service-side privacy and the unlinkable-key protocols of Section~\ref{sec:privacy}. The predicates paper~\cite{predicates} generalizes ownership to programmable spending conditions, proves that those properties survive the generalization, and constructs trustless atomic swaps.
 
-    \item[State Transition SDK] Client libraries for token operations.\\
-    \url{https://github.com/unicitynetwork/state-transition-sdk}
-\end{description}
+\medskip
+
+The State Transition SDK~\cite{sdk} provides client libraries for token operations.
