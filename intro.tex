@@ -5,15 +5,9 @@
 
 Autonomous agents already execute trades, procure compute, subscribe to data feeds, and pay for services. These agents increasingly perform such operations continuously, without human authorization of each step.
 
-\medskip
-
 These operations require settlement infrastructure. Conventional payment systems assume human participation: banks require authorization, card networks reverse transactions, and courts ultimately enforce contracts. An agent cannot invoke these mechanisms. It requires cryptographic verification of settlement correctness and counterparty claims, with payment cost and latency low enough for the value transferred.
 
-\medskip
-
 Blockchains remove these intermediaries through a shared ledger: a public record maintained by validators who process, order, and observe every transaction. Every blockchain since Bitcoin has used this model. Its overhead is acceptable for occasional human transactions but constrains the agentic economy. Validator processing capacity limits throughput, and consensus time determines latency. Competition for processing capacity determines fees. Validator access to transaction data limits privacy, and control over transaction inclusion permits censorship.
-
-\medskip
 
 Unicity uses self-contained cryptographic assets in place of a shared ledger. Parties transfer assets directly, and recipients validate them. The network proves that a given asset state is spent exactly once using a minimal data structure that records only compact, anonymous identifiers. Amounts, counterparties, and transaction content remain private.
 
@@ -21,19 +15,11 @@ Unicity uses self-contained cryptographic assets in place of a shared ledger. Pa
 
 The absence of a shared ledger changes the platform's scaling, verification, privacy, and trust requirements.
 
-\medskip
-
 Horizontal scaling follows from partitioning the spent-state registry by key prefix into shards that operate and prove their transitions independently. Adding a shard adds capacity without increasing the workload of existing shards. Consensus load grows with the number of shards rather than the number of transactions. Assets do not share state, so they require no global ordering.
-
-\medskip
 
 Verification is local to the received asset. A recipient need not replay the network's history, maintain global state, or rely on correct validator behavior for unrelated transactions. A browser tab is sufficient to run a client.
 
-\medskip
-
 The network receives one unlinkable identifier per spend. Amounts, asset details, senders, and recipients are never submitted. This privacy property follows from limiting the data collected and requires no additional cryptographic mechanism.
-
-\medskip
 
 Each shard proves in every round that it preserved all previously recorded entries. Recursive aggregation combines these proofs into a single fixed-size proof covering the network's entire history. Verification establishes that no recorded state was removed, altered, or recorded twice, without assumptions about the validators that certified the rounds.
 
@@ -41,18 +27,10 @@ Each shard proves in every round that it preserved all previously recorded entri
 
 Part~\ref{part:protocol}, The Unicity Protocol, describes the consensus layer and its governance, the aggregation layer and its proofs of correct spent-state recording, recursive aggregation, and the resulting trust models. It identifies the remaining validator behavior for which faults are detectable and attributable.
 
-\medskip
-
 Part~\ref{part:execution}, The Execution Layer, describes tokens as self-contained ledgers, recipient-enforced issuance rules, programmable ownership, verifiable execution, privacy, history compression, the enshrined EVM partition, and trustless bridging of external assets.
 
-\medskip
+% Part~\ref{part:economy}, The Machine Economy, describes identity, wallets, agent-to-agent micropayments, and payments included in ordinary web requests.
 
-Part~\ref{part:economy}, The Machine Economy, describes identity, wallets, agent-to-agent micropayments, and payments included in ordinary web requests.
+% Part~\ref{part:applications}, Applications, describes bridged stablecoins for machine payments, tokenized assets with locally verifiable supply, decentralized finance without operators, agentic commerce, and gaming.
 
-\medskip
-
-Part~\ref{part:applications}, Applications, describes bridged stablecoins for machine payments, tokenized assets with locally verifiable supply, decentralized finance without operators, agentic commerce, and gaming.
-
-\medskip
-
-Unicity Labs also provides a security and runtime stack for AI agents, comprising the Semantic Intercept Fabric, the Astrid agent operating system, and related components. That stack is documented separately and is outside the scope of this paper, which is concerned with the settlement platform.
+% Unicity Labs also provides a security and runtime stack for AI agents, comprising the Semantic Intercept Fabric, the Astrid agent operating system, and related components. That stack is documented separately and is outside the scope of this paper, which is concerned with the settlement platform.

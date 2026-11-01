@@ -6,11 +6,7 @@
 
 Satoshi's whitepaper was titled ``Bitcoin: A Peer-to-Peer Electronic Cash System.'' Seventeen years later, blockchain payment systems still differ from direct peer-to-peer cash exchange. Every transaction passes through miners or validators, and only a small minority of participants download multi-terabyte chain state for independent verification. Every transaction is also recorded on a public ledger. Physical cash, by comparison, is self-contained, transfers directly between parties, and is verified by the recipient alone, without third-party processing or recording. Blockchains replaced trusted institutions with decentralized validators while retaining intermediaries that observe every transaction, process every transfer, and maintain a common ledger.
 
-\medskip
-
 Validator processing constrains all economic activity on the ledger. Processing capacity limits throughput, and consensus time determines latency. Validator access to every transaction limits privacy. Competition for validator capacity determines fees, and control over inclusion permits censorship.
-
-\medskip
 
 Every Layer~1 in production, including Bitcoin, Ethereum, Solana, Sui, and Monad, uses this architecture with different trade-offs among decentralization, security, and scalability. Scaling approaches retain transaction intermediaries. Layer~2 rollups move execution off-chain but route transactions through sequencers that observe, order, and periodically settle them. Sidechains create separate ledgers with their own validator sets. Sharding partitions state while retaining validators within each shard.
 
@@ -55,11 +51,7 @@ Every Layer~1 in production, including Bitcoin, Ethereum, Solana, Sui, and Monad
 
 Unicity represents assets as self-contained cryptographic objects that recipients validate independently. Transactions occur directly between parties, without network broadcast, a block wait, or bidding for inclusion. The recipient is responsible for validation because it has a direct interest in the transaction's validity. The network proves uniqueness: the asset state being spent has not been spent before.
 
-\medskip
-
 Independent asset objects remove the shared-ledger capacity constraint. Transfer, validation, and logic execution are independent for each asset. This parallelism follows from the absence of shared state requiring coordination. Each asset has a separate execution context and interacts with other assets only as required by the application.
-
-\medskip
 
 The architecture supports final, private bilateral exchange and parallel execution without shared-state constraints. Applications can also coordinate settlement across multiple parties when required.
 
@@ -71,19 +63,13 @@ The principle that an asset can be validated by its recipient, with a public mec
 
 Chaum's electronic cash~\cite{chaum1983} established the structure in 1983. A payment is a self-contained object that the recipient verifies, and the only online step is a check that the coin has not already been spent. No ledger of transactions is required, and the payer's identity is hidden from the verifier by construction.
 
-\medskip
-
 The limitation was the checker. A single issuer performed the double-spend check, and that issuer could inflate the supply, censor a payment, or cease to operate, with no means for a user to detect the first two. Unicity retains Chaum's structure and replaces the trusted issuer with a permissionless layer whose every answer carries a proof, and whose own operation is proved correct each round to a consensus layer that the user can audit independently.
 
 \subsection{Single-Use Seals and Client-Side Validation}
 
 Todd's single-use seal~\cite{todd2016} is the abstraction that connects recipient-validated assets to a public chain. A seal is an object that can be closed over a message exactly once. Binding asset state to a seal makes double-spending impossible without breaking the seal's uniqueness, and the asset's history can then remain off-chain, validated only by the parties who hold it. RGB~\cite{rgb} and Taproot Assets~\cite{taprootassets} implement this over Bitcoin, binding state to Bitcoin outputs so that closing a seal means spending the corresponding output.
 
-\medskip
-
 The consequence is that the rate, cost, and latency of state transitions are those of the underlying chain. Closing a seal requires an on-chain spend, and that spend competes for block space with unrelated demand. Bundling several transitions of one contract into a single transaction amortizes the commitment but does not remove the dependency on an on-chain output being spent. Bitcoin was not designed as a seal registry, and using it as one inherits the throughput and fee characteristics it was designed for.
-
-\medskip
 
 Unicity's aggregation layer is a purpose-built seal registry. A round commits an entire batch of state transitions to a single certified root, so the consensus-layer cost attributable to one transition is a vanishing fraction of a root and a proof rather than an output spend. Capacity is increased by adding shards rather than by competing for a fixed supply of block space. The registry also proves, each round, that it preserved everything it had previously recorded, which is a property a general-purpose chain does not establish about seal semantics layered on top of it.
 
@@ -91,47 +77,25 @@ Unicity's aggregation layer is a purpose-built seal registry. A round commits an
 
 Intmax2~\cite{intmax2} occupies the closest position in the Ethereum ecosystem. It moves transaction data and balance proofs to the client, leaves block producers stateless and permissionless, and reduces the public footprint to a few bytes per transaction. The design goals overlap substantially with Unicity's.
 
-\medskip
-
 The difference is the base. Intmax2 is a rollup, so its settlement cost, its latency, and its data availability guarantees derive from Ethereum, and its security argument rests on Ethereum's consensus together with the validity of its own proofs. There is no L1 cost amortization. Unicity supplies its own consensus layer and its own root of trust, which allows the registry to be designed for this purpose alone: it serves non-inclusion proofs as a first-class output, it proves append-only consistency to consensus every round, and those per-round proofs fold recursively into a single fixed-size proof of the entire history that removes the validator set from the correctness argument entirely (Section~\ref{sec:trustless-agg}).
 
 \subsection{The Function of ZK Proofs}
 
 Unicity applies zero-knowledge proof systems to a narrower statement than rollups and privacy chains do. The proving cost follows from that choice.
 
-\medskip
-
 A ZK-rollup~\cite{polygonzkevm} proves that a virtual machine executed a block of transactions correctly, which requires arithmetizing an instruction set, storage tries, signature verification, and gas accounting. Unicity proves only that a tree changed in a permitted way. There is no in-circuit execution, no signature verification, and no contract interpretation, because transaction validation is performed off-chain by the parties with an economic interest in it.
-
-\medskip
 
 Privacy-oriented chains such as Zerocash~\cite{zerocash} use proofs to hide transaction contents, producing one proof per user transaction and paying an anonymity-set cost that grows with use. Unicity obtains privacy structurally, by never submitting the data, and uses proofs only for integrity. One batch proof per round amortizes over the whole round.
 
-\medskip
-
 Nullifier-tree constructions such as Tornado Cash~\cite{tornado} also prevent double-use of a one-time identifier, but the proof is produced by the user at withdrawal and the tree is an append-only log used for set membership. Unicity's registry is a keyed dictionary that answers both inclusion and non-inclusion, and its aggregate proof is produced once per round by the operator rather than once per transaction by the user.
 
-\medskip
-
 Certificate Transparency~\cite{rfc6962} gives the closest operational analogue for the consistency proof: an append-only log whose operator proves to auditors that a new state extends the previous one without rewriting it. Unicity adds a key-determined position, which turns double-spending into a key collision, and succinct compression of the per-round witness. The sparse Merkle tree constructions that make deep-keyed dictionaries practical are due to Dahlberg, Pulls, and Peeters~\cite{dahlberg2016}.
-
-\subsection{Lineage}
-
-Unicity draws on two earlier systems.
-
-\medskip
-
-KSI~\cite{ksi} established the round-based hash-tree aggregation model that the aggregation layer uses: client requests are aggregated into a per-round \emph{ephemeral} tree, the root is published, and each client receives a proof connecting its request to that root. KSI produces timestamps and signatures. It has no notion of a spent state, issues no non-inclusion proofs, and provides no double-spend semantics, because it was not built to transfer assets.
-
-\medskip
-
-Alphabill~\cite{alphabill} shares authorship with this work and the ideas contributed to the consensus layer (HotStuff-based~\cite{hotstuff} consensus and its pattern of a root committee certifying partition roots). The overall architecture differs. Alphabill partitions are replicated state machines whose validators execute user transactions, with traditional Merkle state tree (non-sparse). Alphabill has no client-side-validated execution layer. The Unicity Certificate carries a different, stronger semantics in Unicity, since it certifies an aggregation-layer root only after the consistency proof establishing append-only preservation has been verified.
 
 \subsection{Summary of Positions}
 
 \begin{table}[ht]
     \centering
-    \caption{Where asset state lives, what the public mechanism does, and what history correctness rests on}
+    \caption{Fundamental differences in approaches}
     \label{tab:sota}
     \small
     \begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
@@ -139,7 +103,7 @@ Alphabill~\cite{alphabill} shares authorship with this work and the ideas contri
         \textbf{System} &
         \textbf{Public mechanism} &
         \textbf{Cost per transition} &
-        \textbf{History correctness rests on} \\
+        \textbf{History correctness base} \\
         \midrule
         Chaum e-cash & Issuer checks for double-spending & Issuer capacity & The issuer \\
         \addlinespace
@@ -166,8 +130,8 @@ Unicity separates its functions into three layers, each proving correct operatio
         % Consensus layer (top)
         \node[diagram box, minimum width=13.4cm, minimum height=1.15cm,
               align=center] (con) at (0,0)
-            {\textbf{Consensus Layer} \quad BFT Core\\[1pt]
-             {\scriptsize No blockchain. State is the certified shard roots and the validator trust base.}};
+            {\textbf{Consensus Layer Validators}}; % \quad BFT Core\\[1pt]
+            % {\scriptsize No blockchain. State is the certified shard roots and the validator trust base.}};
 
         % Aggregation layer + EVM (middle)
         \node[diagram box emph, minimum width=9.1cm, minimum height=1.35cm,
@@ -185,7 +149,7 @@ Unicity separates its functions into three layers, each proving correct operatio
         \node[diagram box, minimum width=13.4cm, minimum height=1.15cm,
               align=center] (exe) at (0,-5.0)
             {\textbf{Execution Layer} \quad off-chain, peer-to-peer\\[1pt]
-             {\scriptsize wallets, agents, tokens, predicates. Transactions never leave the parties involved.}};
+             {\scriptsize wallets, agents, tokens, predicates. Transactions' data.}};
 
         % aggregation -> consensus (up), consensus -> aggregation (down)
         \draw[diagram arrow] (-4.5,-1.825) --
@@ -205,29 +169,21 @@ Unicity separates its functions into three layers, each proving correct operatio
         \draw[diagram double arrow] (4.75,-3.175) --
             node[diagram label, right, align=left] {bridged value} (4.75,-4.425);
     \end{tikzpicture}
-    \caption{The three layers and the enshrined EVM partition. Upward communication is limited to roots and proofs. The consensus layer secures the lower layers and certifies the EVM partition alongside the aggregation partitions within the same consensus system.}
+    \caption{The three layers and the enshrined EVM partition. Upward communication is limited to cryptographic state summaries and proofs. The consensus layer secures the lower layers and certifies the EVM partition alongside the aggregation partitions within the same distributed consensus system.}
     \label{fig:arch}
 \end{figure}
 
 The Consensus Layer consists of a Byzantine fault tolerant committee, the BFT~Core. Its cumulative persistent state contains the most recently certified shard roots, combined into one global root, and the trust base. The trust base records the validators and quorum rule for each configuration period. The core maintains no blockchain, blocks, transaction ordering, or user-facing state. Lower layers handle ordering and availability of user requests.
 
-\medskip
-
 The Aggregation Layer permanently records an identifier for every spent asset state. The identifier is a cryptographic hash of the state. A second attempt to spend the same state produces the same identifier and cannot be certified. The layer uses a distributed sparse Merkle tree partitioned by key prefix into parallel shards. It issues inclusion and non-inclusion proofs, together with a per-round proof that all previous entries were preserved.
 
-\medskip
-
 The Execution Layer executes transactions off-chain between peers. A token is a self-contained ledger containing its genesis, transfer history, validation rules, and certificates proving each step. Its holder transacts by sending it to a counterparty. The aggregation layer is consulted only to establish uniqueness and receives no information about the asset, amount, or parties.
-
-\medskip
 
 The Enshrined EVM is a certified partition with an account-based execution environment for governance, staking contracts, and the native currency. Its validator set and voting weights derive from the consensus layer's configuration, and execution requires authenticated input from that layer. It provides an internal channel without a bridge operator.
 
 \subsection{Layering for Optimal Efficiency}
 
 A blockchain has to discharge several distinct functions: agreement on a common view, prevention of double-spending, execution of transactions, ordering of transactions, validation of results, and availability of the data needed to validate them. Conventional designs bundle all of these into one replicated machine and then replicate the bundle at every layer. An Ethereum node runs a consensus client and an execution client together, with a mempool for ordering and a data-availability obligation for the whole chain state. A rollup (L2) above it repeats the arrangement with its own sequencer and its own execution environment, and settles into the layer below, thus, all the functions are repeated by each blockchain layer.
-
-\medskip
 
 \emph{Unicity assigns each function to exactly one place and gives each layer a single responsibility}. The layers are correspondingly thin. The consensus layer runs consensus: it has no execution client, no mempool, and no transaction state. The aggregation layer maintains one authenticated dictionary and nothing else: it performs no execution and reaches no agreement of its own. Execution, ordering, validation, and data availability leave the infrastructure entirely and are discharged by the transacting parties, p2p. Table~\ref{tab:layers} lists the assignment.
 
@@ -260,11 +216,7 @@ A blockchain has to discharge several distinct functions: agreement on a common 
 
 Conventional designs need a total order over transactions to resolve competing writes to shared state: when two transactions touch the same balance, the system must decide which came first. Unicity's assets share no state, so a global order has nothing to resolve. Only the order of a single asset's own transitions is meaningful, and the asset's internal hash chain fixes it, together with the rule that each state may be spent once. A sender orders its own transactions.
 
-\medskip
-
 Several desirable properties follow. There is no mempool, because there is no queue for inclusion. There is no sequencer, and no privileged position from which to reorder or exclude. There is no block-space auction, because there are no blocks to bid for. There is no protocol-level extractable value, because there is no point at which one party chooses the sequence of another party's transactions. Parallelism is limited by the number of shards rather than by contention, since transactions touching different assets never interact.
-
-\medskip
 
 Figuratively, Security ``flows downward'' and data ``flows upward'' in succinct way. The consensus layer secures everything beneath it while receiving only aggregate roots and proofs. Tokens are self-contained, so validating a token requires no external state. Validation belongs to the recipient, the party with a direct interest in the result, who is also the party that stores the assets it holds. There is no shared infrastructure needed for transaction validation.
 
@@ -272,11 +224,7 @@ Figuratively, Security ``flows downward'' and data ``flows upward'' in succinct 
 
 The BFT~Core is a bounded committee of validators running a Byzantine fault tolerant consensus protocol. In each round it receives certification requests from aggregation shards, checks that each request extends that shard's previously certified state, verifies the accompanying consistency proof, and issues a \emph{Unicity Certificate} over the updated global state.
 
-\medskip
-
 Consensus provides deterministic finality in a single round, without probabilistic settlement, confirmation depth, or a reorganization wait. An issued certificate is final and can be verified offline against the trust base without contacting a node.
-
-\medskip
 
 The core does not execute or order user transactions, or store a transaction ledger. The counterparties execute transactions themselves, and assets require no global order because they share no state. The core's work per round is proportional to the number of shards that advanced, independently of the number of transactions they processed. Transaction capacity can therefore increase by adding shards.
 
@@ -284,23 +232,15 @@ The core does not execute or order user transactions, or store a transaction led
 
 A Unicity Certificate authenticates a shard's root within the global state and carries the committee's quorum signature. Verification is self-contained: a recipient checks the certificate against the \emph{trust base}, an authenticated record of the validator set and quorum rule in force for a given configuration period. Because the trust base is versioned and its transitions are themselves certified, a client that has been offline can catch up from a recent checkpoint rather than replaying arbitrary history signed by keys that have since been retired.
 
-\medskip
-
 Proofs issued by the aggregation layer are delivered together with the certificate that authenticates the state they were drawn from. A recipient therefore receives, in one package, the evidence that a state was recorded and the evidence that the recording belongs to the single valid history.
 
 \subsection{Governance}
 
 Governance manages validator assignments, partition configuration, incentives, and protocol upgrades. It produces authenticated change records that consensus adopts. Possession of an operator key or access to a configuration interface is not, by itself, authority to change the validator set.
 
-\medskip
-
 Governance is a modular component. The consumers of its records depend on the record format and the handoff procedure, not on the process that produced them, so the selection mechanism can change without affecting the rest of the protocol. The network selects validators by Proof of Stake.
 
-\medskip
-
 Staking contracts execute on the enshrined EVM partition, and their certified output is authoritative. Validators do not independently rerun the selection algorithm; they verify the certified result of the contract that ran it. A stake registry binds a staking account to its owner and consensus keys, bonded self-stake, and status. Each epoch takes a snapshot at a scheduled boundary and elects validators by effective stake, up to a maximum set size, with ties broken canonically. Election fixes a validator's effective weight for the assignment and reserves the backing collateral. An unbond request queues an exit and cannot release collateral that still backs an active or committed assignment.
-
-\medskip
 
 The staking design imposes the following requirements.
 
@@ -312,17 +252,13 @@ The staking design imposes the following requirements.
     \item Collateral remains reserved beyond the assignment. A reservation ends only after an authenticated acknowledgment that the stake no longer backs any active or prepared assignment. Withdrawal requires a further hold period exceeding the time allowed for evidence production, inclusion, and processing. Key rotation, delegation changes, and queued withdrawals do not remove liability for an earlier offense.
 \end{itemize}
 
-Weighted consensus, the epoch handoff, objective slashing, retirement protection, forced inclusion, and checkpoint recovery together guarantee the accountability and economic security of the validator set.
+Stake-eighted consensus, the epoch handoff, objective slashing, retirement protection, forced inclusion, and checkpoint recovery together guarantee the accountability and economic security of the validator set.
 
 \section{Aggregation Layer}
 
 The aggregation layer maintains a global, append-only record of spent asset states. A client submits a state identifier and the data authorizing its spend. The layer returns a proof that the identifier is recorded or a proof that it is not yet recorded.
 
-\medskip
-
 The identifier is derived from the state itself, so its position in the tree is determined by its value. Two attempts to spend the same state produce the same key, and the second one finds the position already occupied. Double-spending becomes a key collision rather than a condition that has to be detected by comparing transactions.
-
-\medskip
 
 The structure is a path-compressed radix variant of a sparse Merkle tree. Inclusion proofs are logarithmic in tree capacity and remain valid indefinitely because the tree is append-only. Non-inclusion proofs are valid only at the time of issue because the corresponding state may be spent later.
 
@@ -367,23 +303,15 @@ Keys partition across shards by prefix. Every key has exactly one shard whose id
 
 A heavily loaded shard is split by replacing its prefix with two child prefixes. The children receive the parent's entries according to the next bit of each key. Because internal nodes commit to the key regions beneath them, each child root is either an existing subtree of the parent or the canonical empty root. Retained nodes are not rehashed, and the certified history is not replayed. The split activates as a configuration change at an epoch boundary, after which the children update their states and prove transitions independently.
 
-\medskip
-
 Aggregate insertion capacity is the sum of the per-shard rates. Adding a shard adds storage, batching, and proving capacity without increasing the workload of existing shards. The BFT~Core's load grows with the number of shards that advanced in a round. Total capacity depends on deployment size, so the performance figures below are reported per shard.
 
 \subsection{Proofs}
 
 The layer delivers three kinds of evidence.
 
-\medskip
-
 An inclusion proof establishes that a given tree position contains a given value. It confirms transaction registration and excludes acceptance of another transaction spending the same state. Since the tree is append-only, the proof remains valid for the token's lifetime.
 
-\medskip
-
 A non-inclusion proof establishes that a position is empty and the corresponding state is unspent at the time of issue. It provides no guarantee about later states.
-
-\medskip
 
 A Unicity Certificate is issued by the consensus layer and relayed by the aggregation layer. It certifies that the proof refers to the most recent tree state in the single valid history of updates, excluding alternative histories with different spends. Every inclusion or non-inclusion proof is accompanied by its authenticating certificate. A proof contains a path within the shard's tree and a short path from the shard root to the global root. Neither part grows with throughput.
 
@@ -391,15 +319,9 @@ A Unicity Certificate is issued by the consensus layer and relayed by the aggreg
 
 In each round, a shard must prove that no previously recorded entry was deleted or modified and that every new entry was placed at the position determined by its key. Both requirements are necessary. Omitting the placement requirement permits an attack in which entries are inserted at positions that do not correspond to their keys.
 
-\medskip
-
 With hashes alone, the witness size grows with the insertion batch, eventually limiting throughput by the consensus layer's network bandwidth. A zero-knowledge proof system removes this constraint. The shard proves the round's transition as a ZK statement whose public inputs are the previous and resulting roots, with the batch itself supplied as private witness, so the proof size is effectively independent of how many insertions it covers.
 
-\medskip
-
 The instantiation is a STARK over a small prime field, built on a custom Algebraic Intermediate Representation and the Plonky3 toolkit~\cite{plonky3}. It is transparent, requiring no trusted setup and no structured reference string, and rests on hash assumptions alone, which also makes it plausibly post-quantum. The construction is applied for succinctness and integrity rather than for witness hiding, since the aggregation layer holds no confidential inputs to protect.
-
-\medskip
 
 The statement is far narrower than a rollup's, for the reasons given in Section~\ref{sec:sota}, and the proving cost follows from that narrowness.
 
@@ -437,8 +359,6 @@ The consensus layer verifies per-round consistency proofs before certification, 
 \subsection{The Aggregate Statement}
 
 Fix the network's genesis configuration, which commits to the initial sharding scheme, the empty shard roots, and the genesis trust base. For each round, the statement asserts that every shard either did not advance or proved its transition; that any change to the sharding scheme was a legitimate split whose children were seeded from the parent's certified subtrees; that the global root is the one determined by the scheme and the current shard roots; and that the round was appended to an accumulating commitment over the sequence of certified rounds.
-
-\medskip
 
 The aggregate ZK statement asserts that this held for every round from genesis to the present. Its public inputs are the network identifier, the genesis digest, the round number, the current scheme commitment, the current global root, and the accumulator. Everything else, including the intermediate roots, the per-round shard proofs, and the split witnesses, is private witness. Statement and proof are therefore constant in size regardless of how many rounds have elapsed or how many shards exist.
 
@@ -489,11 +409,7 @@ The ZK statement excludes validator signatures because consistency is a property
 
 The construction is incrementally verifiable computation~\cite{valiant2008}: a step relation applied from a known initial state, carrying a succinct proof forward. Each step verifies the previous aggregate proof inside the circuit, together with the shard proofs of the rounds in its span, and commits the updated public inputs. Recursion is instantiated on a zkVM~\cite{sp1}, whose proof composition makes in-circuit verification of another proof a primitive operation at a cost independent of the computation already folded. In practice a step folds a contiguous span of rounds rather than one, and the resulting chain is checkpointed at a protocol-defined cadence, with only the latest checkpoint needing to be retained or distributed.
 
-\medskip
-
 Proof production is a computation over public data. It requires no private inputs, authorization, or privileges, and anyone can verify the result. Any party with a mirror of the round archive can extend the latest checkpoint and publish the result. Acceptance requires a valid proof whose public inputs extend the recorded checkpoint. Validators already retain the artifacts needed for proving but have no exclusive proving capability. If no prover runs, ordinary certificate-based operation is unaffected; only audit latency increases.
-
-\medskip
 
 Aggregation is more expensive than producing the shard proofs it consumes, so it remains off the critical path. It runs behind the certified tip at checkpoint cadence and does not delay rounds.
 
@@ -501,11 +417,7 @@ Aggregation is more expensive than producing the shard proofs it consumes, so it
 
 The serving and audit planes have separate availability requirements and failure modes.
 
-\medskip
-
 The serving plane contains each shard's tree data for answering client requests for inclusion and non-inclusion proofs. It is replicated within the shard's validator cluster. Loss of this data affects shard liveness without compromising system safety: certified roots and append-only consistency persist independently of individual replicas.
-
-\medskip
 
 The audit plane consists of the per-round artifacts consumed by the aggregation prover. These are public and published to a content-addressed archive that anyone may mirror. Archive growth is proportional to the number of shard transitions, at roughly a megabyte per round, independently of transaction volume. After a span of rounds has been aggregated into an accepted checkpoint and sufficient time has passed for independent re-verification, its artifacts may be pruned. The aggregate proof then provides the corresponding evidence.
 
@@ -517,11 +429,7 @@ Unicity supports two modes of operation that differ in what the user is willing 
 
 A maximalist user assumes nothing about the validator set. Their entire root of trust is obtained once, from the software distribution: the network's identifying parameters and the digest of the aggregation program's verifying key.
 
-\medskip
-
 To audit, they obtain the latest checkpoint from any source, trusted or not, and verify it. This takes milliseconds to seconds on ordinary hardware. For each certificate in the history of a token they have received, they check that the round it references is a member of the sequence committed by the checkpoint, which is a short path. That confirms both that the key was routed under the authenticated sharding scheme and that the root anchoring its inclusion proof lies on the proven, non-forking history. Certificates younger than the latest checkpoint are validated against the trust base in the ordinary way and re-audited when the next checkpoint arrives.
-
-\medskip
 
 If such a user ever encounters two verifying checkpoints, or a verifying checkpoint and a quorum-signed certificate, that assign different global roots to the same round, that pair is publishable evidence of equivocation, attributable to specific signing keys.
 
@@ -533,23 +441,11 @@ A practical user assumes economic security of the PoS Consensus Layer and obtain
 
 Under collision resistance of the hash function and soundness of the proof systems, the proven history has two properties independent of assumptions about the validator set. Every round satisfies append-only consistency: no recorded state was deleted, modified, or recorded again, so the history cannot represent a double-spend. The history is also linear, with each round extending its predecessor.
 
-\medskip
-
 Consensus Layer guarantees the liveness and uniqueness of the certification tip. Liveness requires continued round certification and artifact availability. Tip uniqueness requires that a quorum not sign two divergent, internally consistent continuations. No proof system can exclude this signing behavior, although conflicting artifacts provide detectable and attributable evidence. Cryptography establishes the correctness of the recorded history; immediate progress and a single live tip retain the usual quorum assumption.
 
 \section{Access and Fees}
 
-An aggregation gateway sells subscriptions denominated in stable currency. Subscribers submit state transitions without individual transaction charges. Gateway revenue is shared among aggregator operators to fund horizontal capacity.
-
-\medskip
-
-The marginal cost of an additional transaction is close to zero. The architecture has no blocks or shared asset state, so it requires neither a block-space auction nor coordination over shared state. An additional insertion adds one entry to a batch already being proved. Other designs use per-transaction auctions to allocate capacity under congestion; Unicity increases capacity by adding shards.
-
-\medskip
-
-Automated workloads require predictable settlement costs. An agent transacting continuously cannot budget against fees that vary with unrelated demand, and any per-transaction charge increases the cost of high-frequency workloads. A subscription makes cost predictable and independent of volume.
-
-\medskip
+An aggregation gateway charges gas fees; one purchase buys a certain amount of transactions for a certain time. Revenue is shared among aggregator operators to fund the capacity. Dynamic pricing is not used to keep the fees predictable.
 
 The enshrined EVM partition charges gas in the native currency because its contract execution consumes a shared resource subject to contention.
 
@@ -557,19 +453,11 @@ The enshrined EVM partition charges gas in the native currency because its contr
 
 The absence of global state imposes the following trade-offs.
 
-\medskip
-
 Global atomicity is unavailable. Operations such as flash loans that require a single observable global state at a given instant have no equivalent. Settlement is local to the parties in an interaction.
-
-\medskip
 
 Ordering exposure is limited to applications that introduce shared state. Bilateral transfers between willing parties cannot be front-run because there is no mempool to observe or block producer to bribe. For a contended object, such as an automated market maker's shared reserves, the party that successfully advances the object orders the applied trades. Slippage bounds and a guaranteed refund path limit losses per trade. The enshrined EVM uses conventional EVM transaction ordering.
 
-\medskip
-
 Composability requires explicit coordination. On a shared ledger, any contract can read and write any other contract's state. In Unicity, parties must coordinate and verify the data they receive. This reduces convenience while avoiding contention.
-
-\medskip
 
 Traceability is optional. Without a public ownership ledger, token history is visible only to parties that receive it. Regulated applications specify traceability requirements through token-type issuance and transfer rules enforced by every recipient. They do not depend on retrospective inspection of a public chain.
 
