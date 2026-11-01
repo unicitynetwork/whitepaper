@@ -286,159 +286,75 @@ Compression is optional and runs in the background, off the payment preparation 
 
 \section{The Enshrined EVM Partition}\label{sec:evm}
 
-One network partition runs an account-based execution environment compatible with the Ethereum Virtual Machine. The consensus layer certifies its state through the same interface used by aggregation partitions. It hosts governance, staking contracts, and the native currency.
+The enshrined EVM brings Ethereum-compatible smart contracts into the same security system as Unicity's peer-to-peer tokens. Developers can use familiar contracts, wallets and tooling for applications that need shared, ordered state, while ordinary token transfers retain the execution layer's privacy and independent processing.
 
-The partition is enshrined because its validator set and voting weights derive from the consensus layer's configuration, and execution requires authenticated input from that layer. It is an internal channel within the same system, with no bridge operator. Aggregation partitions operate independently, so EVM delays do not delay certification of unrelated shards.
+\begin{itemize}
+    \item \textbf{One security system.} The EVM shares Unicity's validator set and certified consensus state. Contracts can authenticate token-state proofs directly, enabling transfers between the two execution models without an additional bridge committee or trusted relay.
+    \item \textbf{Independent transaction capacity.} Aggregation shards operate independently of the EVM partition. EVM congestion does not impose a block-space bottleneck on unrelated peer-to-peer token transfers.
+    \item \textbf{Native protocol functions.} Governance, staking and asset vaults can use Unicity certificates inside contracts. Certified locks within this partition require no external-chain confirmation wait.
+\end{itemize}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[diagram]
-        \node[diagram box emph, minimum width=11.6cm, minimum height=0.95cm] (core) at (0,2.4)
-            {\textbf{Consensus Layer} \quad {\scriptsize orders and certifies}};
-
-        \node[diagram box, minimum width=3.0cm, minimum height=1.5cm, align=center,
-              fill=uniFillB, draw=uniAccent] (seal) at (-3.9,0.05)
-            {\textbf{Seal}\\\textbf{transaction}\\[2pt]{\scriptsize privileged,}\\{\scriptsize always first}};
-        \node[diagram box, minimum width=3.6cm, minimum height=1.5cm, align=center] (user) at (0.2,0.05)
-            {\textbf{User transactions}\\[2pt]{\scriptsize ordinary EVM}\\{\scriptsize execution}};
-        \node[diagram box, minimum width=3.0cm, minimum height=1.5cm, align=center] (res) at (4.4,0.05)
-            {\textbf{New state}\\\textbf{root}\\[2pt]{\scriptsize and block hash}};
-
-        \draw[diagram arrow] (seal) -- (user);
-        \draw[diagram arrow] (user) -- (res);
-
-        \draw[diagram arrow] (-3.9,1.925) -- node[diagram label, left, align=right]
-            {certified root origin:\\round, time, tree root} (-3.9,0.8);
-        \draw[diagram arrow up] (4.4,0.8) -- node[diagram label, right, align=left]
-            {certification request} (4.4,1.925);
-
-        \node[diagram box faint, minimum width=11.6cm, minimum height=0.7cm] (note) at (0,-1.5)
-            {\scriptsize Contracts read protocol authority only from state written by the seal transaction. Never from a local clock, file, or network response.};
-        \draw[diagram connector, draw=uniLine!45] (seal.south) -- (seal.south |- note.north);
-        \draw[diagram connector, draw=uniLine!45] (user.south) -- (user.south |- note.north);
-    \end{tikzpicture}
-    \caption{One EVM block. A privileged system operation imports the certified consensus state before any user transaction runs, and the resulting state root is certified in turn.}
-    \label{fig:evm}
-\end{figure}
-
-\subsection{The Seal Feed}
-
-Before any user transaction executes, the environment performs exactly one protocol operation that imports the consensus layer's certified state: the round, the epoch, the reference time, the global tree root, and the committed configuration transitions needed to interpret them. Its origin, destination, data, and position are fixed by the protocol, and no private key confers the right to originate it. If the input is missing, forged, stale, or inconsistent, the block is invalid.
-
-A contract obtains protocol authority only from state written by this operation. Execution never reads a node-local trust base, clock, file, or network response. Permissionless certificate verification therefore cannot advance the privileged clock or activate a validator set.
-
-\subsection{Partition Functions}
-
-The partition executes staking contracts whose certified output is adopted by the consensus layer. Validators verify the certified contract result without independently rerunning the election algorithm.
-
-Contracts can call three consensus primitives at fixed addresses with deterministic cost: verification of a complete Unicity Certificate against authenticated trust-base state, verification of a canonical consensus vote including voting metadata, and verification of an inclusion proof against a supplied authenticated root. These functions allow contracts to verify aggregation-layer state directly. The slashing contract can accept evidence from anyone, and the bridge vault can verify redemptions natively.
-
-A bridge vault deployed in this partition authenticates locks through a certificate and a storage proof, without waiting for another chain's probabilistic finality. The two execution models share one root of trust, reducing the work required for transfers between them.
-
-EVM-compatible contracts, wallets, and development tools can be used for application components requiring shared state.
+This lets an application combine shared contract state with direct token settlement within one network.
 
 \subsection{Native Currency}
 
-UCT is the native currency used for gas, bonded stake, and rewards. Its supply is allocated at genesis, and protocol execution creates no additional currency. Supply therefore equals the genesis allocation less burns. There is no mining, issuance schedule, or earlier supply to migrate.
-
-Staking rewards are transfers from an allocated pool rather than new issuance. Slashing transfers collateral to the treasury and neither creates nor destroys currency. Where UCT is represented in another form, as a wrapped contract token for composability or as an execution-layer token claim backed by currency held in a vault, neither representation increases supply, and the accounting keeps the backing from being counted twice.
-
-Custody, withdrawal accounting, allocation, and vault contracts are immutable. Stake custody and its slashing and exit rules are separate from election policy. Election policy changes therefore cannot authorize arbitrary withdrawals or slashing. Parameter governance confers no treasury spending authority.
+UCT pays EVM gas, backs validator stake and funds rewards. Its supply is allocated at genesis, and protocol execution creates no additional currency. Staking rewards come from an existing allocation; slashing transfers collateral to the treasury. Representing UCT as a wrapped contract token or a peer-to-peer token does not increase supply, because each representation is backed by existing currency.
 
 \section{Bridging}\label{sec:bridging}
 
-Bridges are a common source of asset losses, almost always through compromise or action by an operator, committee, or multisig. Unicity's bridge uses none of these in either direction.
+Unicity brings external assets into its peer-to-peer economy without appointing bridge signers or giving an operator discretion over deposits. Holders can transfer those assets with Unicity's privacy and scalable transaction capacity, while recipients independently verify their backing. Withdrawal is authorized by cryptographic evidence checked by the vault contract.
 
 \begin{figure}[htbp]
     \centering
     \begin{tikzpicture}[diagram]
-        % external chain column
-        \node[diagram box ext, minimum width=4.0cm, minimum height=1.15cm, align=center]
-            (vault) at (-4.6,0) {\textbf{Vault}\\{\scriptsize pooled custody, external chain}};
-        \node[diagram box ext, minimum width=4.0cm, minimum height=0.8cm, align=center]
-            (acc) at (-4.6,-1.85) {\textbf{Nullifier root}\\{\scriptsize one value on chain}};
-        \draw[diagram connector, draw=uniWarn!70] (vault) -- (acc);
+        \node[diagram box ext, minimum width=4.0cm, minimum height=1.15cm,
+              align=center] (vault) at (-4.6,0)
+            {\textbf{External-chain vault}\\{\scriptsize assets locked under fixed rules}};
+        \node[diagram box ext, minimum width=4.0cm, minimum height=1.15cm,
+              align=center] (release) at (-4.6,-2.1)
+            {\textbf{Verified payout}\\{\scriptsize to the committed recipient}};
+        \draw[diagram connector] (vault.south) -- (release.north);
 
-        % unicity column
-        \node[diagram box emph, minimum width=4.2cm, minimum height=1.15cm, align=center]
-            (tok) at (4.6,0.75) {\textbf{Unicity token}\\{\scriptsize backing proof in its genesis}};
-        \node[diagram box, minimum width=4.2cm, minimum height=1.15cm, align=center]
-            (burn) at (4.6,-1.85) {\textbf{Burn}\\{\scriptsize commits recipient and amount}};
+        \node[diagram box emph, minimum width=4.2cm, minimum height=1.15cm,
+              align=center] (tok) at (4.6,0)
+            {\textbf{Unicity token}\\{\scriptsize backing verified by each recipient}};
+        \node[diagram box, minimum width=4.2cm, minimum height=1.15cm,
+              align=center] (burn) at (4.6,-2.1)
+            {\textbf{Certified burn}\\{\scriptsize fixes recipient and amount}};
 
-        % bridge in
-        \draw[diagram arrow] (vault.east) -- node[diagram label, above, align=center]
-            {\textbf{in:} lock, then mint against\\a proof every recipient checks} (tok.west);
-        % bridge out
-        \draw[diagram arrow up] (burn.west) -- node[diagram label, below, align=center]
-            {\textbf{out:} one succinct proof\\releases a batch of burns} (acc.east);
-        \draw[diagram arrow] (tok.south) -- node[diagram label, right, align=left]
-            {redeem} (burn.north);
-
-        \node[diagram caption, text width=14.0cm, align=center] at (0,-3.0)
-            {The bridge requires no operator, committee, or challenge window. The vault releases funds only against a valid proof.
-             The prover can delay release but cannot alter the recipient or amount.};
+        \draw[diagram arrow] (vault.east) --
+            node[diagram label, above, align=center] {lock and mint} (tok.west);
+        \draw[diagram arrow] (tok.south) --
+            node[diagram label, right] {redeem} (burn.north);
+        \draw[diagram arrow up] (burn.west) --
+            node[diagram label, below, align=center] {prove the burn; pay once} (release.east);
     \end{tikzpicture}
-    \caption{Bridging in both directions. Entry is authorized by a proof that recipients check; exit is authorized by a proof the vault checks for constant cost.}
+    \caption{Assets enter against verified backing and leave against a verified burn. The bridge requires no privileged signer, and a proof producer cannot change the recipient or amount.}
     \label{fig:bridge}
 \end{figure}
 
-\subsection{Bringing an Asset In}\label{sec:bridge-in}
+\subsection{Verifiable Backing and Redemption}\label{sec:bridge-in}
 
-To bridge an asset into Unicity, a party calls the external-chain vault. The vault places the asset in pooled custody, assigns a lock number, and emits an event committing to the representing Unicity token's identifier, the recipient's spending condition, and the amount. The Unicity token is then minted with a reason referencing that lock.
+To bring an asset in, a holder locks it in the external vault and creates a Unicity token tied to that deposit. Every recipient checks that the lock is final, matches the token's value and ownership, and backs only that token. A token without valid backing is rejected even if someone obtained certification for its mint. Splitting preserves the total backed value.
 
-Permissionless minting alone establishes no backing. Every recipient runs the type's reason verifier. It confirms that a final lock with the specified number exists for the configured vault, asset, and chain, and that the committed identifier, recipient condition, and amount exactly match the genesis. These checks enforce the following properties:
+To redeem, the holder burns the token, fixing the external recipient and amount. A proof establishes that the token was valid and backed, and that the burn has not already been redeemed. The vault checks the evidence and pays once. A Unicity burn is final when certified, and the bridge adds no challenge period; external deposits and payouts still follow the external chain's finality rules.
+
+\subsection{What the Holder Can Verify}
 
 \begin{itemize}
-    \item A token without a matching final lock fails verification and is rejected.
-    \item One lock funds exactly one token. The lock commits to the token identifier, which determines the single state at which its genesis is recorded.
-    \item The lock commits to the recipient's spending condition. Anyone may construct the genesis, but only the intended recipient can spend the resulting token.
-    \item The declared value must equal the locked amount, preventing inflation.
-    \item The chain, vault, and asset must match the pinned configuration, excluding unauthorized contracts.
-    \item The lock must be final on the external chain, excluding reversed deposits.
+    \item \textbf{Backing without reliance on an issuer's promise.} Recipients verify the locked assets themselves. Conservation rules prevent splits from creating additional claims on the same backing.
+    \item \textbf{No privileged proof producer.} Anyone holding the necessary token data can produce a redemption proof. A proving service cannot redirect the payment, change its amount or authorize a second withdrawal.
+    \item \textbf{Immutable release conditions.} The vault's verification rules are fixed at deployment. Even the deployer cannot substitute a rule that releases assets to another party.
+    \item \textbf{Efficient verification.} One succinct proof can cover a batch of redemptions, with proof-verification cost independent of the histories it covers. The contract's record for preventing repeated redemption remains compact as usage grows.
 \end{itemize}
 
-Accepting an external deposit requires waiting for finality, since a chain reorganization could undo the lock after the token begins circulating. Each verifier enforces this wait individually; it is not a global condition attached to the token. A party minting to a condition it already controls need not wait because it knows whether its own deposit exists. The wait applies to the first party that did not witness the lock.
+These guarantees rely on sound proofs, correct vault contracts, authenticated Unicity certificates and the external chain's finality. Bridge administrators and proof producers add no authority over the holder's assets.
 
-\subsection{Taking an Asset Out}
+\subsection{Redemption Without a Proving Service}\label{sec:redemption}
 
-A Unicity burn is final upon certification and can be verified offline against the trust base, without further waiting or a node query. Replaying token history is too expensive for the vault contract. A succinct zero-knowledge validity proof, a SNARK verified on the external chain, replaces this history-dependent check with a single constant-cost verification.
+The vault also supports direct verification of the same redemption conditions. Supported token types are constrained so every admitted history can be checked within the external chain's execution limits. If the succinct prover is unavailable, a holder can use this more expensive path. Redemption therefore does not depend on the continued operation of a particular proving service. A new vault version requires ordinary redemption and re-deposit, preserving the existing vault's fixed release conditions.
 
-Replay is prevented by an accumulator whose root is the only bridge state the external chain stores. The nullifier of a burn derives from its certified state, which the aggregation layer records at most once, so it is globally unique by the same mechanism that prevents double-spending. A release proves the nullifier is absent from the accumulator and inserts it, and the vault advances its stored root. The on-chain state required for replay prevention is therefore one value, regardless of how many redemptions have occurred, and anyone can rebuild the accumulator from the external chain's own transaction history.
+\subsection{Transfers Within Unicity}
 
-One proof can cover a batch of burns. It establishes that a single recent certificate anchors every involved transition. Each token must pass full verification and end in a burn committing to the stated recipient and amount. Each amount must trace through split conservation to a genesis backed by a lock recorded by the vault. The proof also establishes that each nullifier was absent and has now been inserted.
+The same approach connects peer-to-peer tokens with the enshrined EVM partition. Both sides share Unicity's consensus and finality, so transfers need no additional bridge committee, foreign light client or external-chain confirmation wait. UCT can move between contract-based applications and direct token payments without creating additional supply.
 
-The vault verifies the proof, checks its configuration and the allow-listed trust base, and requires the accumulator to match its stored root. It confirms each referenced lock against its records, advances the root, and pays. No external query is required because backing was committed locally when the asset was locked.
-
-\subsection{Redemption Paths}\label{sec:redemption}
-
-A redemption is admitted by a relation: the statement that a burn is authentic, backed, unspent, and destined for the stated recipient. The vault admits exactly one such relation, fixed at deployment. Two independent mechanisms discharge it.
-
-The direct path re-runs token verification in the vault contract. It costs gas proportional to the token's history and is therefore bounded in the size of history it can accept, but it depends on nothing beyond the contract's own code and the pinned trust base.
-
-The succinct path verifies one zero-knowledge proof at constant cost, covering a batch of burns and histories of any length. It is the efficient path and the one ordinary redemptions use.
-
-Both paths implement the same admitted relation and differ only in resource limits. Immutability of the verification key is therefore safe rather than hazardous. A bridged token type admits only operations that the direct verifier can discharge within the contract's limits, so every token the type can produce is redeemable without the succinct path. The succinct proof removes a cost, not a dependency. A token type is never permitted to admit a history shape on the expectation that a future prover will be able to handle it, because that would make redemption contingent on software that does not yet exist.
-
-This closes the failure mode that an immutable verifier would otherwise introduce. If the proving relation were found to be defective, redemptions would continue on the direct path while a new vault is deployed, and value would migrate by ordinary redemption and re-deposit. It would not be stranded behind a contract that can no longer authorize anything. Immutability is what prevents a party from substituting a relation that releases funds it should not; the second path is what prevents that immutability from becoming a single point of failure.
-
-\subsection{Internal Bridging}
-
-When the settlement chain is the enshrined EVM partition of the same network, the bridge connects two execution models that already share a root of trust. This is the path the native currency takes between the EVM, where it is allocated and where it pays gas, and the execution layer, where it circulates as a token.
-
-Sharing the root of trust removes the costs that make external bridging slow. A lock on an external chain must be waited out, because that chain's consensus is probabilistic and a reorganization could undo it. A lock on the enshrined partition is authenticated by a Unicity Certificate together with an account and storage proof, and a certificate is final in the round that issues it. There is no confirmation wait, because there is no reorganization to wait out.
-
-The vault obtains its trust-base context from the mandatory system feed described in Section~\ref{sec:evm} rather than from an allow-listed foreign trust base that someone must maintain. Neither side needs a light client for the other, because neither side is foreign. A recipient authenticates the root history from its own checkpoint, which it already does for every other token it holds.
-
-The accounting is kept separate and is not permitted to overlap. Native custody, outstanding backing, and unpaid withdrawal credits are tracked as distinct quantities. Neither the wrapped contract representation nor the execution-layer token claim adds native supply, and the backing behind them is not counted twice.
-
-\subsection{Bridge Security Properties}
-
-Solvency follows from the bring-in checks of Section~\ref{sec:bridge-in} together with split verification: every circulating token is backed by an equal lock, and children never exceed their parent, so the sum of valid burns cannot exceed the sum of locks.
-
-Double release is excluded because the nullifier is unique, a release both proves its absence and inserts it, and the vault gates on its stored root. A replayed proof fails because the root has moved, and a freshly built one cannot prove absence of something already inserted.
-
-Authenticity is enforced inside the circuit, which embeds full token verification against the pinned trust base, so a forged or non-final burn is unrepresentable under the soundness of the proof system.
-
-The proof producer is not trusted. It cannot alter the recipient or amount fixed in the certified burn, or fabricate a release. It can delay proof production, but any party holding the burned token can produce the proof independently.
-
-The verification key is immutable after vault deployment, preventing any party, including the deployer, from substituting a different proving relation. Correcting or extending that relation therefore requires a new vault, and value held under the old configuration is returned under the old relation, by either of the two paths of Section~\ref{sec:redemption}.
