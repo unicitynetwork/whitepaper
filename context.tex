@@ -1,0 +1,121 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Discussion}\label{part:context}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Related Work}\label{sec:sota}
+
+Unicity builds on recipient-validated electronic cash, client-side validation and succinct proofs. Its contribution is to combine these ideas with a purpose-built, horizontally scalable settlement network. The comparisons below explain how that choice changes capacity, cost and independent verification.
+
+\subsection{Recipient-Validated Assets}
+
+Chaum's electronic cash~\cite{chaum1983} established the structure in 1983. A payment is a self-contained object that the recipient verifies, and the only online step is a check that the coin has not already been spent. No ledger of transactions is required, and the payer's identity is hidden from the verifier by construction.
+
+The limitation was the checker. A single issuer performed the double-spend check, and that issuer could inflate the supply, censor a payment, or cease to operate, with no means for a user to detect the first two. Unicity retains Chaum's structure and replaces the trusted issuer with a permissionless layer whose every answer carries a proof, and whose own operation is proved correct each round to a consensus layer that the user can audit independently.
+
+\subsection{Single-Use Seals and Client-Side Validation}
+
+Todd's single-use seal~\cite{todd2016} is the abstraction that connects recipient-validated assets to a public chain. A seal is an object that can be closed over a message exactly once. Binding asset state to a seal makes double-spending impossible without breaking the seal's uniqueness, and the asset's history can then remain off-chain, validated only by the parties who hold it. RGB~\cite{rgb} and Taproot Assets~\cite{taprootassets} implement this over Bitcoin, binding state to Bitcoin outputs so that closing a seal means spending the corresponding output.
+
+The consequence is that the rate, cost, and latency of state transitions are those of the underlying chain. Closing a seal requires an on-chain spend, and that spend competes for block space with unrelated demand. Bundling several transitions of one contract into a single transaction amortizes the commitment but does not remove the dependency on an on-chain output being spent. Bitcoin was not designed as a seal registry, and using it as one inherits the throughput and fee characteristics it was designed for.
+
+Unicity's aggregation layer is a purpose-built seal registry. A round commits an entire batch of state transitions to a single certified root, so the consensus-layer cost attributable to one transition is a vanishing fraction of a root and a proof rather than an output spend. Capacity is increased by adding shards rather than by competing for a fixed supply of block space. The registry also proves, each round, that it preserved everything it had previously recorded, which is a property a general-purpose chain does not establish about seal semantics layered on top of it.
+
+\subsection{Off-Chain State with a Compact Public Registry}
+
+Intmax2~\cite{intmax2} occupies the closest position in the Ethereum ecosystem. It moves transaction data and balance proofs to the client, leaves block producers stateless and permissionless, and reduces the public footprint to a few bytes per transaction. The design goals overlap substantially with Unicity's.
+
+The difference is the base. Intmax2 is a rollup, so its settlement cost, its latency, and its data availability guarantees derive from Ethereum, and its security argument rests on Ethereum's consensus together with the validity of its own proofs. Unicity supplies its own consensus layer and its own root of trust, which allows the registry to be designed for this purpose alone: it serves non-inclusion proofs as a first-class output, it proves append-only consistency to consensus every round, and those per-round proofs fold recursively into a single fixed-size proof of the entire history that removes the validator set from the correctness argument entirely (Section~\ref{sec:trustless-agg}).
+
+\subsection{The Function of ZK Proofs}
+
+For spent-state recording, Unicity applies zero-knowledge proof systems to a narrower statement than rollups and privacy chains do. The proving cost follows from that choice. Token-history compression and proof-based spending conditions are separate uses at the execution layer.
+
+A ZK-rollup~\cite{polygonzkevm} proves that a virtual machine executed a block of transactions correctly, which requires arithmetizing an instruction set, storage tries, signature verification, and gas accounting. Unicity's registry proof establishes only that a tree changed in a permitted way. There is no in-circuit execution, no signature verification, and no contract interpretation, because transaction validation is performed off-chain by the parties with an economic interest in it.
+
+Privacy-oriented chains such as Zerocash~\cite{zerocash} use proofs to hide transaction contents, producing one proof per user transaction and paying an anonymity-set cost that grows with use. Unicity obtains transaction privacy structurally, by never submitting the data, and uses registry proofs for integrity. One batch proof per round amortizes over the whole round.
+
+Nullifier-tree constructions such as Tornado Cash~\cite{tornado} also prevent double-use of a one-time identifier, but the proof is produced by the user at withdrawal and the tree is an append-only log used for set membership. Unicity's registry is a keyed dictionary that answers both inclusion and non-inclusion, and its aggregate proof is produced once per round by the operator rather than once per transaction by the user.
+
+Certificate Transparency~\cite{rfc6962} gives the closest operational analogue for the consistency proof: an append-only log whose operator proves to auditors that a new state extends the previous one without rewriting it. Unicity adds a key-determined position, which turns double-spending into a key collision, and succinct compression of the per-round witness. The sparse Merkle tree constructions that make deep-keyed dictionaries practical are due to Dahlberg, Pulls, and Peeters~\cite{dahlberg2016}.
+
+\subsection{Summary of Positions}
+
+\begin{table}[ht]
+    \centering
+    \caption{Fundamental differences in approaches}
+    \label{tab:sota}
+    \small
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
+        \toprule
+        \textbf{System} &
+        \textbf{Public mechanism} &
+        \textbf{Cost per transition} &
+        \textbf{History correctness base} \\
+        \midrule
+        Chaum e-cash & Issuer checks for double-spending & Issuer capacity & The issuer \\
+        \addlinespace
+        RGB, Taproot Assets & Bitcoin output spend closes a seal & One on-chain spend, at prevailing fees & Bitcoin consensus \\
+        \addlinespace
+        Intmax2 & Rollup contract records commitments & Amortized L1 data & Ethereum consensus and proof validity \\
+        \addlinespace
+        ZK-rollups & L1 verifies a proof of VM execution & Amortized L1 verification & L1 consensus and proof validity \\
+        \addlinespace
+        Unicity & Sharded registry records spent-state identifiers and proves append-only consistency & Amortized across a round; capacity added by sharding & Cryptography alone, through recursive aggregation \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The combination matters: recipients validate their own assets, settlement capacity grows through independent shards, and recursive proofs make the recorded history independently auditable. Immediate certification and network availability retain the consensus assumptions described in Section~\ref{sec:trust-models}.
+
+\section{Access and Fees}\label{sec:fees}
+
+An aggregation gateway sells a transaction allowance valid for a defined period. Revenue is shared among aggregator operators to fund capacity. Pricing does not use a per-transaction congestion auction, so an agent can budget for repeated payments without bidding for each transfer. Capacity can grow by adding shards as demand increases.
+
+The enshrined EVM partition charges gas in UCT because contract execution consumes shared capacity. Applications can use direct token transfers for routine payments and the EVM where shared state is useful, with the cost of each execution model kept distinct.
+
+\section{Trade-offs and Application Fit}\label{sec:tradeoffs}
+
+Independent token state makes private, parallel settlement possible. Applications choose where they need coordination, shared execution or additional disclosure.
+
+\textbf{Atomicity and composability.} Token transfers have no global state in which every application can execute atomically. Parties coordinate explicitly, using predicates for atomic swaps and other conditional exchanges. Applications needing shared contract state, including operations such as flash loans, can use the enshrined EVM with its conventional execution and gas costs.
+
+\textbf{Transaction ordering.} Bilateral transfers have no public mempool in which another trader can observe and front-run a payment. Applications that introduce contended state must also define how competing operations are ordered. The enshrined EVM uses conventional EVM transaction ordering.
+
+\textbf{Disclosure.} Transaction privacy keeps amounts and counterparties out of the public registry. Recipients still see the history needed to validate the assets they accept. Applications that require traceability can specify disclosure and transfer rules in their token type, enforced by every recipient.
+
+Table~\ref{tab:compshared} compares the peer-to-peer token model with shared-ledger execution. The enshrined EVM remains available within Unicity for applications that need the latter.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Design choices for peer-to-peer settlement}
+    \label{tab:compshared}
+    \small
+    \begin{tabular}{p{2.4cm}p{5.6cm}p{5.6cm}}
+        \toprule
+        \textbf{Property} & \textbf{Shared-ledger model} & \textbf{Unicity token transfers} \\
+        \midrule
+        Throughput & Bounded by block size and validator capacity & Horizontal: capacity is the sum over independent shards \\
+        \addlinespace
+        Finality & Depends on the consensus protocol & Deterministic, single round, one to two seconds \\
+        \addlinespace
+        Fees & Congestion pricing through a gas market & Prepaid transaction allowance; no congestion auction \\
+        \addlinespace
+        Verification & Validators, globally and publicly, on-chain & Recipients, locally and privately, off-chain \\
+        \addlinespace
+        Privacy & Transaction data is public by default; privacy needs additional mechanisms & Visible only to the parties; the network sees one identifier \\
+        \addlinespace
+        Atomicity & Global atomic operations are possible & Local settlement between parties; no global atomicity \\
+        \addlinespace
+        Composability & Universal and implicit & Explicit: parties coordinate and verify \\
+        \addlinespace
+        Client cost & Full verification requires network-wide state or history & A token and its proofs; a browser tab suffices \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\FloatBarrier
+\section{Settlement for the Agentic Economy}\label{sec:conclusion}
+
+An agent buying compute, querying a data service or paying another agent needs predictable costs, prompt settlement and evidence it can check itself. Unicity supports parallel payments, prepaid transaction budgets and local verification, while keeping commercial activity out of a public ledger.
+
+Programmable ownership enforces agreed payment conditions, including complex rules verified succinctly through STARK predicates. Trustless bridging brings external assets into these workflows without custodial bridge signers, and the enshrined EVM supplies shared contract execution where needed. An agent can control spending and verify received value without trusting its counterparties.

@@ -8,11 +8,7 @@ Sections~\ref{part:protocol} and~\ref{part:execution} described the settlement p
 
 In this paper, an \emph{agent} is an untrusted, potentially autonomous program that holds tokens. Counterparties accept its outputs after re-verification, without relying on the program or its operator.
 
-\medskip
-
 This definition is narrower than general usage and does not imply AI / machine learning. The platform's guarantees apply equally to agents using deterministic algorithms and LLMs. Both hold tokens, satisfy spending conditions, and produce results checked by counterparties. Cryptographic guarantees apply to settlement and do not establish the validity of the reasoning that led to it.
-
-\medskip
 
 A verifiable agent payment proves that value was transferred without double-spending. It does not establish whether the payment decision was correct. Section~\ref{sec:verifiable} in Section~\ref{part:execution} identifies which agent actions support verifiable execution and which require other assurances.
 
@@ -34,19 +30,13 @@ An agent shut down on one host can resume on another from its last verifiable st
 
 Machine payments differ from human payments in frequency, size, and how they are budgeted. An agent metering API calls, buying seconds of compute, or settling a data feed transacts at rates no human reaches, often for a fraction of a cent, against a spending limit its operator fixed in advance. Per-transaction charges fail on all three counts: cost grows without bound as volume rises, fees approaching the transferred value make small payments uneconomic, and a fee that moves with unrelated congestion cannot be budgeted.
 
-\medskip
-
 The subscription model of Part~\ref{part:protocol} answers these directly, since cost is independent of volume and of congestion. Two further properties matter specifically for agents. Transfers are private to the parties, so trading patterns, counterparties, and balances are not published to competitors by default. Verification is inexpensive enough for an agent to validate a received payment completely within its own process, without an external service in the path.
 
 \section{Payments Inside Web Requests}
 
 Most agent interactions are ordinary web requests for paid services, which makes the HTTP request the natural place to settle. The x402 protocol~\cite{x402} revives the unused HTTP 402 status code for this purpose and is the established approach.
 
-\medskip
-
 Under x402, a client requests a resource and the server answers 402 with its payment requirements: a scheme, a chain identifier, an asset contract address, a recipient address, a maximum amount, and an expiry. The client signs a token transfer authorization and retries the request with that authorization in a header. A facilitator then verifies the authorization, confirms that the amount and recipient match the server's terms, and settles the transfer on the underlying chain. Once settlement is confirmed, the server returns the resource.
-
-\medskip
 
 The design is a sound response to the constraints of a shared ledger. Those constraints are what produce its structure. A settlement that takes seconds to minutes cannot sit inside a request, so a facilitator absorbs the wait and tells the server when it is safe to respond. An amount too small to justify a transaction fee cannot be settled individually, so schemes batch or defer. A server cannot practically run a node for every chain a client might pay on, so the facilitator holds that capability. Each component compensates for a property of the settlement layer, and each is a party that sees the payment and can decline to serve it.
 
@@ -87,11 +77,7 @@ The design is a sound response to the constraints of a shared ledger. Those cons
 
 On Unicity the payment is the message. A certified token is self-validating, so the client attaches one to the request and the service establishes that it has been paid by verifying what it received. Verification is local, deterministic, and completes in the request handler. Nothing needs to be confirmed elsewhere, because the token carries the value rather than a claim against a balance held on another system.
 
-\medskip
-
 Each of the compensating components therefore has no work to do. There is no facilitator, because verification requires no privileged capability and no chain access. There is no settlement round trip, because the transfer was certified before the request was sent. There is no minimum viable payment size imposed by a per-transaction fee, because settlement is bought as a subscription. There is no chain-specific integration, because the token carries its own validation rules.
-
-\medskip
 
 The properties this preserves are the ones the intermediary would otherwise hold. No third party observes the payment or learns which client paid which service. No public record is created that competitors can analyze. No party in the path can decline to serve a client, because there is no party in the path. A protocol built this way is decentralized end to end rather than decentralized at the settlement layer and intermediated at the point of use.
 
